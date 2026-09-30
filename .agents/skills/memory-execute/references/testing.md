@@ -14,7 +14,8 @@ test 단계가 적용되거나 사용자가 요청한 경우에 읽는다. [프�
 - 각 완료 조건·회귀 위험을 검증 방법과 연결한다. 유효한 기존 결과가 있으면 재사용한다.
 - 새로운 테스트가 의미 있게 오류·회귀를 잡을 때 기존 프로젝트 suite에 추가한다. 구현을 그대로 반복하는 검사나 불필요한 대형 suite를 만들지 않는다.
 - 제품 실행 테스트를 Task 문서 폴더의 새 harness로 옮기지 않는다. Task 폴더에는 보고·비실행 증거만 둔다.
-- test 단계에서 테스트를 작성하면 그 파일도 Task 변경에 포함한다. 관련 review snapshot을 갱신하고 실제 테스트 내용을 필요한 범위에서 재검토한다.
+- test 단계에서 테스트를 작성하면 그 파일도 Task 변경에 포함하고, 영향을 받은 review를 stale로 표시한다. 전체 Task 모드에서는 실제 테스트 내용을 재검토한 뒤 review snapshot·결과를 갱신한다.
+- 단독 test 모드에서는 별도 review를 실행하지 않는다. stale 사유와 재리뷰할 파일을 Task의 Next Action에 남기고, 검토하지 않은 snapshot을 passed로 갱신하지 않는다. test 결과는 실제 실행 범위에서 기록하며 test passed가 남은 review stale를 해소하지 않는다. 기존 current/checkpoint Position, Task done, commit은 자동 변경하지 않는다.
 
 ## Levels
 

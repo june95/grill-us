@@ -122,13 +122,13 @@
 ~~~text
 feat(product): implement CRUD controllers and service
 
-Plan: 2026-08-22-product-api
-Phase: P01-core-crud
-Task: T02-crud-handler
-
 - Implement ProductService with transactional batch variant creation
 - Add ProductController RESTful endpoints with error handling
 - Add controller integration tests for CRUD lifecycle
+
+Plan: 2026-08-22-product-api
+Phase: P01-core-crud
+Task: P01-T02
 ~~~
 
 ## Completion Check

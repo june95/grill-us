@@ -53,13 +53,22 @@ Plan별 `.memory/state/{plan-id}.md`에 아래를 기록한다.
 ### 성공한 커밋 뒤 로컬 상태 누락
 
 1. intent의 Task ID와 현재 대상이 일치하는지 확인한다.
-2. Base HEAD 이후의 commit 중 메시지 Plan/Phase/Task trailer가 일치하는 후보를 찾는다. 현재 HEAD가 다르더라도 해당 실제 commit을 확인한다.
+2. Base HEAD 이후의 commit 중 아래 Commit Message Identity 규칙으로 Plan/Phase/Task가 일치하는 후보를 찾는다. 현재 HEAD가 다르더라도 해당 실제 commit을 확인한다.
 3. 후보 commit의 실제 changed path·added/modified/deleted 상태와 `git ls-tree <commit> -- <후보>`의 Git mode/blob ID를 prepared staged entry에 대조한다. 줄바꿈·clean filter 정규화와 shell 텍스트 변환을 거친 로컬 hash를 commit blob 비교에 쓰지 않는다. 삭제 entry는 없어야 하고 승인된 index deletion의 로컬 파일은 보존되어야 한다.
 4. 기록된 관련 파일 내용과 현재 작업 트리를 비교한다. 성공 이후 새 scope 변경이 있다면 이미 완료한 commit의 복구와 새로운 변경을 구분한다.
 5. 일치가 확인되면 committed SHA를 로컬 기록에 보존한다. 구현·검증·커밋을 다시 하지 않고 누락된 완료/집계/포인터 단계만 복구한다.
 6. 확인이 불충분하거나 실제 commit 내용이 검증 snapshot과 다르면 blocked로 기록하고 차이를 설명한다. trailer만으로 성공을 인정하거나 중복 commit을 시도하지 않는다.
 
 단독 commit 실행에서 성공한 경우도 같은 확인을 거쳐 task-mode finalize만 수행한다. 성공 결과를 '지금 diff가 없음'이라는 이유로 skipped로 덮지 않는다.
+
+### Commit Message Identity
+
+- 새 메시지는 마지막 trailer 블록을 `git interpret-trailers --parse`로 읽는다. Plan ID, 전체 Phase ID, metadata Task ID가 각각 정확히 한 번 있어야 한다. checkpoint의 Commit Intent Task도 같은 metadata Task ID를 사용한다.
+- 과거 메시지는 Plan/Phase/Task 줄이 본문 중간에 있거나 Task 값이 `T01-slug`인 형식도 복구 대상으로 허용한다. `git show -s --format=%B <commit>`의 전체 메시지에서 독립된 `Plan:`, `Phase:`, `Task:` 줄을 확인한다. 단순 부분 문자열 검색으로 일치를 판정하지 않는다.
+- 과거 Task 폴더명을 대응시킬 때 정확한 Plan ID와 전체 Phase ID가 먼저 일치해야 한다. Task 값은 대상의 실제 폴더명 전체와 일치해야 하며, 해당 폴더의 task.md에 기록된 metadata Task ID로 연결한다. 같은 T 번호만 가진 다른 Plan·Phase·slug는 대상이 아니다.
+- 전체 메시지에서 세 식별자 중 하나라도 누락되거나 중복·충돌하면 성공으로 인정하지 않는다. prepared 메시지와 실제 메시지의 식별자가 다르거나 대응할 실제 청사진이 없으면 차이를 기록하고 blocked로 둔다. 표준 파싱에 실패했다는 이유만으로 과거 형식이라고 단정하지 않는다.
+- 과거 형식 호환은 기존 intent·청사진·메시지의 근거가 있는 복구에만 적용한다. 신규 커밋은 표준 마지막 trailer 블록을 사용한다. 이미 완료된 Task 문서와 과거 커밋을 amend/rewrite하지 않는다.
+- 식별자 일치는 후보를 찾는 조건이다. 위 Recovery의 changed paths·A/M/D·staged mode/blob·실제 tree·현재 작업 트리 확인까지 통과해야 committed로 인정한다.
 
 ## Completion
 

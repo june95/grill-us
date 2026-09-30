@@ -124,13 +124,13 @@
 ~~~text
 feat(product): add Product and Variant schema definitions
 
-Plan: 2026-08-22-product-api
-Phase: P01-core-crud
-Task: T01-product-schema
-
 - Define Product and Variant entities with 1:N CASCADE relation
 - Add SKU uniqueness and price/stock non-negative constraints
 - Add unit tests for schema validation
+
+Plan: 2026-08-22-product-api
+Phase: P01-core-crud
+Task: P01-T01
 ~~~
 
 ## Completion Check

@@ -45,6 +45,7 @@ review-action은 실제 actionable finding이 있을 때 수행한다. review가
 - 수정된 구현·테스트·보고 계약에 영향을 받는 부분을 다시 검토한다. 이전 snapshot과 달라졌는데 기존 Pass를 그대로 사용하지 않는다.
 - 코드 수정은 필요한 테스트와 기록을 갱신한다. 문서·주석 수정도 scope·의미·관련 command를 확인한다.
 - 새 테스트 파일은 실제 변경 scope에 포함하여 테스트 내용을 검토한다. 테스트 실행 성공만으로 새 테스트의 적합성 검토를 대신하지 않는다.
+- 단독 test에서 새 테스트가 추가되어 review가 stale인 경우, 실제 재리뷰는 후속 review 요청 또는 전체 Task 실행에서 수행한다. 단독 test 중에는 stale 사유·대상·다음 행동만 남긴다.
 - 재검토에 Revision·snapshot·결과·finding resolution을 추가한다. 원 review의 역사 근거를 보존한다.
 - 단독 review 요청은 발견 사항과 다음 행동만 남긴다. review-action·제품 수정·commit을 자동 수행하지 않는다.
 

@@ -17,7 +17,7 @@
 
 - 시작 시 `git status --short`와 `git diff --cached --name-status`로 기존 사용자 변경·index를 확인한다.
 - Task에 포함되는 명시적 파일 목록을 만든다. 코드·테스트·공유 가이드·설정 등 관련 변경만 포함하며 기본 로컬 `.memory`, 다른 작업, 임시 파일, 비밀 파일, 생성 노이즈는 제외한다.
-- 후보마다 `git check-ignore -v --no-index -- <명시적 경로>`를 확인한다. exit 0은 ignored 매칭, 1은 매칭 없음, 1보다 큰 값은 오류이므로 처리해야 한다. tracked 파일도 검사한다.
+- 후보마다 `git check-ignore -v --no-index -- <명시적 경로>`를 확인한다. tracked 파일도 검사한다. verbose 출력은 부정 패턴에도 exit 0을 반환하므로 종료 코드만으로 ignored를 판정하지 않는다. 아래 Ignore Result 규칙으로 실제 적용 패턴을 읽는다.
 - `git add -- <명시적 파일 목록>`만 사용한다. `git add .`, `git add -A`, `git add -f`, `git add --force`를 사용하지 않는다.
 - staging 후 `git diff --cached --name-status`와 각 staged 경로의 ignore 상태를 다시 확인한다. 전환 예외 외에 ignored 내용 추가·수정은 허용하지 않는다.
 - `git ls-files --stage -- <후보>`로 stage 0의 Git mode/blob ID를 확인한다. unresolved merge stage가 있으면 차단한다. working-tree SHA256은 검증 freshness, staged Git entry는 실제 commit 내용 복구에 사용하여 줄바꿈·clean filter 차이를 구분한다.
@@ -26,16 +26,24 @@
 - 잘못 stage한 경로는 본 실행에서 stage한 것인지 확인하고 index만 복구한다. 로컬 파일·사용자 작업을 삭제하거나 `reset --hard`, 작업 파일 checkout으로 되돌리지 않는다.
 - 명시적 요청 없이 push하지 않는다. 비대화식 commit을 사용하고 shell 문자열 연결 대신 실제 메시지 파일 또는 구조화 입력을 사용한다.
 
+### Ignore Result
+
+- exit 0이면 출력의 실제 적용 패턴을 확인한다. 패턴이 이스케이프되지 않은 `!`로 시작하면 제외 해제이며, 그 외 매칭은 ignored다. `\!literal`은 느낌표로 시작하는 이름을 제외하는 일반 패턴이다.
+- exit 1이고 출력이 없으면 매칭 없음이다. 1보다 큰 종료 코드, 실행 실패, 예상하지 못한 출력은 오류로 기록하고 해당 후보의 staging을 차단한다.
+- 기계 판독은 `git check-ignore -v -z --no-index --stdin`에 명시 경로를 NUL로 구분해 전달한다. 출력은 `source`, `line`, `pattern`, `pathname`의 NUL 구분 4필드 묶음이다. 여러 경로의 전체 종료 코드를 개별 파일 판정으로 사용하지 않는다. 출력 경로와 입력 후보를 대응시키고, 정상 실행에서 출력 없는 경로만 무매칭으로 처리한다. 필드 누락·알 수 없는 경로는 오류다.
+- ignored 부모 아래의 자식 예외는 적용되지 않을 수 있다. `.gitignore`에 `!` 줄이 있다는 사실 대신 해당 경로에 대해 Git이 반환한 실제 패턴을 따른다.
+- 제외 해제·무매칭은 Git ignore 조건만 충족한다. Task scope, 명시 공유 승인, 기본 로컬 `.memory`, 사용자 index 보존 조건을 별도로 확인하며 `!`를 포괄적인 staging 승인으로 사용하지 않는다.
+
 ## Commit Intent
 
 ready 판정과 staged 내용 확인 후, [resume.md](resume.md)의 checkpoint에 prepared intent를 먼저 기록한다.
 
 - 정확한 Plan/Phase/Task, Base HEAD, 명시 후보 경로·added/modified/deleted 상태·working-tree hash·staged Git mode/blob ID, 전체 Commit Message, 전환 index deletion 목록을 기록한다.
-- Commit Message의 Plan/Phase/Task trailer는 해당 청사진과 일치해야 한다.
+- 새 Commit Message는 설명 본문 뒤 마지막 블록에 Plan/Phase/Task trailer를 각각 한 번 둔다. Plan은 Plan ID, Phase는 전체 Phase ID(예: `P01-core`), Task는 metadata Task ID(예: `P01-T01`)와 정확히 일치해야 한다. Task 폴더명 `T01-slug`를 새 trailer 값으로 쓰지 않는다. `git interpret-trailers --parse`로 실제 메시지의 세 값을 확인한다.
 - 커밋 결과가 나오기 전에 report에 committed를 쓰지 않는다. 준비 기록은 prepared다.
 - 성공하면 SHA와 실제 변경을 확인하고 intent/report를 committed로 갱신한다. 이어 Task done, Phase 집계, Plan 상태, current를 동기화한다.
 - 실패하면 failed와 실제 오류·재개 행동을 기록하고 Task는 미완료로 둔다. current를 다음 Task로 옮기지 않는다.
-- 성공 후 상태 기록이 끊겼다면 trailer와 commit 파일·내용을 함께 검증해 복구한다. hash 또는 trailer만 보고 성공을 추측하지 않는다.
+- 성공 후 상태 기록이 끊겼다면 [메시지 호환 규칙](resume.md#commit-message-identity)으로 대상 식별자를 확인하고 commit 파일·내용을 함께 검증해 복구한다. 과거 본문 중간 식별자와 Task 폴더명은 복구에만 허용한다. hash 또는 메시지 식별자만 보고 성공을 추측하지 않는다.
 - stage-only commit은 유효한 선행 점검을 요구하며 성공하더라도 포인터 finalize는 별도 전체 실행에서 수행한다.
 
 ## No Commit

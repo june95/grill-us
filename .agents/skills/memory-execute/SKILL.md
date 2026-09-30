@@ -66,6 +66,7 @@ T01부터 T03까지 순서대로 진행해줘
 
 - 지정한 단계만 수행한다. 선행 증거가 부족하면 필요한 다음 행동을 보고하고 다른 stage를 자동 실행하지 않는다.
 - review는 보고·해당 Task metadata만 갱신한다. test는 scope 안 필요한 테스트 작성·실행과 결과 기록이 가능하나 제품 결함 수정은 다음 행동으로 남긴다.
+- 단독 test에서 새 테스트나 수정으로 review가 영향을 받으면 stale 사유·대상 파일·재리뷰 Next Action만 기록한다. 별도 review를 실행하거나 검토하지 않은 snapshot을 passed로 갱신하지 않는다. test 자체의 성공과 남은 review stale는 구분하고 기존 current/checkpoint Position을 보존한다.
 - commit-check는 quality·후보·현재 index를 읽고 결과를 기록할 뿐 코드 수정·staging·commit·Task done·포인터 전진을 하지 않는다.
 - commit은 기존 공통 판정과 선행 증거가 현재 내용에 유효할 때 관련 후보 staging·의도·commit만 수행한다. 부족한 증거를 만들기 위해 전체 workflow를 실행하지 않는다.
 - review-action·implementation·refactor의 최소 검증은 선택한 단계의 작업에 포함된다. 필요한 별도 재리뷰·test stage는 stale/next action으로 남긴다.

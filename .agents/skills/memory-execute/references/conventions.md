@@ -18,6 +18,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 
 - Plan ID는 `YYYY-MM-DD-{slug}`, Phase ID는 `P01-{slug}`, Task 폴더는 `T01-{slug}` 형식이다. 날짜는 새 Plan 생성일이며 기존 Plan 추가 시 바꾸지 않는다.
 - Task ID는 Plan 안에서 유일한 `P01-T01` 형식이다. 다른 Plan의 같은 Task ID는 Plan ID와 함께 식별한다.
+- 새 커밋 메시지의 마지막 블록은 `Plan: {Plan ID}`, `Phase: {전체 Phase ID}`, `Task: {metadata Task ID}`다. 설명 본문은 이 블록보다 앞에 둔다. Task 폴더명과 Task ID를 구분하며, 과거 메시지의 호환 판정은 [재개 규약](resume.md#commit-message-identity)을 따른다.
 - 일반 작업은 단일 Phase를 기본으로 하고 실행 단위는 Task로 나눈다. 큰 작업을 나눌 때 기존 plan-N의 역할은 Phase 내 T가 맡는다.
 - task.md에 요청·완료 조건·상세 구현 계약을 함께 둔다. 동일 계약을 별도 Task plan.md 또는 plan-N.md에 복제하지 않는다.
 - 보고서와 개인 진행 기록을 프로젝트 공유 설계 문서나 `.github` 작업 디렉터리에 추가하지 않는다. 제품 테스트와 공유 가이드는 해당 프로젝트의 기존 위치를 사용한다.

@@ -97,11 +97,11 @@ Task 폴더의 task.md가 요청·완료 조건·상세 구현의 정본이다. 
 
     feat(scope): {변경 요약}
 
+    - {구체적 변경}
+
     Plan: YYYY-MM-DD-feature
     Phase: P01-phase
-    Task: T01-task
-
-    - {구체적 변경}
+    Task: P01-T01
 
 ## Completion Check
 
@@ -131,6 +131,8 @@ Task 폴더의 task.md가 요청·완료 조건·상세 구현의 정본이다. 
 ```
 
 필수/필요 시는 pending, 해당 없음은 사유 있는 skipped로 작성한다. 모든 항목이 `{판단}`인 미완성 표를 실행 청사진으로 남기지 않는다. 작은 작업은 적용되는 섹션만 구체적으로 작성하고, 상세 계약을 요약하다가 다음 실행자가 추측하게 만들지 않는다.
+
+Commit Message의 마지막 세 줄은 metadata와 같은 Plan/Phase/Task 식별자를 사용하는 Git trailer다. 그 뒤에 설명 목록을 붙이지 않는다. 실제 메시지 파일을 `git interpret-trailers --parse`로 확인하며 과거 완료 문서·커밋은 이 템플릿에 맞추려고 재작성하지 않는다.
 
 ## Plan
 

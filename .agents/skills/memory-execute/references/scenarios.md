@@ -16,7 +16,7 @@
 | S08 | review/test 해당 없음, 대체 AC 근거 충분 | 전체 실행·점검 | skipped 사유만 표, 빈 report 없음; 품질 판정 가능 | 생략과 실제 미완료를 구분 | 지침 walkthrough |
 | S09 | 필수 test failed | 실패 기록 | commit·done·pointer advance 차단 | 실패를 skipped로 덮지 않음, 범위 안 수정/환경 원인 구분 | 지침 walkthrough |
 | S10 | passed 뒤 covered 코드·계약 변경 | evidence 재평가 | 영향 evidence stale, 관련 단계만 재검증 | Revision·파일 snapshot 비교, 동일 내용 HEAD 변경만으로 무효화 안 함 | 지침 walkthrough |
-| S11 | review/test/commit-check만 요청 | 지정 stage | 전체 workflow·commit·전진 자동 실행 없음 | review 제품 수정 없음; test 새 테스트 범위·재리뷰; check staging도 없음 | 지침 walkthrough |
+| S11 | review/test/commit-check만 요청 | 지정 stage | 전체 workflow·commit·전진 자동 실행 없음 | review 제품 수정 없음; 단독 test에서 새 테스트 추가 시 review stale·재리뷰 대상만 기록; check staging도 없음 | 지침 walkthrough |
 | S12 | prepared intent 후 commit command 실패 | 실제 실패 처리 | intent failed, Task 미완료, 현재 pointer 유지 | 실패를 성공으로 미리 기록하지 않음 | 지침 walkthrough; 실제 실패 주입은 별도 안전한 임시 repo가 필요한 경우만 |
 | S13 | commit 성공, checkpoint prepared | 성공 확인·복구 | 새 실행 전에 trailer+tree 확인, finalize만 복구 | staged mode/blob와 실제 tree 비교; working hash와 Git 정규화 구분 | 지침 walkthrough; 실제 commit evidence는 실제 도구 확인 |
 | S14 | 특정 docs·앱 디렉터리 없음 | 프로젝트 탐색 | 실제 정본·manifest·suite 사용 | 예시 경로 부재만으로 blocker 생성 안 함 | 지침 walkthrough |
@@ -25,6 +25,11 @@
 | S17 | 마지막 T 완료, 다른 Plan pending | finalize | Plan/Phase done, Active Task·Stage 없음 | 다른 Plan 임의 시작 없음, Last Commit 보존 | 지침 walkthrough; 현재 Plan 실제 종료 확인 |
 | S18 | 사용자 no-commit 지시 | 품질 판정·정책 준수 | 명시 skipped commit, Git commit 없음; Task mode에서 완료 가능 | stage-only/check_only는 자동 완료·전진 없음 | 지침 walkthrough |
 | S19 | path/내부 이름 차이 또는 API·권한 의미 변경 | 청사진 조정 | 전자는 기록·필요 Revision 갱신, 후자는 실제 승인 확인 | 이미 확정한 결정 재질문 없음, 범위 확대 금지 | 지침 walkthrough |
+| S20 | 일반 ignored·무매칭·부정 예외·escaped 느낌표·공백 경로 | 후보 ignore 검사 | 실제 적용 패턴으로 ignored/허용/오류 구분 | verbose exit 0만으로 차단하지 않음; NUL 4필드로 경로 대응; 허용과 scope 승인은 별개 | 임시 repo의 check-ignore와 ls-files 결과 비교 |
+| S21 | ignored 부모 아래 자식 예외 또는 부모 제외 해제 | 후보 ignore 검사 | Git이 실제 반환한 부모/자식 패턴 적용 | ! 줄이 있다는 이유만으로 자식을 허용하지 않음 | 임시 repo 실제 명령 |
+| S22 | 새 템플릿·Task 메시지 | trailer 검사 | 마지막 블록의 Plan/Phase/metadata Task ID 각각 1개 | 폴더명을 새 Task trailer에 사용하지 않음 | git interpret-trailers --parse |
+| S23 | 과거 본문 중간 식별자·Task 폴더명, 동일 T 번호의 다른 Phase, 중복 키 | commit 복구 후보 식별 | 정확한 Plan/Phase/폴더→metadata 대응만 허용, 충돌은 차단 | 실제 tree·staged entry 비교를 생략하지 않으며 과거 commit/done 문서 보존 | 실제 과거 메시지 확인 + 지침 walkthrough |
+| S24 | 새 테스트로 이전 review가 영향받음 | 전체 Task 또는 단독 test | 전체는 실제 재리뷰 후 snapshot 갱신; 단독은 review stale와 Next Action | test passed와 review stale를 별도 기록; 단독 요청의 active Position 보존 | 두 모드 지침 walkthrough |
 
 ## Expected State
 
