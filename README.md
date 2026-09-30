@@ -113,6 +113,28 @@ T01부터 T03까지 순서대로 진행해줘
 
 [검증 시나리오](.agents/skills/memory-execute/references/scenarios.md)는 선택적 단계·재개·사용자 변경 보존 등의 판단 기준을 설명합니다. 파일·링크·Git 검사와 수동 walkthrough는 실제 모델 자동 실행이나 상품 API 테스트 성공과 구분합니다.
 
+## 로컬 스킬 검증
+
+Node.js 22.13.0 이상과 Git이 필요합니다. 저장소 root에서 다음 명령 하나로 검증기의 회귀 검사와 실제 문서·격리 Git 검사를 실행합니다.
+
+~~~powershell
+node scripts/validate-skills.mjs
+~~~
+
+성공은 exit 0, 검사 실패·도구 오류는 exit 1입니다. 다른 디렉터리에서는 스크립트의 절대 경로를 지정하면 됩니다. CLI 옵션은 없습니다. 검사 결과에는 종류별 검사 수·제외 진단 수·오류 수와 제외/실패의 파일·행·사유가 표시됩니다. fence 안 링크 여러 개는 하나의 제외 진단에 개수를 함께 표시합니다.
+
+- **문서:** AGENTS.md, README.md, examples와 .agents/skills 아래 Markdown을 검사합니다. .memory, .git, .codeburn, node_modules와 심볼릭 링크 디렉터리는 탐색하지 않습니다.
+- **링크:** 실제 inline/reference 상대 파일 링크와 이미지 대상의 존재를 확인합니다. fence/inline code 안의 예시, 외부 URL, 동적 placeholder, 저장소 밖 경로, 내부 anchor는 제외 이유를 표시합니다. heading/anchor의 정확한 대응은 수동 확인 대상입니다.
+- **작업 식별자:** 상품 Task 예제와 공통 Task 템플릿의 metadata·폴더·메시지 마지막 Plan/Phase/Task 블록을 대조합니다. 로컬 완료 기록을 마이그레이션하지 않습니다.
+- **예제 구문:** 완성형 js/javascript와 HTML의 classic inline script는 vm.Script로 검사합니다. module inline script는 Node의 --check --input-type=module로 지원하며 import를 해결하거나 코드를 실행하지 않습니다. src와 데이터 MIME script는 제외합니다.
+- **classic MIME:** [WHATWG JavaScript MIME 목록](https://mimesniff.spec.whatwg.org/#javascript-mime-type)에 있는 과거 alias도 구문 검사 대상으로 포함합니다.
+- **설명 조각:** 직전 줄에 `<!-- skill-check: fragment — 구체적인 이유 -->`를 붙인 코드 조각만 명시 제외합니다. 완성형 실행 예제의 오류를 이 표식으로 숨기지 않습니다.
+- **Git:** OS 임시 저장소에서 ignore 부정 패턴·부모 제외·NUL 출력·tracked 경로·오류와 표준/과거 메시지 식별을 확인합니다. 임시 저장소의 명시 파일만 staging하고 소유 경로를 확인한 뒤 정리합니다. 실제 프로젝트의 index·config·current를 변경하지 않습니다.
+
+회귀 검사만 실행하려면 `node --test tests/validate-skills.test.mjs`를 사용합니다. 추가 패키지 설치와 CI 설정은 필요하지 않습니다. 구현 시 확인한 환경은 Node v26.5.1과 Git 2.53.0.windows.2이며, 최소 지원 버전 전부를 시험한 것은 아닙니다.
+
+이 명령은 정적 구문·파일 참조·격리 Git 동작을 검사합니다. HTML 렌더링, 접근성 전반, 생성된 UI 동작, 실제 모델 workflow 실행, commit tree를 포함한 중단 복구 성공은 별도 검증이 필요합니다.
+
 ## 추가 도구
 
 CodeBurn과 visualize는 필요할 때 독립적으로 사용할 수 있습니다.

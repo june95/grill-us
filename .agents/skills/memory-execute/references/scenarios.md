@@ -41,6 +41,10 @@
 
 ## Verification Level
 
+이 저장소 root의 `node scripts/validate-skills.mjs`는 회귀 fixture와 공유 Markdown의 파일 링크·Task 메시지·완성형 예제 구문, 임시 저장소의 Git 사례를 실행한다. S20~S22는 실제 Git 명령으로, S23의 표준/과거 식별·다른 Phase/slug·중복 키는 fixture로 확인한다. S23의 실제 commit tree 복구와 S11/S24의 에이전트 상태 전이는 수동 walkthrough 또는 실제 실행 증거가 필요하다.
+
+외부 URL·placeholder·anchor·명시 fragment·외부/데이터 script는 출력에 제외 사유를 남긴다. module inline script는 Node의 구문 검사로 지원한다. 검사 성공을 실제 모델/브라우저/제품 테스트 성공으로 표현하지 않는다. 검증기의 회귀 검사만은 `node --test tests/validate-skills.test.mjs`로 실행한다.
+
 | Level | What It Establishes |
 | :--- | :--- |
 | Static file/link/frontmatter check | 실제 파일·이름·링크·형식·범용 경로의 정합성 |
