@@ -50,65 +50,7 @@ Created your visualization! Opening in browser now...
 **NEVER rely on just `:root` or `@media (prefers-color-scheme)` — evaluation system checks for class-based themes.**
 4. **Semantic HTML:** `<main id="main-content">` element, **MANDATORY: Multiple `<section>` elements for major content blocks** (header, metrics, charts, etc.), skip-to-content link. Each distinct content area must be wrapped in semantic `<section>` tags.
 5. **Chart.js Requirements (EVALUATION CRITICAL):** MUST include `<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>` before closing `</head>`. **MANDATORY:** IMMEDIATELY after Chart.js script, add `<script>Chart.defaults.animation = false;</script>` (prevents animation glitches and is automatically checked by evaluation system). **MANDATORY CHART VALIDATION:** Every chart function MUST start with `if (typeof Chart === 'undefined') { console.error('Chart.js not loaded'); return; }`. **CHART ACCESSIBILITY:** Every canvas element MUST have `role="img"` and descriptive `aria-label` attributes. **CRITICAL CHART CONFIG:** Set `maintainAspectRatio: false`, `responsive: true`, and `plugins: { tooltip: { enabled: true } }` for accessibility. **NEVER disable tooltips** - evaluation system checks for enabled tooltips. **CHART RELIABILITY SYSTEM:** Use dedicated ChartManager pattern for bulletproof integration:
-```javascript
-var ChartManager = {
-  charts: new Map(),
-  safeInit: function(canvasId, config) {
-    if (typeof Chart === 'undefined') {
-      console.error('Chart.js library not loaded - check CDN inclusion');
-      return null;
-    }
-    try {
-      if (this.charts.has(canvasId)) {
-        this.charts.get(canvasId).destroy();
-        this.charts.delete(canvasId);
-      }
-      var ctx = document.getElementById(canvasId);
-      if (!ctx) {
-        console.error('Canvas element not found: ' + canvasId);
-        return null;
-      }
-      // Ensure no conflicting chart instances
-      if (ctx.chart) {
-        ctx.chart.destroy();
-        delete ctx.chart;
-      }
-      // Set accessibility attributes
-      ctx.setAttribute('role', 'img');
-      if (!ctx.getAttribute('aria-label')) {
-        ctx.setAttribute('aria-label', 'Chart visualization');
-      }
-      // Initialize with enhanced error handling
-      var chart = new Chart(ctx, config);
-      this.charts.set(canvasId, chart);
-      return chart;
-    } catch (error) {
-      console.error('Chart initialization failed for ' + canvasId + ':', error);
-      return null;
-    }
-  },
-  updateTheme: function() {
-    if (typeof Chart === 'undefined') return;
-    this.charts.forEach(function(chart, canvasId) {
-      try {
-        chart.update();
-      } catch (error) {
-        console.error('Chart theme update failed for ' + canvasId + ':', error);
-      }
-    });
-  },
-  destroyAll: function() {
-    this.charts.forEach(function(chart) {
-      try {
-        chart.destroy();
-      } catch (error) {
-        console.error('Chart destruction failed:', error);
-      }
-    });
-    this.charts.clear();
-  }
-};
-```
+Use the single [Chart Lifecycle Example](#chart-lifecycle-example) below. Copy its manager, DOM-ready binding, and theme hook once; other chart sections provide configuration details.
 Use `ChartManager.safeInit()` instead of raw `new Chart()`. **CRITICAL CHART CONFIG:** Set `maintainAspectRatio: false`, `responsive: true`, and `plugins: { tooltip: { enabled: true } }` for accessibility. **CHART CONTAINER DIMENSIONS:** Container must have explicit `height` >= 300px for charts to render properly. Use theme-aware colors with CSS custom properties, never static hex colors. **NEVER use import/export syntax with Chart.js CDN** — use standard var declarations only.
 
 **CHART.JS TROUBLESHOOTING (CRITICAL):** If charts appear as blank white spaces:
@@ -597,7 +539,7 @@ Charts are the second most common failure. These rules are MANDATORY for every c
 <!-- MANDATORY PATTERN FOR EVERY CHART -->
 <div role="img" aria-label="Detailed description of chart data and insights">
   <div class="chart-container" style="height: 360px; padding: 40px; border-radius: 12px; background: var(--surface);">
-    <canvas id="uniqueChartId"></canvas>
+    <canvas id="myChart" role="img" aria-label="Detailed description of chart data and insights"></canvas>
   </div>
 </div>
 ```
@@ -609,135 +551,163 @@ Charts are the second most common failure. These rules are MANDATORY for every c
 - **Container border-radius:** 12px for modern card appearance
 
 ### 3. Chart.js Initialization (MANDATORY PATTERN)
-```javascript
-// REQUIRED: Chart destruction and canvas reset to prevent "Canvas already in use" errors
-var chartsBuilt = false; // Guard flag
 
-function buildCharts() {
-  if (chartsBuilt) return; // Prevent double-initialization during theme detection
-  
-  // REQUIRED: Reset canvas before building
-  function resetCanvas(id) {
-    var old = document.getElementById(id);
-    if (!old) return null;
-    var parent = old.parentNode;
-    var canvas = document.createElement('canvas');
-    canvas.id = id;
-    parent.replaceChild(canvas, old);
-    return canvas;
-  }
-  
-  // Example chart with required settings
-  var ctx = resetCanvas('myChart');
-  if (ctx) {
-    new Chart(ctx, {
-      type: 'bar',
-      data: { /* your data */ },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false, // REQUIRED
-        animation: false, // MANDATORY: Plus set Chart.defaults.animation = false globally
-        plugins: {
-          tooltip: {
-            enabled: true, // NEVER disable tooltips
-            padding: 12,
-            cornerRadius: 8
-          }
-        },
-        layout: { padding: 20 } // REQUIRED: breathing room
+Use the [Chart Lifecycle Example](#chart-lifecycle-example) as the only full initialization pattern. Keep the same canvas, destroy the previous instance, and rebuild with current theme colors. Do not add a second manager, canvas-reset function, or DOM/load listener.
+
+### Chart Lifecycle Example
+
+This complete classic-script example manages one canvas named `myChart`. Paste it once below the skeleton's menu/theme setup, and replace the empty `chartData` with the user's data. For multiple charts, add their configuration calls inside this same `buildCharts()`; keep one manager and one lifecycle binding.
+
+`ChartManager.safeInit()` owns chart construction. `buildCharts()` prevents duplicate initialization, while `onThemeChange()` destroys managed instances before rebuilding. A missing library/canvas or failed construction returns no instance and leaves initialization retryable. If destruction fails, retain that reference and stop rebuilding until it can be cleaned up.
+
+```javascript
+var chartsBuilt = false;
+var chartLifecycleBound = false;
+var chartData = { labels: [], datasets: [] }; // Fill with the user's data.
+
+var ChartManager = {
+  charts: new Map(),
+  safeInit: function(canvasId, config) {
+    if (typeof Chart === 'undefined') {
+      console.error('Chart.js not loaded');
+      return null;
+    }
+    var canvas = document.getElementById(canvasId);
+    try {
+      var previous = this.charts.get(canvasId) || (canvas && Chart.getChart(canvas));
+      if (previous) {
+        previous.destroy();
+        this.charts.delete(canvasId);
+      }
+      if (!canvas) {
+        console.error('Canvas element not found: ' + canvasId);
+        return null;
+      }
+      canvas.setAttribute('role', 'img');
+      if (!canvas.getAttribute('aria-label')) {
+        canvas.setAttribute('aria-label', 'Chart data');
+      }
+      var chart = new Chart(canvas, config);
+      this.charts.set(canvasId, chart);
+      return chart;
+    } catch (error) {
+      // A constructor can register an instance before throwing.
+      var partial = canvas && Chart.getChart(canvas);
+      if (partial) {
+        this.charts.set(canvasId, partial);
+        try {
+          partial.destroy();
+          this.charts.delete(canvasId);
+        } catch (cleanupError) {
+          console.error('Chart cleanup failed:', cleanupError);
+        }
+      }
+      console.error('Chart initialization failed for ' + canvasId + ':', error);
+      return null;
+    }
+  },
+  destroyAll: function() {
+    var complete = true;
+    this.charts.forEach(function(chart, canvasId, charts) {
+      try {
+        chart.destroy();
+        charts.delete(canvasId);
+      } catch (error) {
+        complete = false;
+        console.error('Chart destruction failed:', error);
       }
     });
+    return complete;
   }
-  
-  chartsBuilt = true; // Mark as built
-}
+};
 
-// CRITICAL: Disable Chart.js default animations IMMEDIATELY after Chart.js loads
-Chart.defaults.animation = false; // MUST be set before any chart creation
-
-// REQUIRED: Build charts after DOM loads
-document.addEventListener('DOMContentLoaded', buildCharts);
-
-// REQUIRED: Rebuild charts on theme change
-function onThemeChange() {
-  chartsBuilt = false; // Reset flag
-  setTimeout(buildCharts, 100); // Slight delay for CSS variable updates
-}
-```
-- **MANDATORY: Hover tooltips enabled** — never disable Chart.js tooltips:
-  ```javascript
-  options: {
-    plugins: {
-      tooltip: {
-        enabled: true, // NEVER set to false
-        mode: 'index',
-        intersect: false
-      }
-    }
-  }
-  ```
-- **Minimum chart height:** 300px on desktop, 250px on mobile
-- **Font size defaults:** Axis tick labels at 13px minimum, axis titles at 14px, chart titles at 16px minimum. Legend at 13px.
-- **Chart padding:** Add `layout: { padding: { top: 20, right: 20, bottom: 20, left: 20 } }` for breathing room
-- **Axis tick config:** `maxRotation: 0` to keep labels horizontal. If labels overflow, use `maxTicksLimit` to reduce count
-- **Grid lines:** Very faint — `rgba(255,255,255,0.04)` in dark, `rgba(0,0,0,0.06)` in light
-- **Tooltip styling:** `padding: 12`, `cornerRadius: 8`, `titleFont: { size: 14 }`, `bodyFont: { size: 13 }`
-- **Point radius:** 0 by default, 6 on hover — cleaner line charts
-- **Set `maintainAspectRatio: false`** and control size via CSS container
-- **Use theme-aware colors:** read CSS vars at render time, re-render on theme change
-- **Chart text colors:** set `Chart.defaults.color = getComputedStyle(root).getPropertyValue('--text-secondary').trim()`
-- **Grid line colors:** use `var(--border)` value
-- **Legend position:** 'top' for horizontal charts, 'right' for vertical with space
-- **Axis labels:** Keep horizontal when possible - avoid rotation unless absolutely necessary
-- **Donut/pie charts:** Always include percentage labels on segments
-- **Responsive:** `responsive: true` is default, but container must have explicit dimensions
-- **High contrast colors:** Ensure sufficient color difference between data series for accessibility
-
-```javascript
-// Theme-aware Chart.js setup (include in every chart visualization)
 function getChartColors() {
-  var s = getComputedStyle(document.documentElement);
+  var style = getComputedStyle(document.documentElement);
   return {
-    text: s.getPropertyValue('--text').trim(),
-    textSecondary: s.getPropertyValue('--text-secondary').trim(),
-    border: s.getPropertyValue('--border').trim(),
-    surface: s.getPropertyValue('--surface').trim(),
-    accent: s.getPropertyValue('--accent').trim(),
+    text: style.getPropertyValue('--text').trim(),
+    textSecondary: style.getPropertyValue('--text-secondary').trim(),
+    border: style.getPropertyValue('--border').trim(),
+    accent: style.getPropertyValue('--accent').trim()
   };
 }
 
-// REQUIRED: Reset canvas before rebuilding charts (prevents "Canvas already in use" errors)
-function resetCanvas(id) {
-  var old = document.getElementById(id);
-  var parent = old.parentNode;
-  var canvas = document.createElement('canvas');
-  canvas.id = id;
-  parent.replaceChild(canvas, old);
-  return canvas;
-}
-
-// Usage in buildCharts():
-//   try { if (window.myChart) window.myChart.destroy(); } catch(e) {}
-//   window.myChart = new Chart(resetCanvas('myChart'), { ... });
-
-// CRITICAL: Always check chart existence before destroy() to prevent console errors
 function buildCharts() {
-  var isDark = document.documentElement.classList.contains('theme-dark');
-  var colors = getChartColors();
-  
-  // Safe chart destruction and rebuild pattern
-  if (window.myChart) {
-    try { window.myChart.destroy(); } catch(e) { /* ignore */ }
+  if (typeof Chart === 'undefined') {
+    console.error('Chart.js not loaded');
+    return;
   }
-  window.myChart = new Chart(resetCanvas('myChart'), {
-    // chart config with theme-aware colors
+  if (chartsBuilt) return;
+  var colors = getChartColors();
+  Chart.defaults.animation = false;
+  Chart.defaults.color = colors.textSecondary;
+  var chart = ChartManager.safeInit('myChart', {
+    type: 'bar',
+    data: chartData,
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: {
+        legend: { labels: { color: colors.textSecondary } },
+        tooltip: { enabled: true, mode: 'index', intersect: false, padding: 12, cornerRadius: 8 }
+      },
       scales: {
-        x: { ticks: { color: colors.textSecondary }, grid: { color: colors.border } },
+        x: { ticks: { color: colors.textSecondary, maxRotation: 0 }, grid: { color: colors.border } },
         y: { ticks: { color: colors.textSecondary }, grid: { color: colors.border } }
-      }
+      },
+      layout: { padding: 20 }
     }
   });
+  chartsBuilt = Boolean(chart);
+}
+
+function onThemeChange() {
+  if (typeof Chart === 'undefined') return;
+  if (!chartsBuilt) return; // Also guards the skeleton's first applyTheme() call.
+  if (!ChartManager.destroyAll()) return;
+  chartsBuilt = false;
+  buildCharts();
+}
+
+function bindChartLifecycle() {
+  if (chartLifecycleBound) return;
+  chartLifecycleBound = true;
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', buildCharts, { once: true });
+  } else {
+    buildCharts();
+  }
+}
+
+bindChartLifecycle();
+```
+
+Keep `Chart.defaults.animation = false;` immediately after the required Chart.js CDN script in `<head>` as specified above. The lifecycle example repeats the setting after checking library availability. It is valid JavaScript on its own; the full chart requires the skeleton, Chart.js, a sized canvas, and actual data.
+
+### Styling and Configuration Details
+
+- **MANDATORY: Hover tooltips enabled** — never disable Chart.js tooltips. The example already enables them.
+- **Minimum chart height:** 300px on desktop, 250px on mobile; use the larger dashboard/slide minimum where applicable.
+- **Font size defaults:** Axis tick labels at 13px minimum, axis titles at 14px, chart titles at 16px minimum. Legend at 13px.
+- **Chart padding:** Use `layout.padding` to give labels breathing room.
+- **Axis tick config:** `maxRotation: 0` keeps labels horizontal; use `maxTicksLimit` when needed.
+- **Grid lines:** Very faint — `rgba(255,255,255,0.04)` in dark, `rgba(0,0,0,0.06)` in light.
+- **Tooltip styling:** `padding: 12`, `cornerRadius: 8`, title font 14px and body font 13px.
+- **Point radius:** 0 by default, 6 on hover for line charts.
+- **Theme colors:** Read CSS variables during construction. Rebuild through the existing theme hook to apply new colors.
+- **Legend:** 'top' for horizontal charts; 'right' where vertical space allows.
+- **Donut/pie charts:** Include percentage labels on segments.
+- **Responsive:** Use `responsive: true`, `maintainAspectRatio: false`, and explicit container dimensions.
+- **Accessibility:** Keep descriptive canvas `aria-label` values and distinguish data series by color.
+
+The following is a configuration fragment for the existing chart, not a standalone script. Do not add a second initializer around it.
+
+<!-- skill-check: fragment — Chart.js options property to merge into the existing configuration. -->
+```javascript
+options: {
+  plugins: {
+    tooltip: { enabled: true, mode: 'index', intersect: false }
+  }
 }
 ```
 
@@ -767,77 +737,8 @@ if (counterEl) {
 ```
 
 ### Chart.js Integration Safety Pattern
-MANDATORY for all Chart.js usage to prevent console errors:
-```javascript
-// STEP 1: Global variables - MUST use var, never let/const
-var chartsBuilt = false;
 
-// STEP 2: Chart building function with validation
-function buildCharts() {
-  // CRITICAL: Always validate Chart.js loaded first
-  if (chartsBuilt || typeof Chart === 'undefined') return;
-  
-  // STEP 3: Destroy existing charts to prevent "Canvas already in use"
-  if (window.myChart) window.myChart.destroy();
-  
-  // STEP 4: Reset canvas elements
-  var canvas = document.getElementById('chartId');
-  if (!canvas) return;
-  
-  // STEP 5: Get theme colors from CSS variables
-  var isDark = document.documentElement.className.includes('theme-dark');
-  var textColor = isDark ? '#EDEDED' : '#0f172a';
-  var gridColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)';
-  
-  // STEP 6: Create chart with proper options
-  try {
-    window.myChart = new Chart(canvas.getContext('2d'), {
-      // Your chart configuration here
-      options: {
-        responsive: true,
-        maintainAspectRatio: false, // REQUIRED
-        plugins: {
-          tooltip: { enabled: true }, // REQUIRED - never disable
-          legend: { 
-            labels: { color: textColor, font: { family: 'Inter' } }
-          }
-        },
-        scales: {
-          x: { 
-            ticks: { color: textColor },
-            grid: { color: gridColor }
-          },
-          y: { 
-            ticks: { color: textColor },
-            grid: { color: gridColor }
-          }
-        }
-      }
-    });
-    
-    chartsBuilt = true;
-  } catch (error) {
-    console.error('Chart creation failed:', error);
-  }
-}
-
-// STEP 7: Theme change handler
-function onThemeChange() {
-  if (chartsBuilt) {
-    chartsBuilt = false;
-    buildCharts();
-  }
-    var ctx = document.getElementById('myChart');
-    if (!ctx) {
-      console.error('Chart canvas #myChart not found');
-      return;
-    }
-    // ... build chart
-  } catch (error) {
-    console.error('Chart building failed:', error);
-  }
-}
-```
+Use the [Chart Lifecycle Example](#chart-lifecycle-example) above instead of copying another initializer. Check that the canvas ID matches, the library is loaded, and only one `bindChartLifecycle()` call path owns DOM-ready initialization. Theme changes must reach the same `onThemeChange()` hook. Inspect initialization or destruction errors before retrying; do not suppress them by replacing the canvas.
 
 ### Menu Outside-Click Fix
 Ensure menu closes when clicking outside by strengthening the event handler:

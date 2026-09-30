@@ -8,7 +8,7 @@ Apply these defaults. They are opinionated and tested — override only when use
 - **Chart.js: DISABLE default animation** — Add `Chart.defaults.animation = false;` before creating charts. Default animations cause charts to appear blank/broken in screenshots, Playwright tests, and initial renders. This is a recurring bug that caused "broken charts" in rounds 13-25.
 - **Chart.js: Use explicit color values** — Don't concatenate CSS variable values with hex alpha suffixes (e.g., `c.remote + '18'`). Use explicit `rgba()` values instead: `'rgba(12, 206, 107, 0.15)'`.
 - **Chart.js: Don't use resetCanvas** — Just reuse the same canvas element. Destroy the old chart instance with `.destroy()` then create a new one on the same canvas.
-- **Chart.js: Build after layout is stable** — Use `window.addEventListener('load', ...)` with a short `setTimeout(200)` and trigger `window.dispatchEvent(new Event('resize'))` after building.
+- **Chart.js: DOM-ready lifecycle** — Use the single [Chart Lifecycle Example](../SKILL.md#chart-lifecycle-example). Its binding handles loading and already-ready documents. If a hidden container becomes visible later, resize the managed instance after that layout change rather than registering another initializer.
 
 ### Typography
 - **Primary font:** Inter via Google Fonts CDN — `https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap`
@@ -548,7 +548,7 @@ Common icons to use:
 
 **CSS animations are the primary system.** They're reliable, performant, and never break from JS scoping issues.
 
-See [references/animations.md](references/animations.md) for complete patterns.
+See [animations.md](animations.md) for complete patterns.
 
 **Modern CSS Animation Features (Progressive Enhancement):**
 

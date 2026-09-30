@@ -287,18 +287,10 @@
       menu.style.display = '';
     }
 
-    // === Chart.js Pattern (use when file has Chart.js) ===
-    // var chartsBuilt = false;
-    // function buildCharts() {
-    //   if (chartsBuilt || typeof Chart === 'undefined') return;
-    //   var isDark = document.documentElement.classList.contains('theme-dark');
-    //   var textColor = isDark ? '#EDEDED' : '#0f172a';
-    //   var borderColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
-    //   // Create charts with theme-aware colors
-    //   chartsBuilt = true;
-    // }
-    // function onThemeChange() { chartsBuilt = false; buildCharts(); }
-    // window.addEventListener('load', buildCharts);
+    // === Chart lifecycle ===
+    // Paste the single Chart Lifecycle Example from SKILL.md here.
+    // It supplies ChartManager, buildCharts, onThemeChange, and one DOM-ready binding.
+    // Replace chartData and the canvas ID; do not add another load/DOMContentLoaded handler.
 
     // === YOUR SCRIPTS BELOW (use var for top-level variables, define onThemeChange for chart re-renders) ===
   </script>
@@ -314,7 +306,7 @@
 - Use `data-count="77" data-suffix="%"` for animated number counters
 - Use `.animate.delay-N` classes for page-load entrance animations
 - Use CSS `:hover` for hover effects (baked into `.card` already)
-- Define `function onThemeChange() {}` to re-render charts on theme toggle
+- For charts, use the complete [Chart Lifecycle Example](../SKILL.md#chart-lifecycle-example) once; it defines the theme hook and DOM-ready binding.
 - Use `<main>`, `<section>`, `<header>`, `<article>` for semantic HTML
 - Keep all chart variables as `var` (not `let`/`const`) at script top level
 
