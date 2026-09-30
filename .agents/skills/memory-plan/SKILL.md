@@ -1,156 +1,85 @@
 ---
 name: memory-plan
-description: Create a hierarchical plan (plans, phases, rich task blueprints) and initialize current.md pointer based on decisions without writing implementation code.
+description: Create or extend a .memory Plan with Phase and independently executable task-folder blueprints from confirmed decisions or a clear request. Use for memory planning without implementation.
 ---
 
-You are an expert technical planner. Your goal is to transform confirmed decisions and requirements into a structured, executable hierarchy of plans, phases, and **rich, unambiguous Task Blueprints**.
+# Memory Plan
 
-## Absolute Golden Rule
-**DO NOT WRITE ANY IMPLEMENTATION CODE DURING THIS STAGE.**
-Your output must strictly be planning documents in `.memory/`.
+확정 결정 또는 확인된 명확한 요청을 Plan → Phase → Task로 나누어 실행 청사진을 작성한다. [공통 규약](../memory-execute/references/conventions.md)과 [템플릿](../memory-execute/references/templates.md)을 정본으로 사용한다.
 
-## Naming & Date Prefix (CRITICAL)
-All plan files, phase folders, and decision files MUST start with today's date in `YYYY-MM-DD-` format (e.g. `2026-08-22-product-api`).
+## Inputs
 
-## Task Blueprint Contract (CRITICAL)
-A Task must be **independently executable**: an engineer or AI agent reading **ONLY that single Task file** must be able to write the exact production code without re-exploring the codebase or guessing missing details.
-Never summarize or collapse technical details into vague bullet points. When brevity conflicts with completeness, **always keep the exact technical information**.
+- 확정 decision 문서, intake가 확인한 요청·코드 근거, 기존 Plan에 추가할 scope를 받는다.
+- 명확한 요청에 형식상 decisions 파일을 요구하지 않는다. 실제 중요한 미결정은 [grill-me](../grill-me/SKILL.md)에 연결하고 해소 후 계획을 확정한다.
+- [프로젝트 구조](../memory-execute/references/project-profile.md)와 기존 작업·정본·필요한 코드 근거를 읽는다. 조사에서 확인되는 정보를 재질문하지 않는다.
+- 사용자 선택·코드 확인 사실·미확정 가정을 구분하고 기존 결정·reference를 재사용한다. 새로운 기반 설계 변경에는 실제 승인과 영향 정본을 기록한다.
 
-## Phase vs Task Granularity (과도한 Phase 분할 금지 - CRITICAL)
-- **기본은 단일 Phase (`P01`)**: 일반적인 기능 추가, 단일 모듈, 리팩토링, 또는 1~4개 Task 수준의 작업은 **억지로 여러 Phase로 쪼개지 말고 단일 Phase (`P01-{feature-slug}`) 하나에 Task들(`T01`, `T02`, `T03`...)을 배치**하세요.
-- **다중 Phase (Multi-Phase) 분리 기준**: 오직 아래와 같이 물리적으로 명확한 마일스톤 경계가 있는 대규모 기능에만 `P01`, `P02`...로 분할합니다:
-  1. 완전히 다른 도메인/레이어의 작업인 경우 (예: `P01-core-backend-api` ➔ `P02-frontend-ui` ➔ `P03-infra-deployment`)
-  2. 선행 Phase 완료 후 외부 연동이나 추가 검증이 필요한 대규모 프로젝트인 경우
-- **핵심 원칙**: 사소한 작업 단계를 Phase로 쪼개지 마세요. 쪼개야 할 단위는 Phase가 아니라 **Task**입니다.
+## Golden Rule
 
----
+생성·갱신 대상은 .memory의 계획·결정·상태·필요한 조사 문서다. 제품 구현, 테스트 코드 작성, 공유 정본 변경, staging·commit을 이 단계에서 수행하지 않는다.
 
-## Artifact Creation Workflow
+## Granularity
 
-You must create the following files in order (using today's date, e.g., `YYYY-MM-DD`):
+- 일반 작업은 P01 하나가 기본이다. 다른 도메인/레이어의 실질 마일스톤 또는 외부 연동 경계가 있을 때만 여러 Phase로 나눈다.
+- 기존 큰 작업을 plan-N으로 나누던 단위는 동일 Plan의 T01/T02로 대응한다. 별도 Task plan.md/plan-N.md를 만들지 않는다.
+- 각 T에는 단일 관찰 결과, 독립 완료·검증 기준, 명시한 Dependencies와 커밋 범위를 둔다. 일부러 깨진 빌드를 후속 T로 넘기지 않는다.
+- 단독 완료가 안 되는 미세 작업은 한 T의 I01/I02로 묶는다. 파일 수나 문서 길이만으로 Phase를 늘리지 않는다.
+- 관련 요청은 기존 목표·scope에 맞는 Phase에 append, 독립 목표는 새 Plan이다. 기존 ID·진행·done 이력은 재번호·재작성하지 않는다. 동일 미완료 요청이나 결과가 여전히 충족된 done 요청은 기존 기록을 재사용하고, 완료 뒤 재발·추가 수정은 새 T로 추적한다.
 
-### 1. `.memory/plans/YYYY-MM-DD-{feature-name}.md`
-```markdown
-# Plan: {Feature Name}
+## Task Contract
 
-## Goal
-{High-level feature summary and measurable outcome}
+상세 정본은 .memory/phases/{plan-id}/{phase}/{T-folder}/task.md다. 요청·완료 조건·구현 계약을 한곳에 둔다. Task 하나로 목표·범위를 이해할 수 있어야 하지만 실행 시 필요한 실제 파일·지침·증거를 읽는 것은 허용한다.
 
-## Phases
-| Phase | Status | Summary | Blueprint |
-| :--- | :--- | :--- | :--- |
-| P01 | `in_progress` | {Phase 1 Summary} | [P01](../phases/YYYY-MM-DD-{feature-name}/P01-{phase-name}/phase.md) |
-| P02 | `pending` | {Phase 2 Summary} | [P02](../phases/YYYY-MM-DD-{feature-name}/P02-{phase-name}/phase.md) |
-```
+| Section | Required Detail |
+| :--- | :--- |
+| Metadata / Status | Plan·Phase·Task ID, Source·Type, Revision, Commit Policy, 초기 pending |
+| Goal / Scope | 관찰 결과·이유·포함/제외 범위 |
+| Decision Summary / Guide Alignment | 확정 선택·코드 근거, Compliant/Approved Design Change/Blocked, 실제 승인·정본 |
+| Dependencies | 선행 T ID/링크와 필요한 결과 |
+| Implementation | path::symbol 또는 문서 heading, 목적, new/modify/read-only, I01/I02 단위 |
+| Signatures / Data / Flow | 적용되는 정확한 타입·필드·기본값·nullable·관계·검증·처리·오류·상태·반환 |
+| Acceptance Criteria | 관찰 가능한 완료 체크리스트 |
+| Workflow | Stage, Applicability, Reason/Trigger, Status, Evidence |
+| Validation | 실제 command 또는 수동 방법, cwd, expected result와 대응 criterion |
+| Commit Message | 요약과 Plan/Phase/Task trailer |
+| Completion Check / Progress | 초기 pending 판정·commit 상태, 첫 미수행 적용 stage·blocker·next step |
+| Change Log | 의미 있는 확정 계약 변경과 이유·날짜 |
 
-### 2. `.memory/phases/YYYY-MM-DD-{feature-name}/P01-{phase-name}/phase.md`
-```markdown
-# Phase: P01 {Phase Name}
+문서 작업은 정확한 변경 섹션·의미·참조 계약을 적는다. 적용되지 않는 DTO·API·함수 타입을 억지로 생성하지 않는다. 명령은 실제 프로젝트에서 확인하고 예시 명령을 실행 가능한 것처럼 남기지 않는다.
 
-## Tasks
-| Task | Status | Summary | Blueprint |
-| :--- | :--- | :--- | :--- |
-| T01 | `pending` | {Task 1 Summary} | [T01](./T01-{task-name}.md) |
-| T02 | `pending` | {Task 2 Summary} | [T02](./T02-{task-name}.md) |
+## Workflow Selection
 
-## Progress
-- done: 0/{N} (active: T01)
-```
+planner가 각 stage를 필수/필요 시/해당 없음으로 판단하고 이유·조건을 적는다. 사용자 지시를 우선하며 모든 표 항목을 미평가 placeholder로 남기지 않는다.
 
-### 3. `.memory/phases/YYYY-MM-DD-{feature-name}/P01-{phase-name}/T01-{task-name}.md` (Rich Task Blueprint)
-Every task MUST strictly follow this detailed blueprint schema:
+- 충분한 기존 조사·결정이 있으면 reference는 해당 없음과 근거 링크로 둔다.
+- 승인된 공유 계약 변경은 필요한 design-guide-update를 의존 구현 전에 배치한다.
+- 동작·권한·데이터·복잡한 회귀 위험에 맞게 review/test를 필수로 지정하고 프로젝트 검증을 구체화한다.
+- 단순 문구 수정은 필요한 diff·문구·링크 확인으로 입증할 수 있다. 별도 review/test 보고서가 불필요하면 생략하되 완료 조건 근거는 남긴다.
+- review-action은 actionable finding 조건, guides/refactor는 실제 영향·필요성으로 결정한다. 구현 사실만으로 정본 재작성·코드 정리를 강제하지 않는다.
+- 변경 Task의 공통 commit-check는 필수다. commit은 정책·실제 후보에 맞게 정한다. 아직 수행 전인 commit을 점검의 선행 passed 조건으로 만들지 않는다.
+- 필수/필요 시는 pending, 해당 없음은 사유 있는 skipped다. 수행된 조사 evidence는 Revision·covered snapshot이 유효하면 재사용한다.
+- 완료 기준이 생략으로는 입증되지 않으면 필요한 검증을 유지한다. 미확정 가정으로 정본·blocker를 덮어쓰지 않는다.
 
-```markdown
-# Task: T01 {Task Name}
+## Artifacts
 
-## Status: pending
+1. Plan: .memory/plans/YYYY-MM-DD-feature.md에 Goal·Source/결정·scope·Phase·순서를 기록한다. 기존 Plan 추가 시 ID·날짜를 유지한다.
+2. Phase: .memory/phases/{plan-id}/P01-phase/phase.md에 Tasks(Task,Status,DependsOn,Summary,Blueprint)와 진행률을 둔다.
+3. Task: 각 T 폴더의 task.md를 완결된 청사진으로 작성한다. 초기 Status pending, Revision 1, 첫 미수행 적용 단계부터 재개하게 한다.
+4. Pointer: 아래 Pointer 규칙에 따라 current/checkpoint를 필요할 때만 갱신한다. 후속 작업을 등록했다고 다른 active 정보를 덮지 않는다.
 
-## Goal
-{관찰 가능한 단일 결과 + 대상 + 필요 이유}
+의미 있는 확정 결정이 reference를 대체하면 관련 부분을 갱신하고 원래 근거·superseded 이력을 보존한다. 청사진 의미 변경은 Revision·Change Log에 반영하며 무관한 가이드 문서를 수정하지 않는다.
 
-## Decision Summary
-- {핵심 기술 결정 및 제약조건 요약 1~2줄}
+## Pointer
 
-## Implementation
+- 실제 active Task가 있으면 Plan 추가·새 Plan 생성만으로 current와 기존 checkpoint Position을 변경하지 않는다.
+- active가 없으면 첫 실행 가능한 T를 활성화한다. 우선 처리 지시가 있으면 [재개 절차](../memory-execute/references/resume.md)로 이전 위치를 보존한 뒤 전환한다.
+- 초기 가짜 링크는 active 없음으로 처리하되, 실제 진행 정보 손상·미해결 commit intent가 확인되면 먼저 복구하며 무작정 덮지 않는다.
+- 새 Plan은 대기면 pending, 활성화되면 in_progress다. 완료 Plan에 T를 추가할 때 기존 done T는 보존하고 새 T만 pending; Phase/Plan 요약을 실제 상태로 갱신한다.
+- current는 Active Plan/Phase/Task·Stage, Status, Blocker, Next Step, Commit Policy를 담는다. 실재하는 Task 링크를 사용하고 새 active T는 실제 시작 전 pending으로 둔다.
+- 쓰기 직전 최신 current를 다시 확인한다. 등록 중 위치가 달라졌으면 새 활성 정보를 보존한다. 상태 파일은 인접 임시 파일에 완성 후 교체한다.
 
-### I01. {구현 단위 1, e.g. 데이터 모델 및 스키마 정의}
+## Report
 
-- Related Files:
-  - `path/to/file.ext` :: `{SymbolName}` — {목적 및 역할}; modify|new|read-only
+생성·추가한 Plan/Phase/Task, 파일·심볼, 분할·의존성 이유, 회귀 방지 포인트와 위험, 현재 활성 위치를 설명한다. 다음 실행은 [memory-execute](../memory-execute/SKILL.md)로 안내한다.
 
-#### Details
-- **Signatures & Types**:
-  ```typescript/python
-  // 정확한 클래스/함수 시그니처, 파라미터 타입, 반환 타입 코드 블록
-  ```
-- **Data & Schema Fields**:
-  - `{Model/DTO}`: 정확한 필드 목록, 데이터 타입, 기본값, Nullable 여부, 외래키 관계
-- **Execution Flow / Logic**:
-  1. Precondition & Validation: {사전 유효성 검증}
-  2. Core Processing: {핵심 데이터 변환 및 비즈니스 로직}
-  3. Error & Exception Handling: {발생 가능한 예외 클래스, HTTP 상태 코드, 롤백 처리}
-  4. State Transition & Return: {최종 반환 값 또는 상태 변경}
-
-### I02. {구현 단위 2 (필요 시), e.g. 서비스 핸들러 또는 유닛 테스트}
-- Related Files:
-  - `path/to/test.ext` :: `{TestSymbol}` — {목적}; new
-#### Details
-- {테스트 케이스 시나리오 및 검증할 엣지 케이스 명세}
-
-## Acceptance Criteria
-- [ ] {관찰 가능한 완료 조건 1}
-- [ ] {관찰 가능한 완료 조건 2}
-
-## Validation
-- `{정확한 테스트 커맨드, e.g. pnpm test path/to/spec.ts}` — {기대 결과}
-
-## Commit Message
-```text
-feat({scope}): {간결한 커밋 요약}
-
-Plan: YYYY-MM-DD-{feature-name}
-Phase: P01-{phase-name}
-Task: T01-{task-name}
-
-- {구체적인 변경점 1}
-- {구체적인 변경점 2}
-```
-
-## Progress
-- [ ] 구현 완료
-- [ ] 검증 통과
-- commit: pending
-```
-
-### 4. Initialize `.memory/current.md`
-```markdown
-# Current Context
-
-## Active Plan
-[{Feature Name}](./plans/YYYY-MM-DD-{feature-name}.md)
-
-## Active Phase
-[P01 {Phase Name}](./phases/YYYY-MM-DD-{feature-name}/P01-{phase-name}/phase.md)
-
-## Active Task
-[T01 {Task 1 Title}](./phases/YYYY-MM-DD-{feature-name}/P01-{phase-name}/T01-{task-name}.md)
-
-## Status
-- T01 구현 시작 준비 완료
-
-## Next Step (IMPORTANT)
-T01 청사진을 읽고 `{path/to/file}` 파일 구현 시작
-```
-
-## Completion Notice
-Once all files are created, notify the user:
-"계획 및 상세 Task 청사진 생성이 완료되었습니다 (`.memory/current.md` 세팅 완료). 이제 `/memory-execute` 또는 `'current 보고 이어서 해줘'`라고 말씀하시면 첫 번째 Task부터 순차 구현을 시작합니다."
-
-## 보고 규칙: 초급 개발자용 학습 노트 (필수)
-
-완료 안내와 함께 아래를 채팅으로 정리한다. 청사진 본문을 그대로 복사하지 말고, **판단의 근거**를 설명한다.
-
-1. **생성된 구조 요약** — Plan/Phase/Task 목록과 각 Task가 건드리는 파일.
-2. **Task를 이렇게 쪼개거나 합친 이유** — 예: "상태만 먼저 넣으면 미사용 변수로 lint가 깨져 Task 단위 검증이 성립하지 않음". 초급 개발자가 작업 단위 나누는 기준을 배울 수 있게 한다.
-3. **청사진에 박아둔 함정(회귀 방지 포인트)** — 예: "모바일 `@media`에 `display:none`이 있어 그대로두면 버튼이 사라짐", "A 목록은 바꾸고 B 목록은 원본을 써야 함". **왜 위험한지**를 함께 쓴다.
-4. **요청밖이지만 함께 다뤄야 할 부분** — 계획 수립 중 발견한 인접 문제(낡은 셀렉터·죽은 코드·타입 오류·보안 갱감 등)를 별도로 목록화하고, **이번 계획에 포함할지는 사용자에게 묻는다**(임의로 Task를 늘리지 않는다).
+완료한 계획 결과는 .memory/history/YYYY-MM-DD.md에 간결히 기록한다. scope 밖 문제는 보고만 하고 임의의 Task를 추가하지 않는다. 실제 테스트·commit은 아직 수행하지 않았음을 구분한다.

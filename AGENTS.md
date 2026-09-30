@@ -1,57 +1,51 @@
 # Project Memory Workflow Rules
 
-## Project Memory 전환 규칙 — 우선 적용
+작업 기록은 .memory에 두고 프로젝트 스킬의 공통 계약을 따른다. 명확한 요청의 등록과 설계 인터뷰를 구분하며, 계획·등록 단계에서는 제품 구현을 하지 않는다.
 
-사용자가 확정한 통합 설계에 따라 아래 공통 계약을 먼저 적용합니다. 이 절과 공통 정본이 기존 3단계 설명의 단일 Task 파일, 모든 단계 강제, 검증 직후 완료, 청사진 커밋 규칙보다 우선합니다.
+## Entry Points
 
-- [공통 규약](.agents/skills/memory-execute/references/conventions.md): Phase 아래 `T01-{작업명}/task.md`를 상세 청사진 정본으로 사용합니다. 기존 큰 작업의 plan-N 분할 역할은 Phase 내 Task로 대응합니다.
-- [템플릿](.agents/skills/memory-execute/references/templates.md): Task마다 workflow의 `필수 / 필요 시 / 해당 없음`과 적용 이유를 기록합니다. 생략한 단계는 표에 이유를 남기고 빈 보고서는 만들지 않습니다.
-- [프로젝트 확인](.agents/skills/memory-execute/references/project-profile.md): 특정 정본·테스트 경로를 강제하지 않고 실제 프로젝트의 지침과 구조를 확인합니다.
-- [공통 커밋 점검](.agents/skills/memory-execute/references/commit-check.md): 선행 적용 단계의 유효한 증거와 최종 품질을 확인합니다. 별도 final-review.md는 항상 필요한 파일이 아닙니다. 커밋 성공 또는 명시적 no-commit 완료 정책을 확인한 후 Task를 done으로 기록합니다.
-- [재개 규약](.agents/skills/memory-execute/references/resume.md): 등록만으로 기존 활성 작업을 바꾸지 않습니다. 요청한 단계만 실행하는 경우 전체 workflow·커밋·포인터 전진을 자동 수행하지 않습니다. 범위 안 구현 조정은 기록하며 진행하고 중요한 동작·계약 변경만 질문합니다.
-- `.memory/`는 특별한 공유 예외가 없으면 로컬 관리합니다. Task 청사진·보고·current를 Git에 추가하지 않습니다. 기존 추적 파일의 승인된 index 제거는 로컬 파일을 보존하며 처리합니다.
-- 구현에서는 활성 청사진을 우선 읽고 필요한 공통 규약·관련 파일·현재 단계의 증거를 추가로 확인합니다. "Task만 읽기"를 최신 코드·검증 근거 확인 금지로 해석하지 않습니다.
+| Request | Skill | Outcome |
+| :--- | :--- | :--- |
+| 명확한 수정·버그·이슈 등록 | [memory-intake](.agents/skills/memory-intake/SKILL.md) | 코드 조사 후 기존/새 Plan에 실행 가능한 Task 등록 |
+| 설계 검토·중요한 미결정 | [grill-me](.agents/skills/grill-me/SKILL.md) | 한 질문씩 결정 확정·근거 보존 |
+| 확정 결정·요청의 작업 분할 | [memory-plan](.agents/skills/memory-plan/SKILL.md) | Plan → Phase → Task 청사진 생성 |
+| 현재 작업·지정 단계 실행 | [memory-execute](.agents/skills/memory-execute/SKILL.md) | 적용 단계 실행·검증·완료 판정·재개 |
 
-당신은 아래 3가지 단계(명령어)에 따라 순차적으로 작업해야 합니다.
+필요한 진입점으로 시작한다. 모든 요청에 인터뷰를 강제하지 않는다. 실제 미결정이 생기면 한 질문씩 2~3개 선택지와 Recommended를 제시하고, 코드에서 확인할 내용이나 확정된 선택은 다시 묻지 않는다.
 
----
+## Planning and Registration
 
-## [1단계: 인터뷰] `/grill-me <기능명>`
+1. 요청·코드·실제 정본의 근거로 scope, 완료 조건, 검증 경로를 확인한다. 특정 프로젝트 문서·테스트 경로·이슈 tracker를 강제하지 않는다.
+2. 관련 목표의 기존 Plan에는 해당 Phase의 새 T를 추가하고 독립 목표는 새 Plan을 만든다. 동일 미완료 요청은 재사용하되 완료 뒤 재발·추가 수정은 과거 done 증거를 보존하며 새 T로 기록한다. 기존 계약을 바꾸는 중요한 미결정은 먼저 해소한다.
+3. 일반 작업은 P01 하나를 기본으로 한다. 기존 큰 작업의 plan-N 분할은 Phase 내 Task로 대응하며, 각 T는 독립적인 완료·검증 기준과 Dependencies를 가진다.
+4. 상세 정본은 .memory/phases/{plan-id}/{phase}/{T-folder}/task.md다. 요청과 상세 계획을 별도 task/plan 문서에 중복 보관하지 않는다.
+5. 청사진에 파일·심볼/문서 섹션, 타입·필드·실행 흐름 등 적용되는 상세 정보, 완료 조건, 실제 command/cwd, workflow 표, Plan/Phase/Task 커밋 메시지를 적는다.
+6. AI가 단계별 필수/필요 시/해당 없음과 근거를 지정한다. 생략은 Task 표에 기록하고 실행한 단계만 보고서를 만든다. 등록·계획은 구현·staging·commit하지 않는다.
 
-코딩을 시작하기 전에 애매한 요구사항과 아키텍처 결정을 확정합니다.
+## Active Work and Resume
 
-1. **한 번에 딱 1개씩 질문하세요.** (질문 폭탄 금지)
-2. **질문할 때 추천 답안(Recommended)과 2~3개 선택지를 함께 제시하세요.**
-3. 기존 코드베이스를 뒤져서 알 수 있는 내용은 묻지 말고 직접 확인하세요.
-4. 모든 설계 분기가 확정되면 `.memory/decisions/YYYY-MM-DD-{기능명}.md` 파일로 저장하고 종료합니다.
+- 등록만으로 기존 current나 활성 checkpoint Position을 바꾸지 않는다. 활성 작업이 없으면 실행 가능한 첫 Task를 활성화한다.
+- 우선 처리 지시가 있으면 이전 Task의 재개 위치를 보존한 뒤 전환한다. completed Task의 과거 계약·증거를 조용히 수정하지 않고 후속 수정은 새 T로 기록한다.
+- current는 활성 위치와 다음 행동, Task는 상세 상태의 정본이다. Phase/Plan 진행률은 실제 Task 상태에서 계산한다.
+- 기본 실행은 Task 하나다. 연속 실행은 요청한 범위를 따르며 다른 pending Plan을 임의로 시작하지 않는다.
 
----
+## Execution and Commit
 
-## [2단계: 계획] `/memory-plan <기능명>`
+1. 새 실행 전에 Task의 Dependencies·승인·기존 intent를 확인한다. 성공한 같은 commit이 있으면 실제 tree를 검증하고 누락된 finalize만 복구한다.
+2. 선택한 workflow만 수행한다. 필수 실패·차단·stale 증거를 생략으로 덮지 않는다. 대상 변경 뒤 영향받은 evidence를 갱신한다.
+3. 공통 점검으로 선행 적용 단계·완료 조건·최종 품질·Git 경계를 확인한다. 별도 final-review.md는 모든 커밋의 필수 파일이 아니다.
+4. ready 뒤 명시 후보·prepared intent로 commit하고 성공 또는 명시 no-commit 완료 정책을 확인한 뒤 Task done → Phase/Plan → current를 갱신한다. 실패하면 현재 Task에 머무른다.
+5. --stage review/test/commit-check 등은 요청 단계만 수행한다. 부족한 선행 단계를 자동 실행하거나 Task를 자동 완료·전진하지 않는다. commit-check만은 코드 수정·staging·commit도 하지 않는다.
+6. 비활성 Task의 단독 단계는 해당 결과만 갱신하고 active Position을 보존한다. 범위 안 구현 조정은 기록하며 진행하고 중요한 사용자 동작·계약 변경은 확인한다.
+7. unrelated 사용자 변경·index를 보존한다. 제품 테스트와 공유 가이드는 기존 프로젝트 위치에 두며 자동 push·외부 메시지를 수행하지 않는다.
 
-`decisions/`를 바탕으로 계획을 물리적 파일로 쪼갭니다.
-**(이 단계에서는 절대로 코드를 치지 마세요!)**
+## Local Storage and Shared References
 
-1. 전체 로드맵을 `.memory/plans/YYYY-MM-DD-{기능명}.md`로 작성합니다.
-2. 각 Phase 폴더(`phases/YYYY-MM-DD-{기능명}/P01.../`)를 만들고 `phase.md`를 생성합니다.
-3. 각 Task 파일(`T01...md`)에 아래 내용을 포함한 상세 청사진을 작성합니다:
-   - 수정할 파일 경로 및 심볼(클래스/함수)
-   - 모델 스키마, 필드명, 타입
-   - 검증 커맨드 (테스트 명령어)
-   - 커밋 메시지 (Plan: YYYY-MM-DD-{기능명} 헤더 포함)
-4. `.memory/current.md`를 생성하여 첫 번째 Task(P01-T01)를 가리키게 세팅합니다.
+- .memory는 특별한 명시 공유 예외가 없으면 Git에서 제외한다. 기존 tracked memory의 index 해제는 승인 범위에서 로컬 파일을 보존하여 처리한다. force-add하지 않는다.
+- [공통 규약](.agents/skills/memory-execute/references/conventions.md): 필드·상태·경로·증거·범위·이력.
+- [템플릿](.agents/skills/memory-execute/references/templates.md): 청사진·현황·포인터·보고 형식.
+- [프로젝트 확인](.agents/skills/memory-execute/references/project-profile.md): 선택적 프로필과 실제 구조 탐색.
+- [커밋 점검](.agents/skills/memory-execute/references/commit-check.md): 품질 판정·명시 후보·Git intent.
+- [재개](.agents/skills/memory-execute/references/resume.md): checkpoint·stale·실패·성공 후 복구.
 
----
-
-## [3단계: 순차 실행] `/memory-execute` 또는 `"current 보고 이어서 해줘"`
-
-기본 실행은 활성 Task 하나이며 명시한 Task 경로가 있으면 그 대상을 확인합니다. 각 Task의 workflow 표와 현재 유효한 증거를 기준으로 필요한 단계만 수행합니다.
-
-1. 청사진, Dependencies, 정본 승인, 현재 위치와 기존 사용자 변경을 확인합니다. 관련 단계 지침은 필요할 때만 읽습니다.
-2. `필수 / 필요 시 / 해당 없음`을 평가합니다. 생략은 사유를 기록하고, 실패·차단·오래된 증거를 생략으로 바꾸지 않습니다.
-3. 구현·리뷰 수정·테스트 작성으로 대상이 바뀌면 영향받은 증거를 갱신합니다. 범위 안 조정은 기록하며 진행하고 중요한 동작·계약 변경은 질문합니다.
-4. 공통 커밋 점검으로 선행 적용 단계, 완료 조건, 최종 품질과 명시적 Git 후보를 확인합니다. `ready` 판정 후 커밋 의도를 기록하고 청사진 메시지로 커밋합니다. `.memory` 내용은 추가하지 않습니다.
-5. 커밋 성공 또는 사용자가 지정한 no-commit 완료 정책을 확인한 뒤 Task `done`, Phase/Plan 집계, current 다음 위치를 갱신합니다. 실패하면 현재 Task에 머무르고 재개 행동을 기록합니다.
-6. `--stage review`, `--stage test`, `--stage commit-check` 또는 "현재 Task 테스트만"은 지정 단계만 수행합니다. 선행 증거가 부족하면 다른 단계를 자동 실행하지 않습니다. 공통 점검만 요청한 경우 코드 수정·staging·커밋·포인터 전진을 하지 않습니다.
-7. 비활성 Task의 단계만 요청하면 그 Task의 결과만 갱신하고 기존 활성 포인터와 재개 위치를 보존합니다. 단계 단독 commit 성공도 전체 실행의 finalize에서 확인한 뒤 전진합니다.
-8. 이미 성공한 동일 커밋은 실제 tree와 의도를 비교하여 상태만 복구합니다. 연속 실행은 요청한 범위를 따르며 마지막 Task가 끝나도 다른 대기 Plan을 임의로 시작하지 않습니다.
+실행 보고에는 무엇·왜, 검증과 한계, commit·다음 행동, 범위 밖 발견을 간결히 설명한다. 발견이 없으면 특이사항 없음으로 적는다.
