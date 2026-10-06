@@ -103,8 +103,9 @@
 
     /* ===== PRINT ===== */
     @media print {
-      body { background: white !important; color: black !important; }
-      .viz-menu, .reveal { display: revert; opacity: 1 !important; transform: none !important; }
+      body { background: white !important; color: black !important; --text: #000; --text-secondary: #444; }
+      .viz-menu, .skip-to-content { display: none !important; }
+      .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
       .card { break-inside: avoid; border: 1px solid #ddd; box-shadow: none; }
       * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
     }
@@ -167,8 +168,7 @@
   </style>
 </head>
 <body>
-  <a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:10000;padding:8px 16px;background:var(--accent);color:white;text-decoration:none;border-radius:4px;" onfocus="this.style.cssText='position:fixed;left:16px;top:16px;z-index:10000;padding:8px 16px;background:var(--accent);color:white;text-decoration:none;border-radius:4px;'" onblur="this.style.cssText='position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;'">Skip to content</a>
-  <main id="main-content">
+  <a href="#main-content" class="skip-to-content">Skip to content</a>
 
   <!-- MENU -->
   <div class="viz-menu">
@@ -184,10 +184,7 @@
     </div>
   </div>
 
-  <!-- SKIP TO CONTENT (accessibility) -->
-  <a href="#main-content" class="skip-to-content">Skip to content</a>
-
-  <main id="main-content" role="main">
+  <main id="main-content" tabindex="-1">
     <!-- YOUR CONTENT HERE (use <section>, <header>, <article> for semantics) -->
   </main>
 
@@ -212,7 +209,6 @@
   </div>
   -->
 
-  </main>
   <script>
     // === Menu ===
     function toggleMenu() { 
@@ -233,14 +229,24 @@
     });
 
     // === Theme (class-based, OS detection on first visit) ===
+    // Normalize legacy numeric choices; unknown values use the OS preference.
+    function resolveTheme(saved) {
+      if (saved === 'dark' || saved === '0') return 'dark';
+      if (saved === 'light' || saved === '1') return 'light';
+      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
     var savedTheme = localStorage.getItem('viz-theme');
-    var currentTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    var currentTheme = resolveTheme(savedTheme);
     function applyTheme(t) {
-      document.documentElement.className = 'theme-' + t;
-      document.getElementById('themeIcon').textContent = t === 'dark' ? '🌙' : '☀️';
-      document.getElementById('themeLabel').textContent = t === 'dark' ? 'Dark' : 'Light';
-      localStorage.setItem('viz-theme', t);
-      currentTheme = t;
+      var theme = resolveTheme(t);
+      document.documentElement.classList.remove('theme-dark', 'theme-light', 'theme-auto');
+      document.documentElement.classList.add('theme-' + theme);
+      var icon = document.getElementById('themeIcon');
+      var label = document.getElementById('themeLabel');
+      if (icon) icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+      if (label) label.textContent = theme === 'dark' ? 'Dark' : 'Light';
+      localStorage.setItem('viz-theme', theme);
+      currentTheme = theme;
       if (typeof onThemeChange === 'function') onThemeChange();
     }
     function cycleTheme() { applyTheme(currentTheme === 'dark' ? 'light' : 'dark'); }

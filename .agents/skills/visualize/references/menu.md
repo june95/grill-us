@@ -1,7 +1,7 @@
 # Hamburger Menu Component
 
 Every visualization MUST include a hamburger menu in the top-right corner with these features:
-1. **Theme toggle** — dark/light mode (or multi-theme selector)
+1. **Theme toggle** — dark/light mode, using the OS preference on first visit
 2. **Download as image** — PNG export via html-to-image
 3. **Print as PDF** — browser print with optimized print styles
 
@@ -13,7 +13,7 @@ Every visualization MUST include a hamburger menu in the top-right corner with t
 
 ## Complete Menu Implementation
 
-Paste this into every visualization. Customize theme colors to match the visualization's palette.
+The mandatory [skeleton](skeleton.md) already includes the menu and owns its initialization. Use these excerpts only when adapting that component; replace its corresponding code rather than adding a second menu or initializer. Customize theme colors to match the visualization's palette.
 
 ### HTML (place just inside `<body>`)
 
@@ -29,7 +29,7 @@ Paste this into every visualization. Customize theme colors to match the visuali
   </button>
   <div class="viz-menu-dropdown" id="vizMenuDropdown">
     <button onclick="cycleTheme()">
-      <span class="viz-menu-icon">◐</span>
+      <span class="viz-menu-icon" id="themeIcon">🌙</span>
       <span>Theme: <span id="themeLabel">Dark</span></span>
     </button>
     <button onclick="downloadImage()">
@@ -155,34 +155,29 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') document.getElementById('vizMenuDropdown').classList.remove('open');
 });
 
-// === Theme system ===
-const themes = [
-  { name: 'Dark', class: 'theme-dark' },
-  { name: 'Light', class: 'theme-light' },
-  { name: 'Auto', class: 'theme-auto' },
-];
-let currentTheme = 0;
-
-function cycleTheme() {
-  // Remove all theme classes
-  themes.forEach(t => document.documentElement.classList.remove(t.class));
-  // Advance to next
-  currentTheme = (currentTheme + 1) % themes.length;
-  document.documentElement.classList.add(themes[currentTheme].class);
-  document.getElementById('themeLabel').textContent = themes[currentTheme].name;
-  // Persist
-  localStorage.setItem('viz-theme', currentTheme);
+// === Theme (class-based, OS detection on first visit) ===
+// Normalize legacy numeric choices; unknown values use the OS preference.
+function resolveTheme(saved) {
+  if (saved === 'dark' || saved === '0') return 'dark';
+  if (saved === 'light' || saved === '1') return 'light';
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 }
-
-// Restore saved theme on load
-(function() {
-  const saved = localStorage.getItem('viz-theme');
-  if (saved !== null) {
-    currentTheme = parseInt(saved);
-    document.documentElement.classList.add(themes[currentTheme].class);
-    document.getElementById('themeLabel').textContent = themes[currentTheme].name;
-  }
-})();
+var savedTheme = localStorage.getItem('viz-theme');
+var currentTheme = resolveTheme(savedTheme);
+function applyTheme(t) {
+  var theme = resolveTheme(t);
+  document.documentElement.classList.remove('theme-dark', 'theme-light', 'theme-auto');
+  document.documentElement.classList.add('theme-' + theme);
+  var icon = document.getElementById('themeIcon');
+  var label = document.getElementById('themeLabel');
+  if (icon) icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+  if (label) label.textContent = theme === 'dark' ? 'Dark' : 'Light';
+  localStorage.setItem('viz-theme', theme);
+  currentTheme = theme;
+  if (typeof onThemeChange === 'function') onThemeChange();
+}
+function cycleTheme() { applyTheme(currentTheme === 'dark' ? 'light' : 'dark'); }
+applyTheme(currentTheme);
 
 // === Download as PNG ===
 async function downloadImage() {
@@ -225,10 +220,10 @@ function printPDF() {
 
 ## Theme CSS Pattern
 
-Define theme variables on `:root` for dark (default), and override on `.theme-light`:
+Define the same class-based dark/light theme variables as the skeleton. JavaScript chooses the initial OS preference and saves only `dark` or `light` under `viz-theme`. Legacy values `0`/`1` map to dark/light; `2` and invalid values use the current OS preference. Preserve other root classes and use the existing `onThemeChange()` hook for charts. Do not add an Auto class or a second theme initializer.
 
 ```css
-:root, .theme-dark {
+html.theme-dark {
   --bg: hsl(220, 20%, 8%);
   --surface: hsl(220, 15%, 14%);
   --text: hsl(220, 10%, 92%);
@@ -242,7 +237,7 @@ Define theme variables on `:root` for dark (default), and override on `.theme-li
   --menu-item-hover: rgba(255, 255, 255, 0.1);
 }
 
-.theme-light {
+html.theme-light {
   --bg: hsl(220, 15%, 97%);
   --surface: hsl(0, 0%, 100%);
   --text: hsl(220, 20%, 15%);
@@ -256,24 +251,6 @@ Define theme variables on `:root` for dark (default), and override on `.theme-li
   --menu-item-hover: rgba(0, 0, 0, 0.06);
 }
 
-.theme-auto {
-  /* Uses prefers-color-scheme */
-}
-
-@media (prefers-color-scheme: light) {
-  .theme-auto {
-    --bg: hsl(220, 15%, 97%);
-    --surface: hsl(0, 0%, 100%);
-    --text: hsl(220, 20%, 15%);
-    --text-secondary: hsl(220, 10%, 45%);
-    --accent: hsl(220, 80%, 50%);
-    --menu-bg: rgba(255, 255, 255, 0.85);
-    --menu-bg-hover: rgba(255, 255, 255, 0.95);
-    --menu-border: rgba(0, 0, 0, 0.1);
-    --menu-text: #333;
-    --menu-item-hover: rgba(0, 0, 0, 0.06);
-  }
-}
 ```
 
 ## Print Styles
@@ -289,6 +266,8 @@ Always include optimized print styles:
   body {
     background: white !important;
     color: black !important;
+    --text: #000;
+    --text-secondary: #444;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }

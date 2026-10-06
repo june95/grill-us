@@ -141,7 +141,8 @@ Key highlights (consult reference for full details):
 
 **Theming System (CRITICAL):**
 - Use **class-based theming ONLY** — `<html class="theme-dark">` or `<html class="theme-light">`
-- Theme toggle changes html class: `document.documentElement.className = 'theme-' + newTheme`
+- Use the skeleton's `applyTheme()` and `cycleTheme()` to replace only theme classes, preserving other root classes and the existing chart theme hook.
+- Save `dark` or `light` under `viz-theme`. Legacy `0`/`1` restore dark/light; `2` and invalid values use the OS preference through `resolveTheme()`.
 - **Never use `data-theme` attributes** — the evaluation system expects class-based themes
 - **Required CSS custom properties:** `--bg, --surface, --text, --accent, --border` (minimum set for evaluation compatibility)
 
