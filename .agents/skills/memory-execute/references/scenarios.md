@@ -32,6 +32,12 @@
 | S24 | 새 테스트로 이전 review가 영향받음 | 전체 Task 또는 단독 test | 전체는 실제 재리뷰 후 snapshot 갱신; 단독은 review stale와 Next Action | test passed와 review stale를 별도 기록; 단독 요청의 active Position 보존 | 두 모드 지침 walkthrough |
 | S25 | SKILL.md 필수 필드 누락·중복·빈값·타입/이름 오류 또는 정상 scalar/block | 로컬 frontmatter 검사 | 정상 지원 표현 통과; 잘못된 필드 file/line 오류; nested metadata는 top-level로 오인하지 않음 | 필수 문자열/폴더 이름만 확인하며 전체 YAML parser로 주장하지 않음 | 실패/정상 회귀 fixture와 CLI exit 0/1 확인 |
 | S26 | 한 HTML fence의 ID 중복 또는 comments/rawtext/quoted attr/entity/별도 fence | 로컬 HTML ID 검사 | 중복 속성 위치와 최초 행; 지원 범위 밖 named entity는 비교 제외 정보 진단 | fence별 token/ID 검사와 실제 DOM/rendering을 구분; 원문 수정 없음 | 실패/정상 회귀 fixture와 실제 문서 검사 |
+| S27 | 같은 입력·절차에서 버그 현상 관찰, 원인은 분리 확인 전 | 버그 intake | reproduced 및 실제 원인 근거 수준을 별도 기록 | 재현이 confirmed/test passed를 뜻하지 않음; 자료·주체·환경·시각 구분 | 지침 walkthrough |
+| S28 | 코드에서 후보·path::symbol만 확인, 실행 재현 미시도 | 버그 intake/planning | code_only와 supported/hypothesis 등 실제 후보 수준·한계·다음 검증 | 미실행 성공/실패 로그를 쓰지 않고 수정 전/후 확인 경로 계획 | 지침 walkthrough |
+| S29 | 환경·자료 또는 안전한 절차 부족, 기대 동작·scope·검증 경로는 명확 | 버그 intake/planning | unavailable 사유를 남기고 원인 확인을 첫 실행 단위로 등록 가능 | 한계 자체로 무조건 차단하지 않으며 실행 완료 검증 의무는 유지 | 지침 walkthrough |
+| S30 | 실제 절차를 시도했으나 목표 현상 관찰 안 됨 | 버그 intake | not_reproduced와 실제 결과·환경·확신·추가 검증 기록 | 버그 없음/해결 완료로 단정하지 않음; 새 Task/current 정책 유지 | 지침 walkthrough |
+| S31 | 버그의 기대 권한/동작 정책에 중요한 미결정 | intake → grill-me | 부족한 분기 한 질문과 2~3개 추천 포함 선택지; 실행 청사진 확정 보류 | 원인 조사 부족과 제품 결정 부족을 구분 | 지침 walkthrough |
+| S32 | 기능·문서 Task 또는 과거 done Task | 조건부 형식 적용 확인 | nonbug에는 Bug Investigation 빈 표 없음; 과거 done 증거 불변 | Type/실제 scope로 판단, 소급 마이그레이션/Revision 일괄 증가 없음 | 지침 walkthrough |
 
 ## Expected State
 

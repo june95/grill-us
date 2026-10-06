@@ -6,6 +6,8 @@
 
 Task 폴더의 task.md가 요청·완료 조건·상세 구현의 정본이다. Blueprint Revision은 의미 있는 계약 변경에만 증가시킨다. Workflow의 적용·조건·초기 상태는 Task별 판단 후 확정한다.
 
+아래 Bug Investigation은 [공통 버그 조사 계약](conventions.md#bug-investigation)에 따라 버그 수정 Task에만 채운다. 일반 기능·문서 Task에서는 해당 섹션 전체를 제외하며, 과거 완료 기록에 빈 표를 소급 추가하지 않는다.
+
 ```markdown
 # Task: T01 {작업명}
 
@@ -28,6 +30,25 @@ Task 폴더의 task.md가 요청·완료 조건·상세 구현의 정본이다. 
 ## Decision Summary
 
 - {확정 선택과 확인된 코드 사실을 구분하고 관련 결정 링크를 적는다.}
+
+## Bug Investigation
+
+{버그 수정 Task인 경우에만 실제 근거로 작성. 다른 Task에서는 이 섹션을 제거한다.}
+
+- Reproduction Status: {reproduced / not_reproduced / unavailable / code_only 중 실제 수준}
+- Cause Confidence: {confirmed / supported / hypothesis / unknown 중 후보의 근거 수준}
+
+| Item | Evidence |
+| :--- | :--- |
+| Minimal Input / Preconditions | {최소 입력·사전 상태; 비밀 값 없이 안전한 fixture/요약} |
+| Procedure / Command / Cwd | {실제 존재하는 절차·명령·cwd; 실행 또는 예정 여부} |
+| Expected Result | {사용자가 기대하는 동작} |
+| Actual Result | {관찰한 현상·오류 또는 미실행; 임의 성공/실패 로그 없음} |
+| Attempt / Source | {시도 여부·관찰 주체·실제 자료/코드 출처} |
+| Checked At | {근거를 실제 확인한 ISO 시각; 원 실행 시각 미상은 구분} |
+| Relevant Environment | {확인한 관련 환경·버전 또는 미확인/해당 없음의 이유} |
+| Cause Candidate / Code Location | {후보·실제 path::symbol·근거 또는 확인하지 못한 이유; 복수 후보면 각각 대응} |
+| Limitation / Next Verification | {확인 한계와 실행 시 검증할 조건·방법} |
 
 ## Scope
 

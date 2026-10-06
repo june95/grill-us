@@ -35,6 +35,7 @@ description: Create or extend a .memory Plan with Phase and independently execut
 | Metadata / Status | Plan·Phase·Task ID, Source·Type, Revision, Commit Policy, 초기 pending |
 | Goal / Scope | 관찰 결과·이유·포함/제외 범위 |
 | Decision Summary / Guide Alignment | 확정 선택·코드 근거, Compliant/Approved Design Change/Blocked, 실제 승인·정본 |
+| Bug Investigation (버그 수정 Task만) | [공통 계약](../memory-execute/references/conventions.md#bug-investigation)의 최소 재현 근거·실제/기대 결과·독립 재현/원인 수준·한계·다음 검증 |
 | Dependencies | 선행 T ID/링크와 필요한 결과 |
 | Implementation | path::symbol 또는 문서 heading, 목적, new/modify/read-only, I01/I02 단위 |
 | Signatures / Data / Flow | 적용되는 정확한 타입·필드·기본값·nullable·관계·검증·처리·오류·상태·반환 |
@@ -46,6 +47,8 @@ description: Create or extend a .memory Plan with Phase and independently execut
 | Change Log | 의미 있는 확정 계약 변경과 이유·날짜 |
 
 문서 작업은 정확한 변경 섹션·의미·참조 계약을 적는다. 적용되지 않는 DTO·API·함수 타입을 억지로 생성하지 않는다. 명령은 실제 프로젝트에서 확인하고 예시 명령을 실행 가능한 것처럼 남기지 않는다.
+
+버그 청사진은 intake/기존 분석의 Bug Investigation을 재사용한다. `reproduced`와 원인 `confirmed`를 자동 연결하지 않고, 실행하지 않은 조사에는 그 수준과 한계를 유지한다. 원인이 미확정이어도 목표·범위·완료 조건·검증 경로가 충분하면 첫 구현 단위에 원인 확인과 검증 경로를 적고 확인 결과에 따른 수정 범위·중요 계약 변경 경계를 명시한다. 등록/계획 중 제품을 수정하거나 회귀 테스트를 새로 작성하지 않으며 nonbug·과거 done 기록에 빈 표를 추가하지 않는다.
 
 ## Workflow Selection
 

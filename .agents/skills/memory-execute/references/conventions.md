@@ -56,6 +56,42 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 
 Revision은 계약의 버전이다. 단순 문구 정리, stage 상태·보고 기록·커밋 해시 갱신은 계약 변경이 아니면 증가시키지 않는다. scope 또는 검증 의무를 바꿨다면 Revision을 증가시키고 영향을 받는 증거를 다시 확인한다.
 
+## Bug Investigation
+
+버그 수정이 목적인 새 Task에만 `## Bug Investigation`을 작성한다. Type과 실제 요청·scope로 적용 여부를 판단하며, 일반 기능·문서 Task에는 빈 항목을 만들지 않는다. 완료된 Task나 과거 보고에 이 형식을 소급 추가하지 않는다.
+
+| Field | Type / Allowed Values | 기록 기준 |
+| :--- | :--- | :--- |
+| Reproduction Status | `reproduced / not_reproduced / unavailable / code_only` | 아래 실제 시도·관찰 수준으로 선택; 성공 기본값 없음 |
+| Minimal Input / Preconditions | string | 현상을 구분할 최소 입력·사전 상태; 민감한 값은 제거하거나 안전한 fixture 식별자로 대체 |
+| Procedure / Command / Cwd | string | 안전한 절차 또는 실제 존재하는 command/cwd. 예정 방법과 실제 실행을 구분 |
+| Expected Result | string | 사용자 기대 동작·완료 기준 |
+| Actual Result | string | 실제 관찰·오류 또는 미실행. 발생하지 않은 성공/실패 로그를 생성하지 않음 |
+| Attempt / Source | string | 시도 여부·관찰 주체·로그/사용자 자료/코드 출처. 사용자 제공 자료를 에이전트의 직접 실행으로 표현하지 않음 |
+| Checked At | ISO 8601 timestamp | 근거를 확인한 시각. 원 관찰·실행 시각이 미상이면 추정하지 않고 구분 |
+| Relevant Environment | string 또는 없음 | 확인한 관련 환경·버전만 기록; 미확인 값과 비밀 원문을 채우지 않음 |
+| Cause Candidate / Code Location | string 또는 없음 | 원인 후보와 관련 실제 path::symbol/근거. 후보·위치를 확인하지 못하면 그 이유를 적고 경로를 만들지 않음. 복수 후보는 확신·근거를 각각 대응 |
+| Cause Confidence | `confirmed / supported / hypothesis / unknown` | 재현 여부와 독립적으로 선택; 아래 근거 수준 적용 |
+| Limitation / Next Verification | string | 재현·원인 확인 한계와 실행 시 확인할 방법·의무 |
+
+Reproduction Status는 목표 버그의 관찰 수준이다.
+
+- `reproduced`: 기록한 입력·절차에서 목표 현상이 실제 관찰되었다. 실행/관찰 출처와 적용 환경을 함께 적는다.
+- `not_reproduced`: 절차를 실제로 시도했으나 목표 현상이 관찰되지 않았다. 이 결과만으로 버그가 없거나 해결됐다고 단정하지 않는다.
+- `unavailable`: 환경·자료·안전한 절차 부족 등으로 목표 재현을 수행하거나 결과를 판단할 수 없다. setup 실패를 제품 버그 재현으로 기록하지 않는다.
+- `code_only`: 실행 재현을 시도하지 않고 코드·설정만 조사했다. 직접 확인한 코드 사실과 실행에서 확인하지 못한 부분을 구분한다.
+
+Cause Confidence는 기록한 원인 후보의 근거 수준이다.
+
+- `confirmed`: 후보를 구분하는 재현/통제 확인으로 해당 원인을 입증했다. 버그 재현만으로 원인이 확정되는 것은 아니다.
+- `supported`: 직접 코드·설정 근거가 있으나 후보를 구분하는 실행/통제 확인은 부족하다.
+- `hypothesis`: 아직 확인되지 않은 가능성이다. 실제 근거와 추가 확인 방법을 적는다.
+- `unknown`: 원인 후보를 지지할 근거가 부족하다.
+
+이 값들은 Task Status·workflow 결과가 아니다. `reproduced`는 test passed나 `confirmed`를 뜻하지 않고, `unavailable`/`code_only`도 등록을 자동 차단하지 않는다. 동작·scope·완료 조건·검증 경로가 명확하면 한계를 남기고 원인 확인을 실행의 첫 단위로 계획할 수 있다. 특정 수정안을 단정할 근거가 없으면 실제 확인할 조건과 수정 범위·중요 계약 변경 경계를 적는다. 실행 완료 시에는 원래의 완료 조건과 필수 검증을 충족해야 한다.
+
+조사 결과를 보완할 때 이전 후보·판단 근거는 Change Log 또는 관련 조사 기록에 보존한다. 상태·확신 관찰값 갱신만으로 Revision을 일괄 증가시키지 않으며 구현 계약·scope·검증 의무가 바뀌면 기존 Revision/evidence 규칙을 적용한다.
+
 ## Workflow
 
 ```text

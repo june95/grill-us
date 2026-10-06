@@ -17,12 +17,16 @@ description: Register a clear change, bug, or issue as a .memory task without im
 2. [분석 지침](../memory-execute/references/analysis.md)으로 요청 Source, 실제 현상·기대 결과, scope, 완료 조건, 검증 경로를 확인한다.
 3. 원하는 동작이 명확하지만 버그 원인이 모르면 코드 조사부터 한다. 재현에 필요한 정보가 실제 부족할 때만 누락 정보 하나를 질문한다. 원인을 사용자에게 추측하게 요구하지 않는다.
 4. 사용자 선택·확인된 코드 사실·미확정 가정을 구분한다. 기존 결정·조사를 재사용하고 승인이나 테스트 성공을 만들어내지 않는다.
+5. 버그는 [Bug Investigation](../memory-execute/references/conventions.md#bug-investigation)에 따라 최소 입력·안전한 절차/실제 command와 cwd, 기대/실제 결과, 시도·관찰 주체·출처·확인 시각을 정리한다. 확인한 관련 환경과 원인 후보 path::symbol, Reproduction Status·Cause Confidence·한계·다음 검증을 연결한다. 기존 재현 명령도 제품·테스트·공유 문서·설정/index를 변경하는 경우 등록 단계에서 실행하지 않는다.
+
+실제 목표 현상을 관찰한 근거가 있어야 `reproduced`이며, 원인 후보를 구분한 근거가 있어야 `confirmed`다. 코드만 조사했으면 `code_only`와 해당 원인 근거 수준을 사용하고, 시도했으나 현상이 없으면 `not_reproduced`, 환경·자료·안전한 절차가 부족하면 `unavailable`로 기록한다. 두 축을 독립적으로 판단하며 관찰하지 않은 성공/실패를 채우지 않는다.
 
 ## Clarity Gate
 
 - scope·동작·완료 조건·검증 경로가 충분하면 확정 요청과 코드 근거를 planning 입력으로 사용한다. decisions 파일을 형식상 강제하지 않는다.
 - 동작·권한·데이터·API·rollout 등 중요한 미결정이 남으면 조사 결과와 그 항목만 [grill-me](../grill-me/SKILL.md)에 연결한다. 질문은 하나씩 2~3개 선택지·추천안을 제시한다.
 - 미결정이 해소되기 전에 executable Task를 확정하지 않는다. 기본 추천안을 사용자가 선택한 것으로 기록하지 않는다.
+- 원인 미확정이나 재현 불가만으로 명확한 버그 등록을 막지 않는다. scope·완료 조건·검증 경로가 충분하면 한계와 원인 확인을 첫 실행 단위로 계획하고, 확인 결과에 따른 수정 범위·중요 계약 변경 경계를 적는다. 동작 선택이 실제 부족한 경우에는 기존 인터뷰 규칙을 따른다.
 
 ## Placement
 
@@ -37,6 +41,7 @@ description: Register a clear change, bug, or issue as a .memory task without im
 2. 신규 Plan은 생성일 YYYY-MM-DD-feature ID를 사용한다. 기존 Plan에 추가하면 ID·날짜를 유지한다. 같은 날짜 slug 충돌은 기존 의미를 확인하고 다른 요청에는 구별되는 이름을 쓴다.
 3. [공통 규약](../memory-execute/references/conventions.md)의 상세 구현·Dependencies·workflow·완료 조건·실제 검증·커밋 메시지를 작성한다. stub만 남기고 구현을 시작하게 만들지 않는다.
 4. 상세 조사 기록이 필요한 경우에만 reference.md를 만들고, 이미 충분한 근거는 Task와 결정 링크로 재사용한다. 해당 없음 단계의 빈 보고서는 생성하지 않는다.
+5. 새 버그 Task는 [조건부 템플릿](../memory-execute/references/templates.md#task)의 Bug Investigation에 조사 결과를 보존한다. nonbug에는 빈 버그 표를 만들지 않고, 이미 완료된 Task에는 소급 추가하지 않는다. 수정 전 실패/수정 후 기대 동작을 입증할 회귀 검증 경로를 적되 제품 수정·새 테스트 작성은 실행 단계에 둔다.
 
 ## Activation
 
@@ -49,5 +54,7 @@ description: Register a clear change, bug, or issue as a .memory task without im
 ## Report
 
 Plan/Phase/Task 링크, 배치·분할 이유, 적용 workflow, 질문/확정 근거, 활성화 여부와 다음 행동을 설명한다. [memory-execute](../memory-execute/SKILL.md) 실행이 다음 단계임을 안내한다.
+
+버그 등록 보고에는 실제 재현 수준·원인 확신과 확인 한계·다음 검증을 짧게 포함한다. 예: "코드 조사만 수행(code_only), 후보는 직접 코드 근거 있음(supported); 실행 재현은 미확인, 첫 단위에서 기존 검증 명령으로 확인." 이 예시는 실제 실행 결과가 아니며 실제 근거에 맞게 바꾼다.
 
 작업 이력은 .memory/history/YYYY-MM-DD.md에 간단히 남긴다. planner가 같은 생성 결과를 기록했다면 intake는 별도의 배치·활성화 판단이 있을 때만 요약을 추가한다. scope 밖 발견은 사실·영향·권고만 보고하고 임의로 등록·구현하지 않는다.
