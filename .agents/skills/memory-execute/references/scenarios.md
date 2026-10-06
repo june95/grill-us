@@ -30,6 +30,8 @@
 | S22 | 새 템플릿·Task 메시지 | trailer 검사 | 마지막 블록의 Plan/Phase/metadata Task ID 각각 1개 | 폴더명을 새 Task trailer에 사용하지 않음 | git interpret-trailers --parse |
 | S23 | 과거 본문 중간 식별자·Task 폴더명, 동일 T 번호의 다른 Phase, 중복 키 | commit 복구 후보 식별 | 정확한 Plan/Phase/폴더→metadata 대응만 허용, 충돌은 차단 | 실제 tree·staged entry 비교를 생략하지 않으며 과거 commit/done 문서 보존 | 실제 과거 메시지 확인 + 지침 walkthrough |
 | S24 | 새 테스트로 이전 review가 영향받음 | 전체 Task 또는 단독 test | 전체는 실제 재리뷰 후 snapshot 갱신; 단독은 review stale와 Next Action | test passed와 review stale를 별도 기록; 단독 요청의 active Position 보존 | 두 모드 지침 walkthrough |
+| S25 | SKILL.md 필수 필드 누락·중복·빈값·타입/이름 오류 또는 정상 scalar/block | 로컬 frontmatter 검사 | 정상 지원 표현 통과; 잘못된 필드 file/line 오류; nested metadata는 top-level로 오인하지 않음 | 필수 문자열/폴더 이름만 확인하며 전체 YAML parser로 주장하지 않음 | 실패/정상 회귀 fixture와 CLI exit 0/1 확인 |
+| S26 | 한 HTML fence의 ID 중복 또는 comments/rawtext/quoted attr/entity/별도 fence | 로컬 HTML ID 검사 | 중복 속성 위치와 최초 행; 지원 범위 밖 named entity는 비교 제외 정보 진단 | fence별 token/ID 검사와 실제 DOM/rendering을 구분; 원문 수정 없음 | 실패/정상 회귀 fixture와 실제 문서 검사 |
 
 ## Expected State
 
@@ -41,13 +43,13 @@
 
 ## Verification Level
 
-이 저장소 root의 `node scripts/validate-skills.mjs`는 회귀 fixture와 공유 Markdown의 파일 링크·Task 메시지·완성형 예제 구문, 임시 저장소의 Git 사례를 실행한다. S20~S22는 실제 Git 명령으로, S23의 표준/과거 식별·다른 Phase/slug·중복 키는 fixture로 확인한다. S23의 실제 commit tree 복구와 S11/S24의 에이전트 상태 전이는 수동 walkthrough 또는 실제 실행 증거가 필요하다.
+이 저장소 root의 `node scripts/validate-skills.mjs`는 회귀 fixture와 공유 Markdown의 필수 스킬 frontmatter·파일 링크·Task 메시지·HTML fence ID·완성형 예제 구문, 임시 저장소의 Git 사례를 실행한다. S20~S22는 실제 Git 명령으로, S23의 표준/과거 식별·다른 Phase/slug·중복 키 및 S25/S26의 검출/오탐 경계는 fixture로 확인한다. S23의 실제 commit tree 복구와 S11/S24의 에이전트 상태 전이는 수동 walkthrough 또는 실제 실행 증거가 필요하다.
 
 외부 URL·placeholder·anchor·명시 fragment·외부/데이터 script는 출력에 제외 사유를 남긴다. module inline script는 Node의 구문 검사로 지원한다. 검사 성공을 실제 모델/브라우저/제품 테스트 성공으로 표현하지 않는다. 검증기의 회귀 검사만은 `node --test tests/validate-skills.test.mjs`로 실행한다.
 
 | Level | What It Establishes |
 | :--- | :--- |
-| Static file/link/frontmatter check | 실제 파일·이름·링크·형식·범용 경로의 정합성 |
+| Static scalar/link/message/HTML ID/example check | 지원하는 필수 문자열·스킬 이름·파일 링크·메시지·fence 내 ID·JS 구문의 정합성 |
 | Git status/ignore/index/tree check | 실제 local 정책·후보·commit 내용과 기록 일치 |
 | Manual walkthrough | 입력·상태·요청 범위에 대한 지침의 일관성과 판단 경계 |
 | Actual model/product execution | 실제로 수행한 경우에만 해당 입력·환경·관찰·한계를 별도로 기록 |
@@ -55,6 +57,8 @@
 완료 조건을 입증하는 최소 관련 검증을 사용한다. 변경이 없는 case를 단계가 바뀌었다는 이유로 반복하지 않는다. 새 변경·실패·미해결 위험이 있는 부분만 재검토한다.
 
 ## Limitations
+
+frontmatter 검사는 한 줄 plain/quoted 필수 문자열과 description block만 지원한다. 전체 YAML/metadata 해석은 하지 않는다. HTML ID는 fence마다 태그 속성을 비교하며 numeric/common named reference만 정규화한다. 지원하지 않는 named reference는 해당 ID 비교를 제외하고 이유를 표시한다. 실제 DOM 트리/namespace/동적 ID, 전체 entity 표·HTML 문법·접근성·렌더링은 별도 확인 대상이다. 정확한 scalar/참조 지원 범위는 [README](../../../../README.md#로컬-스킬-검증)에 기록한다.
 
 이 저장소에는 상품 API 앱·테스트 harness와 자동 workflow 실행 엔진이 없다. 문서 예시·case 표·수동 검토를 앱 테스트나 모델 forward-run 성공으로 표현하지 않는다.
 

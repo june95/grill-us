@@ -6,7 +6,7 @@ import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import {
-  collectDocuments, readFences, checkLinks, checkTaskMessages, checkExamples,
+  collectDocuments, readFences, checkLinks, checkTaskMessages, checkExamples, checkSkillFrontmatter, checkHtmlIds,
   identifyMessage, decodeIgnoreOutput, cleanupGitDirectory
 } from '../scripts/validate-skills.mjs';
 
@@ -41,6 +41,187 @@ test('collection excludes memory/runtime and rejects missing required documents'
   assert.equal(collectDocuments(root).length, 4);
   fs.unlinkSync(path.join(root, 'AGENTS.md'));
   assert.throws(() => collectDocuments(root), /필수 문서/);
+});
+
+test('skill frontmatter accepts quoted, folded, literal, BOM and CRLF declarations', t => {
+  const documents = {
+    '.agents/skills/plain/SKILL.md': '---\nname: plain\ndescription: Useful instructions # note\n---\n',
+    '.agents/skills/quoted/SKILL.md': '---\nname: "quoted" # note\ndescription: "Keep # and : inside quotes"\n---\n',
+    '.agents/skills/single/SKILL.md': "---\nname: 'single'\ndescription: 'Owner''s # guide: useful'\n---\n",
+    '.agents/skills/folded/SKILL.md': '\uFEFF---\r\nname: folded\r\ndescription: >-\r\n  Explain behavior\r\n  with real evidence.\r\nmetadata:\r\n  name: unrelated\r\n  description: nested\r\n---\r\n',
+    '.agents/skills/literal/SKILL.md': '---\nname: literal\ndescription: |+ # note\n  First line\n\n  Second line\n---\n',
+    '.agents/skills/escape/SKILL.md': '---\nname: escape\ndescription: "Unicode \\uD55C and newline \\n"\n---\n'
+  };
+  const root = fixture(t, documents);
+  const out = checkSkillFrontmatter(root, collectDocuments(root));
+  assert.equal(out.checked, 6);
+  assert.deepEqual(errors(out), []);
+});
+
+test('skill frontmatter reports missing delimiters, keys and exact duplicate field lines', t => {
+  const documents = {
+    '.agents/skills/no-start/SKILL.md': '# No frontmatter',
+    '.agents/skills/no-end/SKILL.md': '---\nname: no-end\ndescription: Useful\n',
+    '.agents/skills/missing/SKILL.md': '---\nmetadata:\n  name: missing\n  description: nested\n---\n',
+    '.agents/skills/duplicate/SKILL.md': '---\nname: duplicate\ndescription: Useful\nname: duplicate\n---\n'
+  };
+  const root = fixture(t, documents);
+  const out = checkSkillFrontmatter(root, collectDocuments(root));
+  const issues = errors(out);
+  assert.equal(out.checked, 4);
+  assert.equal(issues.length, 5);
+  assert(issues.some(d => /문서 시작/.test(d.message)));
+  assert(issues.some(d => /종료/.test(d.message)));
+  assert.equal(issues.filter(d => /top-level 필드 없음/.test(d.message)).length, 2);
+  assert.equal(issues.find(d => /중복/.test(d.message)).line, 4);
+});
+
+test('required frontmatter values reject empty, typed and unsupported scalars', t => {
+  const values = ['', '# comment', '""', "''", 'null', '~', 'false', '42', '1e3', '0xFF', '[one]', '{a: b}', '*alias', '&anchor text', '!tag text', 'key: value', '"unterminated', "'unterminated", '"valid" trailing', '"unsupported\\N"', '>2'];
+  for (const [index, value] of values.entries()) {
+    const name = 'invalid-' + index;
+    const file = `.agents/skills/${name}/SKILL.md`;
+    const root = fixture(t, { [file]: `---\nname: ${name}\ndescription: ${value}\n---\n` });
+    const out = checkSkillFrontmatter(root, collectDocuments(root));
+    assert.equal(errors(out).length, 1, value);
+    assert.equal(errors(out)[0].line, 3, value);
+    assert.match(errors(out)[0].message, /description:/, value);
+  }
+});
+
+test('frontmatter blocks reject invalid indentation and plain continuations', t => {
+  for (const body of ['description: |\n', 'description: >\n    first\n  second\n', 'description: >\n\ttext\n', 'description: Plain\n  continuation\n', 'name: |\n  block\ndescription: Useful\n']) {
+    const root = fixture(t, { '.agents/skills/block/SKILL.md': `---\n${body.startsWith('name:') ? '' : 'name: block\n'}${body}---\n` });
+    assert(errors(checkSkillFrontmatter(root, collectDocuments(root))).length > 0, body);
+  }
+});
+
+test('skill identity rejects folder mismatch, bad names and cross-file duplicates', t => {
+  const documents = {
+    '.agents/skills/folder/SKILL.md': '---\nname: different\ndescription: Useful\n---\n',
+    '.agents/skills/Upper/SKILL.md': '---\nname: Upper\ndescription: Useful\n---\n',
+    '.agents/skills/group-a/shared/SKILL.md': '---\nname: shared\ndescription: Useful\n---\n',
+    '.agents/skills/group-b/shared/SKILL.md': '---\nname: shared\ndescription: Useful\n---\n'
+  };
+  const root = fixture(t, documents);
+  const issues = errors(checkSkillFrontmatter(root, collectDocuments(root)));
+  assert.equal(issues.length, 3);
+  assert(issues.some(d => /디렉터리명/.test(d.message)));
+  assert(issues.some(d => /kebab-case/.test(d.message)));
+  assert(issues.some(d => /스킬 name 중복: shared; 최초/.test(d.message)));
+});
+
+test('frontmatter checking ignores ordinary and private markdown', t => {
+  const root = fixture(t, { 'examples/SKILL.md': 'not a skill', '.memory/SKILL.md': 'private', '.agents/skills/real/reference.md': 'reference' });
+  const out = checkSkillFrontmatter(root, collectDocuments(root));
+  assert.equal(out.checked, 0);
+  assert.deepEqual(errors(out), []);
+});
+
+test('HTML duplicate main IDs report the actual ID attribute and first source line', t => {
+  const root = fixture(t, { 'README.md': `${ticks}html\n<main\n id=main-content></main>\n<main\n ID="main-content"></main>\n${ticks}\n` });
+  const out = checkHtmlIds([path.join(root, 'README.md')]);
+  assert.equal(out.checked, 2);
+  assert.equal(errors(out).length, 1);
+  assert.equal(errors(out)[0].line, 5);
+  assert.match(errors(out)[0].message, /main-content.*최초 3행/);
+});
+
+test('HTML quoted attributes and data-id do not manufacture DOM identifiers', t => {
+  const html = '<div title="a > b; id=shared; <span id=shared>" data-id="shared"></div>\n<span id=shared></span>\n<b id="Shared"></b>\n<i id=first id=shared></i>';
+  const root = fixture(t, { 'README.md': `${ticks}html\n${html}\n${ticks}\n` });
+  const out = checkHtmlIds([path.join(root, 'README.md')]);
+  assert.equal(out.checked, 3);
+  assert.deepEqual(errors(out), []);
+});
+
+test('non-ASCII whitespace remains part of HTML attribute names and unquoted values', t => {
+  const html = '<div data\u00A0id=ghost></div><span id=ghost></span><div id=a\u00A0b></div><span id=a></span>';
+  const root = fixture(t, { 'README.md': `${ticks}html\n${html}\n${ticks}\n` });
+  const out = checkHtmlIds([path.join(root, 'README.md')]);
+  assert.equal(out.checked, 3);
+  assert.deepEqual(errors(out), []);
+});
+
+test('HTML tag tokenization does not treat non-ASCII whitespace as an attribute separator', t => {
+  const html = '<div\u00A0id=shared></div\u00A0id=shared><span id=shared></span><custom-é id=unicode></custom-é>';
+  const root = fixture(t, { 'README.md': `${ticks}html\n${html}\n${ticks}\n` });
+  const out = checkHtmlIds([path.join(root, 'README.md')]);
+  assert.equal(out.checked, 2);
+  assert.deepEqual(errors(out), []);
+});
+
+test('raw text closing-tag quotes do not expose fake IDs after a greater-than sign', t => {
+  const html = '<div id=actual></div><script>var text = 1;</script data="a > <span id=actual>"><p id=next></p>';
+  const root = fixture(t, { 'README.md': `${ticks}html\n${html}\n${ticks}\n` });
+  const out = checkHtmlIds([path.join(root, 'README.md')]);
+  assert.equal(out.checked, 2);
+  assert.deepEqual(errors(out), []);
+});
+
+test('empty and boolean ID attributes still take part in duplicate detection', t => {
+  const root = fixture(t, { 'README.md': `${ticks}html\n<div id></div>\n<span id=""></span>\n${ticks}\n` });
+  const out = checkHtmlIds([path.join(root, 'README.md')]);
+  assert.equal(out.checked, 2);
+  assert.equal(errors(out).length, 1);
+});
+
+test('HTML comments and raw text contents cannot create duplicate IDs', t => {
+  const html = '<div id="actual"></div>\n<!-- <i id=actual></i> -->\n<script id="script-node">var source = "<i id=actual>";</script>\n<style>.rule { content: "<i id=actual>"; }</style>\n<textarea><i id=actual></textarea>\n<title><i id=actual></title>\n<plaintext><i id=actual>\n';
+  const root = fixture(t, { 'README.md': `${ticks}html\n${html}\n${ticks}\n` });
+  const out = checkHtmlIds([path.join(root, 'README.md')]);
+  assert.equal(out.checked, 2);
+  assert.deepEqual(errors(out), []);
+  fs.writeFileSync(path.join(root, 'README.md'), `${ticks}html\n<div id=actual></div><!-- unfinished <span id=actual>\n${ticks}\n`);
+  assert.deepEqual(errors(checkHtmlIds([path.join(root, 'README.md')])), []);
+});
+
+test('raw text element IDs themselves participate in HTML duplicate checking', t => {
+  const root = fixture(t, { 'README.md': `${ticks}html\n<script id=shared type="text/plain"><div id=shared></script>\n<span id=shared></span>\n${ticks}\n` });
+  const out = checkHtmlIds([path.join(root, 'README.md')]);
+  assert.equal(out.checked, 2);
+  assert.equal(errors(out).length, 1);
+});
+
+test('HTML fences have independent ID scopes and text fences are not HTML', t => {
+  const root = fixture(t, { 'README.md': `${ticks}html\n<div id=shared></div>\n${ticks}\n${ticks}html\n<div id=shared></div>\n${ticks}\n${ticks}text\n<div id=shared><span id=shared></span></div>\n${ticks}\n` });
+  const out = checkHtmlIds([path.join(root, 'README.md')]);
+  assert.equal(out.checked, 2);
+  assert.deepEqual(errors(out), []);
+});
+
+test('HTML IDs normalize numeric and common named references exactly once', t => {
+  const pairs = [
+    ['a&amp;b', 'a&#38;b'], ['A', '&#65'], ['&#x41;', 'A'], ['&quot;quoted', '&#34;quoted'], ['&nbsp;x', '\u00A0x'],
+    ['&#x80;', '€'], ['&#0;', '\uFFFD'], ['&#xD800;', '\uFFFD'], ['&#x110000;', '\uFFFD'], ['&amp;lt;', '&#38;lt;']
+  ];
+  for (const [first, second] of pairs) {
+    const root = fixture(t, { 'README.md': `${ticks}html\n<div id='${first}'></div>\n<span id='${second}'></span>\n${ticks}\n` });
+    const out = checkHtmlIds([path.join(root, 'README.md')]);
+    assert.equal(out.checked, 2);
+    assert.equal(errors(out).length, 1, first + ' / ' + second);
+  }
+});
+
+test('unsupported named ID references produce explicit partial-check diagnostics', t => {
+  const root = fixture(t, { 'README.md': `${ticks}html\n<div id="&copy;"></div>\n<span id="©"></span>\n${ticks}\n` });
+  const out = checkHtmlIds([path.join(root, 'README.md')]);
+  assert.equal(out.checked, 1);
+  assert.equal(out.skipped, 1);
+  assert.equal(errors(out).length, 0);
+  assert.match(out.diagnostics[0].message, /&copy;.*비교 제외/);
+});
+
+test('HTML fragments require an explicit reason and unclosed fences fail', t => {
+  const root = fixture(t, { 'README.md': `<!-- skill-check: fragment — intentionally duplicated alternatives -->\n${ticks}html\n<div id=a><span id=a></span></div>\n${ticks}\n` });
+  const file = path.join(root, 'README.md');
+  const skipped = checkHtmlIds([file]);
+  assert.equal(skipped.checked, 0);
+  assert.equal(skipped.skipped, 1);
+  fs.writeFileSync(file, `<!-- skill-check: fragment -->\n${ticks}html\n<div id=a></div>\n${ticks}\n`);
+  assert.match(errors(checkHtmlIds([file]))[0].message, /구체적인 이유/);
+  fs.writeFileSync(file, `${ticks}html\n<div id=a>\n`);
+  assert.match(errors(checkHtmlIds([file]))[0].message, /닫히지 않은 HTML fence/);
 });
 
 test('broken local links report source line and normal links succeed', t => {
@@ -254,6 +435,30 @@ test('fixture process returns exit 1 for a broken link and preserves its files',
   assert.match(run.stdout, /\[FAIL links\].*README.md:1/);
   assert.match(run.stdout, /git: checked=16, skipped=0, errors=0/);
   assert.equal(fs.readFileSync(path.join(root, '.memory/current.md'), 'utf8'), before);
+  assert.equal(fs.existsSync(path.join(root, '.git')), false);
+});
+
+test('main reports frontmatter and HTML failures without mutating source documents', t => {
+  const runMain = root => spawnSync(process.execPath, ['--input-type=module', '-e', `import { main } from ${JSON.stringify(moduleURL)}; process.exitCode = main({root:${JSON.stringify(root)},runRegressionTests:false});`], { cwd: root, encoding: 'utf8', timeout: 30000 });
+  const skill = '.agents/skills/sample/SKILL.md';
+  const root = fixture(t, { [skill]: '---\nname: sample\ndescription: Useful test fixture\n---\n', 'README.md': `${ticks}html\n<main id=main-content></main>\n${ticks}\n`, '.memory/current.md': 'must stay unchanged' });
+  const sources = [skill, 'README.md', '.memory/current.md'];
+  const before = sources.map(file => fs.readFileSync(path.join(root, file), 'utf8'));
+  const valid = runMain(root);
+  assert.equal(valid.status, 0, valid.stdout + valid.stderr);
+  assert.match(valid.stdout, /frontmatter: checked=1, skipped=0, errors=0/);
+  assert.match(valid.stdout, /html-ids: checked=1, skipped=0, errors=0/);
+  sources.forEach((file, index) => assert.equal(fs.readFileSync(path.join(root, file), 'utf8'), before[index]));
+  fs.writeFileSync(path.join(root, skill), '---\nname: sample\ndescription: null\n---\n');
+  const badFrontmatter = runMain(root);
+  assert.equal(badFrontmatter.status, 1);
+  assert.match(badFrontmatter.stdout, /\[FAIL frontmatter\].*SKILL.md:3/);
+  fs.writeFileSync(path.join(root, skill), before[0]);
+  fs.writeFileSync(path.join(root, 'README.md'), `${ticks}html\n<main id=main-content><main id=main-content></main></main>\n${ticks}\n`);
+  const badIds = runMain(root);
+  assert.equal(badIds.status, 1);
+  assert.match(badIds.stdout, /\[FAIL html-ids\].*README.md:2.*main-content/);
+  assert.equal(fs.readFileSync(path.join(root, '.memory/current.md'), 'utf8'), before[2]);
   assert.equal(fs.existsSync(path.join(root, '.git')), false);
 });
 

@@ -56,6 +56,93 @@ export function collectDocuments(root) {
   return files.sort();
 }
 
+/** 필수 frontmatter scalar만 읽으며 범용 YAML 해석을 시도하지 않는다. */
+function requiredScalar(raw) {
+  const value = raw.trim();
+  if (!value || value.startsWith('#')) return '';
+  if (value.startsWith('"') || value.startsWith("'")) {
+    const quote = value[0];
+    for (let i = 1; i < value.length; i++) {
+      if (quote === '"' && value[i] === '\\') { i++; continue; }
+      if (value[i] !== quote) continue;
+      if (quote === "'" && value[i + 1] === "'") { i++; continue; }
+      if (value.slice(i + 1).trim() && !/^\s+#/.test(value.slice(i + 1))) throw new Error('인용 문자열 뒤의 지원하지 않는 값');
+      const quoted = value.slice(0, i + 1);
+      if (quote === "'") return quoted.slice(1, -1).replace(/''/g, "'");
+      try { return JSON.parse(quoted); }
+      catch { throw new Error('큰따옴표 문자열은 JSON escape 형식만 지원'); }
+    }
+    throw new Error('닫히지 않은 인용 문자열');
+  }
+  const plain = value.replace(/\s+#.*$/, '').trim();
+  if (/^(?:null|~|true|false|yes|no|on|off|[-+]?(?:\d[\d_]*(?:\.[\d_]*)?|\.[\d_]+)(?:e[-+]?\d+)?|[-+]?\.inf|\.nan|0[xob][\da-f_]+)$/i.test(plain)) {
+    throw new Error('필수 필드는 문자열이어야 함; 숫자·boolean·null은 인용 필요');
+  }
+  if (/^[\[\]{}&*!|>"'%@`]|^-(?:\s|$)|:(?:\s|$)/.test(plain)) throw new Error('지원하지 않는 필수 필드 scalar 표현');
+  return plain;
+}
+
+/** 스킬 필수 필드·폴더 식별자와 중복 이름을 문서 위치에 대응한다. */
+export function checkSkillFrontmatter(root, files) {
+  const out = result();
+  const names = new Map();
+  for (const file of files) {
+    const relative = path.relative(root, file).split(path.sep).join('/');
+    if (!relative.startsWith('.agents/skills/') || path.basename(file) !== 'SKILL.md') continue;
+    out.checked++;
+    const lines = fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').split('\n');
+    if (!/^---[ \t]*$/.test(lines[0])) {
+      diagnostic(out, 'frontmatter', file, 1, '문서 시작에 frontmatter --- 필요'); continue;
+    }
+    const end = lines.findIndex((line, index) => index > 0 && /^---[ \t]*$/.test(line));
+    if (end === -1) { diagnostic(out, 'frontmatter', file, 1, 'frontmatter 종료 --- 없음'); continue; }
+    const fields = new Map();
+    for (let i = 1; i < end; i++) {
+      const match = lines[i].match(/^(name|description)[ \t]*:[ \t]*(.*)$/);
+      if (!match) continue;
+      const [, key, raw] = match;
+      const fieldLine = i + 1;
+      if (fields.has(key)) { diagnostic(out, 'frontmatter', file, fieldLine, `${key} top-level 필드 중복`); continue; }
+      fields.set(key, { line: fieldLine, value: null });
+      try {
+        const block = raw.trim().match(/^([>|])[+-]?(?:[ \t]+#.*)?$/);
+        let value;
+        if (block) {
+          if (key !== 'description') throw new Error('block scalar는 description에서만 지원');
+          const body = [];
+          let indent;
+          while (i + 1 < end && (/^[ \t]/.test(lines[i + 1]) || !lines[i + 1].trim())) {
+            const next = lines[++i];
+            if (!next.trim()) { body.push(''); continue; }
+            if (/^ *\t/.test(next)) throw new Error('block 들여쓰기에 tab 사용 불가');
+            const width = next.match(/^ */)[0].length;
+            if (indent === undefined) indent = width;
+            if (width < indent) throw new Error('block scalar 들여쓰기 불일치');
+            body.push(next.slice(indent));
+          }
+          value = body.join(block[1] === '|' ? '\n' : ' ');
+        } else {
+          value = requiredScalar(raw);
+          if (i + 1 < end && /^[ \t]+\S/.test(lines[i + 1])) throw new Error('필수 scalar의 들여쓴 continuation은 block 형식 필요');
+        }
+        if (!value.trim()) throw new Error(`${key} 문자열이 비어 있음`);
+        fields.set(key, { line: fieldLine, value: value.trim() });
+      } catch (error) { diagnostic(out, 'frontmatter', file, fieldLine, `${key}: ${error.message}`); }
+    }
+    for (const key of ['name', 'description']) {
+      if (!fields.has(key)) diagnostic(out, 'frontmatter', file, 1, `${key} top-level 필드 없음`);
+    }
+    const name = fields.get('name');
+    if (name?.value) {
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name.value)) diagnostic(out, 'frontmatter', file, name.line, 'name은 lower kebab-case 식별자여야 함');
+      if (name.value !== path.basename(path.dirname(file))) diagnostic(out, 'frontmatter', file, name.line, 'name과 스킬 디렉터리명 불일치');
+      if (names.has(name.value)) diagnostic(out, 'frontmatter', file, name.line, `스킬 name 중복: ${name.value}; 최초 ${path.relative(root, names.get(name.value))}`);
+      else names.set(name.value, file);
+    }
+  }
+  return out;
+}
+
 /** fence 문자·길이·들여쓰기를 보존해 중첩된 예제의 경계를 구분한다. */
 export function readFences(text) {
   const lines = text.replace(/\r\n/g, '\n').split('\n');
@@ -233,14 +320,82 @@ export function checkTaskMessages(root, files) {
   return out;
 }
 
-// 인용된 값 안의 src/type과 data-src/data-type은 실제 script 속성이 아니다.
-function scriptAttributes(text) {
+// 인용된 다른 값 안의 id/src/type과 data-*는 실제 해당 속성이 아니다.
+function htmlAttributes(text, positions) {
   const attributes = new Map();
-  for (const m of text.matchAll(/([^\s"'<>/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'<>`=]+)))?/g)) {
+  for (const m of text.matchAll(/([^ \t\n\f\r"'<>/=]+)(?:[ \t\n\f\r]*=[ \t\n\f\r]*(?:"([^"]*)"|'([^']*)'|([^ \t\n\f\r"'<>`=]+)))?/g)) {
     const key = m[1].toLowerCase();
-    if (!attributes.has(key)) attributes.set(key, m.slice(2).find(value => value !== undefined) || '');
+    if (!attributes.has(key)) {
+      attributes.set(key, m.slice(2).find(value => value !== undefined) || '');
+      positions?.set(key, m.index);
+    }
   }
   return attributes;
+}
+
+const namedIdReferences = new Map(Object.entries({ amp: '&', AMP: '&', lt: '<', LT: '<', gt: '>', GT: '>', quot: '"', QUOT: '"', apos: "'", nbsp: '\u00A0' }));
+// HTML numeric character reference의 C1 치환표.
+// https://html.spec.whatwg.org/multipage/parsing.html#numeric-character-reference-end-state
+const numericIdReplacements = new Map([
+  [0x80, 0x20AC], [0x82, 0x201A], [0x83, 0x0192], [0x84, 0x201E], [0x85, 0x2026], [0x86, 0x2020], [0x87, 0x2021],
+  [0x88, 0x02C6], [0x89, 0x2030], [0x8A, 0x0160], [0x8B, 0x2039], [0x8C, 0x0152], [0x8E, 0x017D],
+  [0x91, 0x2018], [0x92, 0x2019], [0x93, 0x201C], [0x94, 0x201D], [0x95, 0x2022], [0x96, 0x2013], [0x97, 0x2014],
+  [0x98, 0x02DC], [0x99, 0x2122], [0x9A, 0x0161], [0x9B, 0x203A], [0x9C, 0x0153], [0x9E, 0x017E], [0x9F, 0x0178]
+]);
+
+/** 비교할 ID만 정규화하며 지원하지 않는 named reference는 진단용으로 반환한다. */
+function decodeHtmlId(value) {
+  const unknown = [...value.matchAll(/&([A-Za-z][A-Za-z0-9]+);/g)].find(m => !namedIdReferences.has(m[1]));
+  if (unknown) return { unsupported: unknown[0] };
+  return { value: value.replace(/&#(?:[xX][\da-fA-F]+|\d+);?|&(?:amp|AMP|lt|LT|gt|GT|quot|QUOT|nbsp)(?:;|(?![=A-Za-z0-9]))|&apos;/g, reference => {
+    if (!reference.startsWith('&#')) return namedIdReferences.get(reference.slice(1).replace(/;$/, ''));
+    const digits = reference.slice(2).replace(/;$/, '');
+    let code = /^[xX]/.test(digits) ? Number.parseInt(digits.slice(1), 16) : Number.parseInt(digits, 10);
+    if (code === 0 || code > 0x10FFFF || (code >= 0xD800 && code <= 0xDFFF)) code = 0xFFFD;
+    return String.fromCodePoint(numericIdReplacements.get(code) || code);
+  }) };
+}
+
+/** HTML fence마다 태그의 ID를 비교하고 raw-text·주석은 태그로 세지 않는다. */
+export function checkHtmlIds(files) {
+  const out = result();
+  for (const file of files) {
+    for (const fence of readFences(fs.readFileSync(file, 'utf8')).fences) {
+      if (fence.language !== 'html') continue;
+      if (!fence.closed) { diagnostic(out, 'html-ids', file, fence.line, '닫히지 않은 HTML fence'); continue; }
+      const fragment = fence.preceding.match(/^\s*<!--\s*skill-check:\s*fragment\s*[—:-]\s*(.+?)\s*-->\s*$/);
+      if (fragment && fragment[1].trim()) { diagnostic(out, 'html-ids', file, fence.line, `명시 fragment 제외: ${fragment[1].trim()}`, 'info'); continue; }
+      if (/skill-check:\s*fragment/.test(fence.preceding)) { diagnostic(out, 'html-ids', file, fence.line, 'fragment 제외에 구체적인 이유 필요'); continue; }
+      const ids = new Map();
+      const html = fence.content;
+      const tags = /<!--[\s\S]*?(?:-->|$)|<![^>]*>|<\?[^>]*>|<\/?([a-z][^ \t\n\f\r/>]*)(?=[ \t\n\f\r/>])((?:[^>"']|"[^"]*"|'[^']*')*)>/gi;
+      let tag;
+      while ((tag = tags.exec(html))) {
+        if (!tag[1] || tag[0].startsWith('</')) continue;
+        const positions = new Map();
+        const attributes = htmlAttributes(tag[2], positions);
+        if (attributes.has('id')) {
+          const line = fence.bodyLine + lineAt(html, tag.index + tag[1].length + 1 + positions.get('id')) - 1;
+          const decoded = decodeHtmlId(attributes.get('id'));
+          if (decoded.unsupported) diagnostic(out, 'html-ids', file, line, `지원하지 않는 named reference ${decoded.unsupported}; 이 ID 비교 제외`, 'info');
+          else {
+            out.checked++;
+            if (ids.has(decoded.value)) diagnostic(out, 'html-ids', file, line, `중복 HTML id ${JSON.stringify(decoded.value)}; 최초 ${ids.get(decoded.value)}행`);
+            else ids.set(decoded.value, line);
+          }
+        }
+        const name = tag[1].toLowerCase();
+        if (name === 'plaintext') break;
+        if (['script', 'style', 'textarea', 'title', 'xmp', 'iframe', 'noembed', 'noframes'].includes(name)) {
+          const end = new RegExp(`</${name}(?=[ \\t\\n\\f\\r/>])(?:[^>"']|"[^"]*"|'[^']*')*>`, 'gi');
+          end.lastIndex = tags.lastIndex;
+          const close = end.exec(html);
+          tags.lastIndex = close ? end.lastIndex : html.length;
+        }
+      }
+    }
+  }
+  return out;
 }
 
 export function checkExamples(files) {
@@ -278,7 +433,7 @@ export function checkExamples(files) {
       if (!scripts.length && !/<script(?=[\s>]|$)/i.test(html)) diagnostic(out, 'examples', file, fence.line, 'HTML inline script 없음', 'info');
       for (const m of scripts) {
         const line = fence.bodyLine + lineAt(html, m.index) - 1;
-        const attributes = scriptAttributes(m[1]);
+        const attributes = htmlAttributes(m[1]);
         const type = (attributes.get('type') || '').trim().toLowerCase();
         if (attributes.has('src')) { diagnostic(out, 'examples', file, line, '외부 script src는 다운로드/실행하지 않음', 'info'); continue; }
         if (type === 'module') { parse(m[2], file, line, true); continue; }
@@ -393,7 +548,10 @@ export function main({ root = projectRoot, runRegressionTests = true } = {}) {
   }
   try {
     const files = collectDocuments(root);
-    const checks = { links: checkLinks(root, files), messages: checkTaskMessages(root, files), examples: checkExamples(files), git: checkGitCases() };
+    const checks = {
+      frontmatter: checkSkillFrontmatter(root, files), links: checkLinks(root, files), messages: checkTaskMessages(root, files),
+      examples: checkExamples(files), 'html-ids': checkHtmlIds(files), git: checkGitCases()
+    };
     console.log(`Documents: ${files.length}`);
     for (const [name, out] of Object.entries(checks)) {
       const errors = out.diagnostics.filter(d => d.severity === 'error').length;
