@@ -41,12 +41,14 @@ description: Create or extend a .memory Plan with Phase and independently execut
 | Signatures / Data / Flow | 적용되는 정확한 타입·필드·기본값·nullable·관계·검증·처리·오류·상태·반환 |
 | Acceptance Criteria | 관찰 가능한 완료 체크리스트 |
 | Workflow | Stage, Applicability, Reason/Trigger, Status, Evidence |
-| Validation | 실제 command 또는 수동 방법, cwd, expected result와 대응 criterion |
+| Validation | 실제 command 또는 수동 방법, cwd, expected result와 대응 criterion; 관련 환경 근거를 실행 시 확인할 범위·이유 |
 | Commit Message | 요약과 Plan/Phase/Task trailer |
 | Completion Check / Progress | 초기 pending 판정·commit 상태, 첫 미수행 적용 stage·blocker·next step |
 | Change Log | 의미 있는 확정 계약 변경과 이유·날짜 |
 
 문서 작업은 정확한 변경 섹션·의미·참조 계약을 적는다. 적용되지 않는 DTO·API·함수 타입을 억지로 생성하지 않는다. 명령은 실제 프로젝트에서 확인하고 예시 명령을 실행 가능한 것처럼 남기지 않는다.
+
+검증 계획에는 [Environment Evidence](../memory-execute/references/conventions.md#environment-evidence)에 따라 결과에 관련된 runtime/tool·lockfile·manifest·test/build 설정과 비밀 아닌 동작 설정의 확인 범위를 정한다. 모든 항목을 강제하지 않으며 실제 실행 버전·hash·결과는 미리 채우지 않는다. 실행/재사용 시 관련 환경 비교와 영향받은 결과만 재검증할 의무를 적고, 과거 기록 부재의 한계는 완료 조건 영향으로 판단한다.
 
 버그 청사진은 intake/기존 분석의 Bug Investigation을 재사용한다. `reproduced`와 원인 `confirmed`를 자동 연결하지 않고, 실행하지 않은 조사에는 그 수준과 한계를 유지한다. 원인이 미확정이어도 목표·범위·완료 조건·검증 경로가 충분하면 첫 구현 단위에 원인 확인과 검증 경로를 적고 확인 결과에 따른 수정 범위·중요 계약 변경 경계를 명시한다. 등록/계획 중 제품을 수정하거나 회귀 테스트를 새로 작성하지 않으며 nonbug·과거 done 기록에 빈 표를 추가하지 않는다.
 

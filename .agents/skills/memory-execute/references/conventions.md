@@ -126,6 +126,7 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 
 ## Evidence and Completion
 
+- 검증의 기록·재사용에는 아래 Environment Evidence를 조건부로 적용한다. Revision·내용 snapshot과 함께 결과에 실제 영향을 주는 환경의 동일성 또는 변경 영향을 확인한다.
 - 실행한 보고에는 Task, Stage, Blueprint Revision, Covered Files, Source Snapshot, Checked At, Result, Blockers, Next Action을 포함한다.
 - 현재 파일의 SHA256은 `Get-FileHash` 등의 읽기 전용 도구로 확인한다. 새 파일도 포함하고 삭제된 경로는 deleted로 기록한다. 원문·비밀 값 대신 필요한 hash만 기록한다.
 - HEAD 식별자는 checkpoint의 Base HEAD와 별도로 기록한다. source snapshot은 covered 파일 내용이므로 커밋으로 HEAD가 달라졌다는 이유만으로 동일 내용의 검증을 무효화하지 않는다.
@@ -134,6 +135,24 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 - Completion Check는 `pending / ready / blocked`를 사용한다. ready에는 현재 Revision·snapshot, 완료 조건별 근거, 적용 단계 판정, 남은 위험, Git 경계를 기록한다.
 - ready는 커밋을 만들 수 있다는 판정이며 done은 아니다. auto 작업은 커밋 성공 후 done이다. 명시적 none 또는 실제 변경 없음은 이유를 기록하고 완료 조건·품질 판정 후 done 가능하다. check_only 및 단계 단독 실행은 자동 finalize하지 않는다.
 - 조사나 로컬 보고만 만든 Task도 완료 조건 증거를 평가한다. Git 변경이 없으면 빈 커밋을 만들지 않고 실제 변경 없음을 기록한다.
+
+### Environment Evidence
+
+검증 명령별로 관련 있는 항목만 기록한다. 모든 명령에 모든 필드를 강제하거나 전체 환경변수·설치 패키지·파일을 수집하지 않는다. 이 항목은 보고 계약이며 새 실행 엔진이나 상태 enum이 아니다.
+
+| Field | 기록 기준 |
+| :--- | :--- |
+| Tool Versions | 관련 runtime/tool 이름, 읽기 전용 확인 명령과 실제 버전. 미확인 버전을 추정하지 않음 |
+| Relevant Files | 관련 lockfile·manifest·test/build 설정의 repo-relative path와 SHA256 또는 missing/deleted. Covered Files/Source Snapshot에 있으면 해당 항목을 참조하며 중복 hash를 별도로 관리하지 않음 |
+| Non-secret Settings | 결과에 영향을 주는 비밀 아닌 동작 설정의 확인 가능한 값/요약만. credential·토큰·환경변수 전체 원문 제외 |
+| Scope / Reason | 해당 검사와 환경 항목의 관계, 해당 없음·미확인·확인 못함의 이유 |
+| Checked At | 실제 환경 근거를 확인한 ISO 8601 시각 |
+
+명령 실행 전에 실제 checkout/cwd와 관련 도구·설정을 확인하고 결과와 함께 기록한다. 재사용 시 현재 값과 비교하여 어떤 검증 결과의 의미가 바뀌는지 판단한다. 관련 runtime·lockfile·runner 설정 변화가 영향을 주면 해당 결과만 stale로 표시하고 필요한 검사만 재수행한다. 변경 사실·영향 판단·재사용 또는 재검증 근거를 보고에 남긴다. 무관한 설정, 동일 bytes의 HEAD/branch 변경, 다른 PC의 경로명 변화만으로 전체 재검증하지 않으며 실제 대상·설정 차이는 별도로 확인한다.
+
+과거 환경 기록이 없으면 현재 확인과 기존 로그로 필요한 사실을 보완하되, 현재 값이 과거에도 같았다고 추정하지 않는다. 기록 부재만으로 일괄 실패시키거나 자동 통과시키지 않는다. 필요한 검증을 새로 수행하거나 대체 근거로 완료 조건을 입증할 수 있는지 판단하고 한계를 기록한다. 필요한 환경 동일성을 입증할 수 없어 완료 조건을 막는 경우에만 blocked로 둔다. 과거 done 증거를 덮어쓰지 않는다.
+
+환경 근거를 얻기 위한 설치·업그레이드·설정 변경은 자동 수행하지 않는다. 단독 단계에서 선행 환경 evidence가 stale이면 사유·대상·Next Action만 남기고 요청하지 않은 단계·제품 수정·commit/finalize를 수행하지 않으며 기존 active Position을 보존한다.
 
 ## State Ownership
 

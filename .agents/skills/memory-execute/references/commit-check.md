@@ -6,7 +6,7 @@
 
 1. Task Goal·Scope·Acceptance Criteria·Alignment와 현재 관련 변경을 대조한다. 범위 밖 변경, 누락된 완료 조건, 명백한 결함·회귀 위험을 확인한다.
 2. commit-check **이전**의 적용 단계만 평가한다. 필수 단계는 passed와 현재 유효한 증거, 필요 시는 조건 평가 후 passed 또는 이유 있는 skipped, 해당 없음은 이유 있는 skipped여야 한다. 아직 수행 전인 commit과 running 상태의 이 점검 자체는 선행 완료 조건이 아니다.
-3. Evidence Revision, 실제 Covered Files·Source Snapshot을 확인한다. 문서가 존재한다는 이유만으로 유효하다고 보지 않는다. 실패·환경 차단·stale 증거를 생략으로 덮지 않는다.
+3. Evidence Revision, 실제 Covered Files·Source Snapshot과 [Environment Evidence](conventions.md#environment-evidence)를 확인한다. 관련 도구 버전·lockfile·테스트 설정의 현재 값과 기존 근거를 비교하여 영향받은 결과만 stale로 판단한다. 과거 환경 기록 부재는 확인 가능한 사실·한계·완료 조건 영향으로 평가하며 일괄 차단하거나 자동 통과하지 않는다. 문서가 존재한다는 이유만으로 유효하다고 보지 않는다. 실패·환경 차단·stale 증거를 생략으로 덮지 않는다.
 4. unresolved current-scope Critical/High, 승인되지 않은 계약 변경, 충족하지 못한 완료 조건이 있으면 blocked다. 후속 Task로 옮긴 사실만으로 blocking finding을 해소하지 않는다. 다른 수준의 finding도 완료 조건을 막으면 차단한다.
 5. 필요한 정본은 승인된 계약 및 현재 구현·검증과 일치해야 한다. 정본 갱신이 해당 없음이면 그 근거를 읽고 빈 guide-update.md를 요구하지 않는다.
 6. Task Completion Check에 `Verdict: ready / blocked`, Revision·snapshot, 완료 조건별 근거, 단계 적용·판정, blocking finding, 남은 검증 한계를 적는다.

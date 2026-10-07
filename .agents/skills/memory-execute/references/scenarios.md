@@ -39,6 +39,19 @@
 | S31 | 버그의 기대 권한/동작 정책에 중요한 미결정 | intake → grill-me | 부족한 분기 한 질문과 2~3개 추천 포함 선택지; 실행 청사진 확정 보류 | 원인 조사 부족과 제품 결정 부족을 구분 | 지침 walkthrough |
 | S32 | 기능·문서 Task 또는 과거 done Task | 조건부 형식 적용 확인 | nonbug에는 Bug Investigation 빈 표 없음; 과거 done 증거 불변 | Type/실제 scope로 판단, 소급 마이그레이션/Revision 일괄 증가 없음 | 지침 walkthrough |
 
+## Validation Environment Cases
+
+| Case | 입력 | 확인할 결과와 경계 | 수준 |
+| :--- | :--- | :--- | :--- |
+| E01 | 동일 Revision/source/관련 환경, HEAD만 변경 | 환경 비교 근거를 남겨 결과 재사용; 전체 retest 없음 | 지침 walkthrough |
+| E02 | 해당 검사의 lockfile 또는 runner 설정 변경 | Relevant Files snapshot 비교 후 영향받은 검사만 stale/재수행 | 지침 walkthrough |
+| E03 | 무관한 설정·파일 또는 PC 경로명/branch만 변경 | 실제 checkout/cwd·대상 내용 확인; 무관 변경만으로 stale 없음 | 지침 walkthrough |
+| E04 | 관련 runtime/tool 버전 차이 | 버전 차이가 결과 의미에 주는 영향과 판단 근거 기록; 영향 있는 검사만 재검증 | 지침 walkthrough |
+| E05 | 과거 Environment Evidence 없음 | 현재/기존 로그 보완과 한계 기록; 현재 값을 과거 값으로 추정하지 않음. 새 검증/대체 근거로 AC 충족 가능하면 진행, 필요한 동일성 미입증이 AC를 막으면 blocked | 지침 walkthrough |
+| E06 | 단독 test/commit-check에서 선행 환경 근거 stale | 사유·대상·Next Action 기록; 선행 단계·제품 수정·commit/finalize 자동 실행 및 active Position 변경 없음 | 두 모드 지침 walkthrough |
+| E07 | 비밀 설정 또는 버전 도구 부재 | 비밀 아닌 동작 요약·확인 불가 이유만 기록; env 전체/토큰 수집 및 자동 설치·업그레이드·설정 변경 없음 | 지침 walkthrough |
+| E08 | 설정 파일이 Source Snapshot에 이미 포함 | Relevant Files에서 같은 snapshot 참조; 다른 hash 사본 관리 없음, missing/deleted는 사실대로 기록 | 지침 walkthrough |
+
 ## Expected State
 
 - 표의 expected는 시험할 계약이며 실제 실행 결과가 아니다. Task report에 case별 실제 관찰·근거·결과와 확인 수준을 기록한다.
@@ -49,6 +62,7 @@
 
 ## Verification Level
 
+E01~E08은 환경 변화에 대한 문서 판단 경계다. 실제 runtime 변경 실험이나 모델 실행 성공을 뜻하지 않는다. 수행 보고에는 case별 관찰과 관련 Environment Evidence를 기록한다.
 이 저장소 root의 `node scripts/validate-skills.mjs`는 회귀 fixture와 공유 Markdown의 필수 스킬 frontmatter·파일 링크·Task 메시지·HTML fence ID·완성형 예제 구문, 임시 저장소의 Git 사례를 실행한다. S20~S22는 실제 Git 명령으로, S23의 표준/과거 식별·다른 Phase/slug·중복 키 및 S25/S26의 검출/오탐 경계는 fixture로 확인한다. S23의 실제 commit tree 복구와 S11/S24의 에이전트 상태 전이는 수동 walkthrough 또는 실제 실행 증거가 필요하다.
 
 외부 URL·placeholder·anchor·명시 fragment·외부/데이터 script는 출력에 제외 사유를 남긴다. module inline script는 Node의 구문 검사로 지원한다. 검사 성공을 실제 모델/브라우저/제품 테스트 성공으로 표현하지 않는다. 검증기의 회귀 검사만은 `node --test tests/validate-skills.test.mjs`로 실행한다.

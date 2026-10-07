@@ -30,10 +30,12 @@ Plan별 `.memory/state/{plan-id}.md`에 아래를 기록한다.
 
 1. 명시 Task 경로 또는 current Active Task를 확인하고 Task의 Revision·Status·workflow·Resume Stage를 읽는다.
 2. 필요한 관련 파일과 적용 단계의 evidence를 확인한다. placeholder·없는 링크·실제 done Task를 새로 구현하지 않는다.
-3. Evidence Revision과 실제 covered 파일 snapshot을 비교한다. 현재 contract/covered 내용에 영향을 받은 결과만 stale로 표시한다.
+3. Evidence Revision과 실제 covered 파일 snapshot 및 [Environment Evidence](conventions.md#environment-evidence)를 비교한다. 관련 runtime/tool·lockfile·runner 설정 변경이 결과에 주는 영향을 기록하고 영향받은 결과만 stale로 표시한다. 같은 내용의 HEAD/branch·PC 경로명 변화나 무관한 설정만으로 전체 retest하지 않는다. 실제 checkout/cwd와 대상은 확인한다.
 4. 같은 내용의 코드가 커밋되어 HEAD만 바뀐 것은 내용 검증 실패가 아니다. 준비 시 Base HEAD는 commit recovery에 사용하고 내용 유효성은 파일 snapshot으로 판단한다.
 5. stale/failed/blocked를 passed나 skipped로 자동 변환하지 않는다. 실제 필요한 단계로 재개한다. 환경·설계 blocker가 해결되지 않으면 근거를 남기고 멈춘다.
 6. stage-only 요청은 선행 증거가 부족해도 전체 workflow를 자동 실행하지 않는다. 필요한 다음 행동을 보고한다.
+
+과거 환경 근거가 없으면 현재/기존 로그로 필요한 사실을 확인하되 현재 값을 과거 값으로 간주하지 않는다. 근거 부재만으로 자동 실패/통과하지 않고 재검증 가능성·완료 조건 영향·한계를 기록한다. 필요한 동일성을 입증할 수 없어 완료 조건을 막을 때만 blocked다. 과거 done 기록은 보존하며 단독 단계는 선행 stale의 사유·대상·Next Action만 남기고 요청하지 않은 단계·제품 수정·commit/finalize와 active Position 변경을 수행하지 않는다.
 
 ## Switch
 

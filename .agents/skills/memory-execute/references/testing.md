@@ -4,6 +4,7 @@ test 단계가 적용되거나 사용자가 요청한 경우에 읽는다. [프�
 
 ## Discovery
 
+- 실행할 검사에 관련된 runtime/tool·lockfile·test/build 설정과 실제 cwd를 먼저 확인한다. [Environment Evidence](conventions.md#environment-evidence)에 따라 확인 불가 이유를 남기고 환경 근거 수집을 위한 설치·업그레이드·설정 변경은 자동 수행하지 않는다.
 - Task 완료 조건·검증 의무·현재 구현·해결된 finding과 실제 테스트 구조를 확인한다.
 - manifest·CI·README의 command/cwd, 근접 suite·fixture·이름을 따른다. 특정 앱 디렉터리나 테스트 프레임워크를 강제하지 않는다.
 - 적용되는 선행 구현·리뷰의 유효 evidence가 필요하다. review가 해당 없음이면 승인된 생략 이유와 Task 내 근거를 읽으며 review.md 부재만으로 차단하지 않는다.
@@ -41,5 +42,6 @@ test 단계가 적용되거나 사용자가 요청한 경우에 읽는다. [프�
 test.md에 `Pass / Pass with Issues / Fail / Blocked`, 완료 조건별 coverage, 새·수정 테스트 파일, command/cwd/실제 exit/result, 생략·환경 제약, 다음 행동을 적는다.
 
 - 수행한 범위의 Revision·Covered Files·Source Snapshot·Checked At을 기록한다.
+- Environment Evidence에는 관련 Tool Versions, Relevant Files의 snapshot 참조, Non-secret Settings와 Scope / Reason·Checked At만 조건부로 기록한다. 재사용 시 현재 값과 비교해 해당 검사에 영향을 주는 변경만 stale/재검증하고 과거 기록 부재는 실제 완료 조건 영향·한계로 판단한다. 단독 test는 선행 stale 사유·대상·Next Action을 남기며 선행 단계 자동 실행이나 active Position 변경을 하지 않는다.
 - 수동 walkthrough·실제 command 실행·자동 모델/제품 테스트를 구분한다. 예시 command나 예정 결과를 실행한 성공처럼 쓰지 않는다.
 - test passed는 Task done·commit·포인터 전진을 의미하지 않는다. 전체 완료는 공통 판정과 실행 모드에 따른다.

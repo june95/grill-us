@@ -316,6 +316,16 @@ Candidate Snapshot의 각 항목에는 path, added/modified/deleted 상태, 검�
 
 {실제 변경·판단·검증 근거, command/cwd/result 또는 필요한 대응표}
 
+## Environment Evidence
+
+{검증 결과에 관련된 항목만 작성한다. 적용되지 않으면 이유를 적고 빈 필드 나열은 제거한다.}
+
+- Tool Versions: {관련 도구·runtime, 읽기 명령, 실제 버전 또는 미확인 이유}
+- Relevant Files: {관련 설정 path → 위 Source Snapshot 참조 또는 SHA256/missing/deleted; 중복 hash 관리 금지}
+- Non-secret Settings: {확인한 비밀 아닌 동작 설정 요약 또는 해당 없음의 이유}
+- Scope / Reason: {검사와의 관계, 재사용 시 현재/기존 값 비교·변경 영향·재사용/재검증 판단과 한계}
+- Checked At: {실제 환경 확인 시각}
+
 ## Blockers and Risks
 
 {없음 또는 근거·영향·검증 한계}
