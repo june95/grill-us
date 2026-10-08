@@ -18,7 +18,17 @@ Run a report without installing anything globally:
 & .\.codeburn\codeburn.ps1 sessions -p today --provider copilot --no-pager
 ```
 
-Optionally register CodeBurn as a project-scoped MCP server:
+This lists today's Copilot sessions, not overall usage. For today's available local records across providers, use `overview -p today --provider all --no-color`. Running from a project root only locates this bundle; it does not filter the report to that project. State the actual provider, period, project, and session scope with results.
+
+If the wrapper is blocked by signing or execution policy, the existing Node alternative is:
+
+```powershell
+node .codeburn/runtime/dist/cli.js overview -p today --provider all --no-color
+```
+
+Do not automatically change execution policy or install/configure tools to make a query work. See [report scope and help commands](../CODEBURN-SETUP.md#report-scope) for project name/path substring matching, session attribution, and estimated/missing data limitations.
+
+Only when explicitly requested, register CodeBurn as a project-scoped MCP server:
 
 ```powershell
 & .\.codeburn\install.ps1

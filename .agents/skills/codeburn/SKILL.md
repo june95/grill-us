@@ -20,22 +20,48 @@ Run commands from the project root:
 & .\.codeburn\codeburn.ps1 sessions -p today --provider copilot --no-pager
 ```
 
+The working directory locates the bundled runtime; it does not restrict usage to this project. If the wrapper is blocked by a signature or execution policy, use the existing Node entry point with the same arguments:
+
+```powershell
+node .codeburn/runtime/dist/cli.js overview -p today --provider all --no-color
+```
+
+Do not change execution policy, use Bypass, install packages, or configure MCP just to run a query. Check supported options with the relevant subcommand's `--help`.
+
+## Query Scope
+
+Before querying, resolve the user's provider, period, project, and session scope. Preserve explicit choices and state the actual scope in the answer.
+
+- Provider: use `--provider all` for overall usage, or the requested provider. Overall means available local provider records, not guaranteed coverage of every account or machine. Never silently narrow overall usage to Copilot.
+- Period: specify it explicitly. `overview` defaults to `month`; `sessions` and `optimize` default to `30days`. Use `-p today` for today or supported `--from`/`--to` dates for a requested range; date options override the period for overview.
+- Project: without a project filter, the report may cover multiple projects on this machine. `overview --project <name>` is a case-insensitive project-name or recorded-path substring filter, not an exact repository-path match. It and `--exclude <name>` are repeatable. Check the returned project breakdown; if multiple projects match, explain the scope or ask one necessary question. Do not present machine-wide totals as this project's usage.
+- Session: identify the provider session using actual session evidence. Time proximity alone does not identify one question. One user turn can trigger multiple model calls. The bundled `sessions --help` has no `--project` or `--session` option; do not invent them. Narrow supported period/provider options, then identify the relevant session in available results. If attribution remains uncertain, report that limitation.
+- Missing or mismatched data: distinguish no matching records, unsupported scope, and missing counters from confirmed zero usage. Report input, output, cache, total tokens, and cost only when available; label unavailable or estimated values. Do not equate calculated cost with the actual subscription bill.
+
+Apply the same scope rules to MCP queries. Confirm each tool's supported filters; if they cannot express the requested scope, use the available CLI within its supported limits and disclose any remaining ambiguity.
+
 ## Common Requests
 
 - Today's Copilot sessions:
   `& .\.codeburn\codeburn.ps1 sessions -p today --provider copilot --no-pager`
 - Today's overall usage:
+  `& .\.codeburn\codeburn.ps1 overview -p today --provider all --no-color`
+- Today's Copilot usage:
   `& .\.codeburn\codeburn.ps1 overview -p today --provider copilot --no-color`
-- Optimization report:
+- Today's Codex usage:
+  `& .\.codeburn\codeburn.ps1 overview -p today --provider codex --no-color`
+- Today's usage for matching project names (replace the example name and verify matches):
+  `& .\.codeburn\codeburn.ps1 overview -p today --provider all --project "project-name" --no-color`
+- Optimization report for today's Copilot usage, when requested:
   `& .\.codeburn\codeburn.ps1 optimize -p today --provider copilot`
 - Interactive dashboard:
   `& .\.codeburn\codeburn.ps1`
 
-For a request about one recent question or conversation, inspect the current session's records and explain that one user turn can trigger multiple model calls. Report input, output, cache, total tokens, and cost when available.
+Run usage or optimization reports only when the user requests them. Documentation checks use help and example/option comparisons, not actual usage queries. Keep aggregate answers free of raw session content.
 
 ## MCP
 
-If the workspace CodeBurn MCP server is already available, prefer its `get_usage` and `get_savings` tools for structured queries. Otherwise, use the bundled CLI. To register the bundled runtime as a project-scoped MCP server, run:
+If the workspace CodeBurn MCP server is already available, prefer its `get_usage` and `get_savings` tools for structured queries with supported filters. Otherwise, use the bundled CLI. Only when the user explicitly requests MCP registration, run:
 
 ```powershell
 & .\.codeburn\install.ps1
