@@ -10,8 +10,11 @@
 | 설계 검토·중요한 미결정 | [grill-me](.agents/skills/grill-me/SKILL.md) | 한 질문씩 결정 확정·근거 보존 |
 | 확정 결정·요청의 작업 분할 | [memory-plan](.agents/skills/memory-plan/SKILL.md) | Plan → Phase → Task 청사진 생성 |
 | 현재 작업·지정 단계 실행 | [memory-execute](.agents/skills/memory-execute/SKILL.md) | 적용 단계 실행·검증·완료 판정·재개 |
+| 설계·계획·진행·완료 결과 설명 | [memory-explain](.agents/skills/memory-explain/SKILL.md) | 관련 기록·코드·Git 근거를 읽고 이유·상태·결과 설명 |
 
 필요한 진입점으로 시작한다. 모든 요청에 인터뷰를 강제하지 않는다. 실제 미결정이 생기면 한 질문씩 2~3개 선택지와 Recommended를 제시하고, 코드에서 확인할 내용이나 확정된 선택은 다시 묻지 않는다.
+
+memory-explain은 기존 네 작업 진입점을 보조하는 설명 전용 진입점이다. 설명만 하는 호출에서는 `.memory` 보고·일일 이력 작성 의무를 적용하지 않으며 기록·current·checkpoint·제품·Git 상태를 변경하거나 테스트를 실행하지 않는다. 상태 불일치나 미해결 commit intent는 사실·영향·권고를 채팅에 설명하고 복구는 별도 실행 요청으로 연결한다. 과거 완료 근거와 현재 코드 상태를 구분하며 기록을 수정해 일치시키지 않는다.
 
 ## Planning and Registration
 

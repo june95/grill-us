@@ -1,6 +1,6 @@
 # Project Memory Starter Kit
 
-요구사항·설계 결정·구현 청사진·검증 결과를 파일로 남기고, 다음 작업을 이어갈 위치를 관리하는 에이전트 스킬 묶음입니다. 핵심 진입점은 네 개입니다.
+요구사항·설계 결정·구현 청사진·검증 결과를 파일로 남기고, 다음 작업을 이어갈 위치를 관리하는 에이전트 스킬 묶음입니다. 작업 관리 진입점 네 개와 기록을 읽어 설명하는 보조 진입점을 제공합니다.
 
 | 스킬 | 사용할 때 | 결과 |
 | :--- | :--- | :--- |
@@ -8,12 +8,13 @@
 | [grill-me](.agents/skills/grill-me/SKILL.md) | 설계 검토나 중요한 미결정이 있을 때 | 한 질문씩 선택·이유 확정 |
 | [memory-plan](.agents/skills/memory-plan/SKILL.md) | 확정 요청을 실행 단위로 나눌 때 | Plan·Phase·Task 청사진 작성 |
 | [memory-execute](.agents/skills/memory-execute/SKILL.md) | 현재 Task 또는 지정 단계만 수행할 때 | 구현·검증·완료 판정·재개 |
+| [memory-explain](.agents/skills/memory-explain/SKILL.md) | 설계 이유·계획·진행·완료 결과를 이해할 때 | 관련 기록·코드·Git 근거에 따른 채팅 설명 |
 
 스킬은 에이전트가 따르는 업무 지침입니다. 별도 workflow 실행 프로그램이나 제품 앱을 포함하지 않습니다.
 
 ## 다른 프로젝트에 적용하기
 
-1. 대상 프로젝트의 .agents/skills 아래에 grill-me, memory-intake, memory-plan, memory-execute 폴더를 복사합니다. memory-execute의 references도 함께 복사합니다. 기존 같은 이름의 스킬이 있다면 내용을 확인해 통합합니다.
+1. 대상 프로젝트의 .agents/skills 아래에 grill-me, memory-intake, memory-plan, memory-execute, memory-explain 폴더를 복사합니다. memory-execute의 공통 references와 memory-explain의 references도 함께 복사합니다. 기존 같은 이름의 스킬이 있다면 내용을 확인해 통합합니다. 명시적 HTML 설명도 사용하려면 별도 visualize 폴더와 references를 함께 복사합니다.
 2. [AGENTS.md](AGENTS.md)의 프로젝트 메모리 규칙을 대상 지침에 반영합니다. 대상 프로젝트의 기존 지침과 정본 우선순위를 보존합니다.
 3. 대상 .gitignore에 다음 기본 로컬 정책을 추가합니다. 기존 ignore 규칙은 유지합니다.
 
@@ -31,13 +32,14 @@ git ls-files -- .memory
 git rm --cached -- .memory/current.md
 ~~~
 
-스킬 호출 표기는 사용하는 에이전트 도구에 맞춥니다. 아래 /스킬명은 작업 요청 예시이며, 도구가 $스킬명 또는 자연어 지정을 지원하면 그 방식으로 같은 스킬을 선택할 수 있습니다.
+스킬 호출 표기는 사용하는 에이전트 도구에 맞춥니다. 아래 /스킬명은 작업 요청 예시이며, 도구가 $스킬명 또는 자연어 지정을 지원하면 그 방식으로 같은 스킬을 선택할 수 있습니다. 이 표기와 선택적 입력은 에이전트 요청 형식이며 새로운 터미널 CLI가 아닙니다.
 
 ## 시작 경로
 
 ~~~text
 명확한 수정·이슈 → memory-intake → Plan/Phase/Task 등록 → memory-execute
 중요한 설계 분기 → grill-me → 결정 확정 → memory-plan → memory-execute
+기록된 설계·계획·진행·완료 결과 질문 → memory-explain → 읽기 전용 설명
 ~~~
 
 명확함은 변경 규모뿐 아니라 코드 근거·범위·완료 조건·검증 경로로 판단합니다. 작은 수정에도 권한·데이터·API 의미의 미결정이 있으면 해당 부분을 확인합니다. 원하는 동작이 명확한 버그의 원인은 코드에서 조사하며, 필요한 재현 정보만 질문합니다.
@@ -64,6 +66,22 @@ current 보고 이어서 해줘
 관련 요청은 기존 Plan에 추가하고 독립 목표는 새 Plan을 만듭니다. 같은 미완료 요청은 재사용하며, 완료 뒤 재발·추가 수정은 과거 기록을 보존하고 새 Task로 추적합니다.
 
 버그 등록 보고는 실제 확인 수준을 함께 설명합니다. 예를 들어 실행하지 않고 코드만 조사했다면 "code_only, 원인 후보는 코드 근거 있음(supported), 실행 재현 미확인; 첫 단위에서 안전한 기존 검증 방법으로 확인"처럼 적습니다. 이 문구는 보고 형식 예시이며 실제 결과에 맞게 바꿉니다. 사용자 제공 로그와 에이전트의 직접 실행도 구분합니다.
+
+설명은 대상과 원하는 깊이를 자연어로 지정합니다. 기본은 간결한 채팅이며, 명시한 비활성·완료 Task도 현재 작업을 전환하지 않고 설명합니다.
+
+~~~text
+$memory-explain 현재 계획을 짧게 설명해줘
+$memory-explain 마지막 완료 Task는 무엇이 바뀌었어?
+memory-explain 이 설계를 선택한 이유를 알려줘
+memory-explain 이 Plan의 계획과 실제 구현 차이를 설명해줘
+memory-explain 이 완료 작업을 비개발자에게 요약해줘
+memory-explain 이 Task의 흐름과 검증 한계를 개발자 인수인계용으로 설명해줘
+memory-explain 이 Plan의 의존 관계를 visualize로 HTML 도식으로 만들어줘
+~~~
+
+계획은 예정 동작으로, 완료 작업은 당시 구현·검증·커밋 또는 no-commit 근거로 설명합니다. 완료 기록과 현재 코드가 다를 수 있으며, 기록되지 않은 이유나 확인하지 못한 결과는 추측으로 채우지 않습니다. 변경 전후·관련 작업·검증 한계는 근거가 있을 때 포함합니다. [설명 시나리오](.agents/skills/memory-explain/references/scenarios.md)는 정적 검사·수동 대조와 실제 모델 행동 검증의 차이도 안내합니다.
+
+설명만 요청하면 보고·이력·current·checkpoint·제품·Git을 수정하거나 테스트를 실행하지 않습니다. 상태 불일치는 설명하고 복구는 별도 실행 요청으로 연결합니다. HTML은 명시적으로 요청할 때만 [visualize](.agents/skills/visualize/SKILL.md)를 적용하며, 기본 산출물은 저장소 밖에 두어 기존 기록과 Git 상태를 보존합니다.
 
 ## 전체 실행과 부분 실행
 
@@ -110,6 +128,7 @@ T01부터 T03까지 순서대로 진행해줘
 
 - task.md는 상세 계약·workflow·완료 조건의 정본입니다.
 - current는 활성 위치, state는 재개·커밋 의도, Phase/Plan은 실제 Task 상태의 요약입니다.
+- memory-explain은 이 기록을 읽어 설명하며 설명 결과를 보고·history로 자동 저장하지 않습니다.
 - 코드·계약·관련 검증 환경 변경 뒤에는 영향을 받은 증거의 최신성을 확인합니다.
 - 제품 테스트와 공유 가이드는 해당 프로젝트의 기존 디렉터리에 둡니다.
 - 특정 정본·앱 경로를 강제하지 않습니다. [선택적 프로필](.agents/skills/memory-execute/references/project-profile.md)이 없으면 기존 구조를 확인합니다.
