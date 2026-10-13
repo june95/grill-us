@@ -2,9 +2,34 @@
 
 2026-10-13에 생성 package 0.1.0을 개발 저장소 밖의 별도 Windows 가상 프로젝트에서 실제 CLI와 모델 요청으로 시험했습니다. 포함 스킬은 `grill-me`, `memory-intake`, `memory-plan`, `memory-execute`, `memory-explain`, `visualize` 6개이며 CodeBurn은 포함하지 않습니다. 현재 확인한 버전은 최소 지원 버전이 아닙니다.
 
-## 표면과 로드 경로
+## GitHub 주소 설치 — 2026-10-14
 
-Git 주소 설치용 배포 준비는 기존 로컬 host 시험과 별도입니다. 저장소의 `.agents/plugins/marketplace.json`·`.claude-plugin/marketplace.json`은 generated `plugins/grill-us`를 가리키며, 이 snapshot과 catalog가 main에 공개되면 `june95/grill-us` source 등록/설치 경로를 사용할 수 있습니다. 소비자는 ZIP·수동 clone·Node 빌드를 하지 않습니다. 현재의 생성/freshness·Git clone·manifest 검사 성공을 **실제 GitHub native 설치 성공으로 표시하지 않습니다**. 공개된 commit을 대상으로 양쪽 설치를 별도로 확인한 뒤 성공 범위를 갱신합니다.
+공개된 `june95/grill-us`의 default branch main, 커밋 **`905e8fd66163c2da77335e6556a9a82666ae9a69`**, package **0.1.0**을 별도 Windows 사용자 프로젝트 두 곳에서 실제 native CLI로 등록·설치했습니다. 수동 ZIP·clone·package 복사·Node 빌드·개발 스킬 직접 로딩 없이 도구가 GitHub source를 받았고, 양쪽 marketplace의 실제 Git origin/HEAD와 설치 cache의 36개 파일 bytes가 공개 package와 일치했습니다.
+
+| 항목 | Codex CLI | Claude Code CLI |
+| :--- | :--- | :--- |
+| 실제 버전 / OS | 0.160.1 / Windows | 2.1.296 / Windows |
+| source 등록 | `codex plugin marketplace add june95/grill-us` | `claude plugin marketplace add june95/grill-us` |
+| native 설치 | `codex plugin add grill-us@grill-us` | `claude plugin install grill-us@grill-us --scope user` |
+| 실제 발견 | app-server `skills/list` 활성 namespace 6개, errors 0 | 새 세션 init의 plugin 0.1.0 및 slash command 6개 |
+| 명시 대표 요청 | `$grill-us:memory-explain` / `codex exec` | `/grill-us:memory-explain` / `claude -p` |
+| 실제 본문·참조 | 설치 cache의 SKILL.md·conventions/review/project-profile | 설치 cache의 SKILL.md·scenarios/conventions |
+| 설명 경계 | fixture의 done T01와 pending T02·현재 코드·실제 commit diff 구분 | fixture의 done T01와 pending T02·현재 코드·Git refs/log 구분 |
+| 전후 대조 | fixture 파일·Git·package bytes 변화 0 | 최종 설명 호출에서 fixture 파일·Git·package bytes 변화 0 |
+
+설치 경로는 각각 `~/.codex/plugins/cache/grill-us/grill-us/0.1.0`과 `~/.claude/plugins/cache/grill-us/grill-us/0.1.0`입니다. Claude는 내부 slash 명령을 대화형으로 실행한 시험 대신 동등한 native CLI 설치를 사용했습니다. init 목록과 cache 읽기 event는 실제 근거이며 별도 `Skill` tool event는 두 Claude 설명 시도 모두 0건입니다. 목록 발견·명시 요청·tool event를 서로 대체하여 주장하지 않습니다.
+
+Claude 최초 설명은 exit 0과 목록 6개·fixture 무쓰기를 확인했지만, 시험의 `--restricted`가 cwd 밖의 cache Read를 거부하여 참조 읽기는 실패했습니다. 원 부분 실패를 보존한 뒤 **정확한 설치 cache 하나만 `--add-dir`에 추가**하고 Read/Glob/Grep/Skill 제한을 유지한 재시험에서 본문·형제 참조 읽기를 확인했습니다. Bash/Write/Edit나 인증·HOME 재지정은 추가하지 않았습니다. Git 근거는 Claude의 파일 도구로 refs/log를 읽었으며 commit diff 실행은 Codex 시험의 근거입니다.
+
+기존 로컬 시험의 다른 5개 대표 흐름은 6개 SKILL.md의 bytes와 같은 CLI 버전을 확인해 재사용했습니다. visualize 참조 7개는 LF 정규화만 달랐고, project-profile의 생성물/정본 설명 변경은 현재 설치 cache 출처·사용 프로젝트 경계 시험과 대조했습니다. 새 GitHub 설치 뒤 모든 모델 흐름이나 모든 설정 조합을 다시 실행한 것은 아닙니다. 모델·개인 기본 설정의 완전한 동일성이나 미래 출력 준수를 보장하지 않습니다.
+
+trial plugin과 marketplace는 정확한 identity의 native uninstall/remove로 제거했고, 양쪽의 무관 native 설치·marketplace 목록과 선택한 설정의 무관 내용은 유지됐습니다. 무관 Codex cache 1,331개도 동일했습니다. Codex 시험 cache와 임시 신뢰 항목·시험으로 처음 생긴 빈 registry는 정리했습니다. 별도 실행 세션이 참조 중인 Claude version cache는 **사용자의 보존 선택에 따라 유지**했으며 이를 삭제 완료로 표시하지 않습니다.
+
+정상 CLI 실행은 개인 상태 파일을 기록할 수 있습니다. `.claude.json`과 marketplace registry의 상태 hash 변화도 관측했고 원인이나 모든 metadata의 동일성을 단정하지 않았습니다. native 목록의 source·identity·기존 설치와 selected 설정 본문의 보존을 확인했으며 개인 상태 전체를 과거 파일로 복원하지 않았습니다. fixture 무쓰기를 개인 상태 전체 무쓰기로 확대하지 않습니다. 사용 중인 cache나 소유성이 불명확한 항목을 강제로 삭제하지 않습니다.
+
+이후 안내 문구만 바꿔 생성 README/build 목록을 갱신한 package는 위 실제 설치 당시 bytes와 구분합니다. 스킬·manifest·catalog·version은 유지하며 안내 변경을 새로운 GitHub 재설치나 자동 upgrade 성공으로 표시하지 않습니다. macOS/Linux·Codex 앱/IDE/웹·구버전·최소 지원 버전·버전 간 자동 upgrade는 미검증입니다.
+
+## 기존 로컬 시험의 표면과 로드 경로
 
 | 항목 | Codex CLI | Claude Code CLI |
 | :--- | :--- | :--- |
@@ -17,7 +42,7 @@ Git 주소 설치용 배포 준비는 기존 로컬 host 시험과 별도입니�
 | 작업 기록 | 가상 사용자 프로젝트 `.memory` | 가상 사용자 프로젝트 `.memory` |
 | 리뷰 시험 | 실제 위임 런타임 오류 알림 후 Self | Agent 도구 제한 시 사유 알림 후 Self |
 
-실제 명령의 상세 옵션·prompt·exit·파일 전후 hash는 로컬 Task 증거로 보관합니다. 개인 인증값·이메일·기존 사용자 세션은 공유 문서에 포함하지 않습니다. 지원 안내와 재현용 설치 구성은 [패키지 사용자 안내](../packaging/README.md)에 있습니다. Codex 앱·IDE·웹, macOS/Linux, 구버전, 영구 Claude marketplace 설치·자동 upgrade는 실제 호출 미검증입니다.
+실제 명령의 상세 옵션·prompt·exit·파일 전후 hash는 로컬 Task 증거로 보관합니다. 개인 인증값·이메일·기존 사용자 세션은 공유 문서에 포함하지 않습니다. 지원 안내와 재현용 설치 구성은 [패키지 사용자 안내](../packaging/README.md)에 있습니다. 이 표는 2026-10-13의 로컬 시험이고 GitHub native user 설치는 위 절의 별도 근거입니다. 다른 표면·OS·구버전·버전 간 자동 upgrade는 미검증입니다.
 
 ## 대표 흐름과 경계
 

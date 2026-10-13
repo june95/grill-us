@@ -4,7 +4,7 @@
 
 ## 검증 상태
 
-Windows에서 Codex CLI **0.160.1**과 Claude Code **2.1.296**의 실제 plugin 목록에 포함 스킬 6개가 발견되는 것을 확인했습니다. 이는 시험한 버전이며 최소 지원 버전이나 다른 OS·Codex 앱/IDE/웹의 지원을 뜻하지 않습니다. 아래 설치는 사용자가 선택하여 수행하는 절차이며 공개 marketplace 게시나 자동 개인 설치를 제공하지 않습니다.
+Windows에서 Codex CLI **0.160.1**과 Claude Code **2.1.296**의 실제 plugin 목록에 포함 스킬 6개가 발견되는 것을 확인했습니다. 2026-10-14에는 GitHub `june95/grill-us`의 main 커밋 `905e8fd66163c2da77335e6556a9a82666ae9a69`, package **0.1.0**을 양쪽 native 명령으로 설치하고 설치 cache에서 명시 `memory-explain` 호출과 형제 참조 읽기를 확인했습니다. 이는 시험한 버전이며 최소 지원 버전이나 다른 OS·Codex 앱/IDE/웹의 지원을 뜻하지 않습니다. 아래 설치는 사용자가 선택하여 수행하며 vendor 공개 store 게시나 자동 개인 설치를 제공하지 않습니다.
 
 ## 제공 스킬과 선택
 
@@ -17,11 +17,11 @@ Windows에서 Codex CLI **0.160.1**과 Claude Code **2.1.296**의 실제 plugin 
 | memory-explain | 기록·코드·Git 근거로 설명 | `$grill-us:memory-explain` | `/grill-us:memory-explain` |
 | visualize | 명시한 HTML 시각화 생성 | `$grill-us:visualize` | `/grill-us:visualize` |
 
-호출 표기는 에이전트에 입력하는 요청이며 터미널 실행 파일이 아닙니다. 동명 개인 스킬이 있으면 namespace를 포함하고, 실제 읽은 경로가 이 plugin의 `skills/`인지 확인합니다. 시험에서는 Codex 설치 cache와 Claude 세션 package에서 본문·형제 references를 읽었습니다. 모든 이름 충돌 조합이나 암묵적 자동 선택까지 검증한 것은 아닙니다. Claude 표기는 [공식 skills 문서](https://code.claude.com/docs/en/skills)도 참고합니다.
+호출 표기는 에이전트에 입력하는 요청이며 터미널 실행 파일이 아닙니다. 동명 개인 스킬이 있으면 namespace를 포함하고, 실제 읽은 경로가 이 plugin의 `skills/`인지 확인합니다. GitHub 설치 시험에서는 양쪽 설치 cache에서 본문·형제 references를 읽었습니다. 기존 로컬 시험의 다른 5개 대표 흐름은 본문·참조·CLI 버전의 변경 영향을 대조해 재사용했으며 GitHub 설치 뒤 모든 요청을 다시 실행한 것은 아닙니다. 모든 이름 충돌 조합이나 암묵적 자동 선택까지 검증한 것도 아닙니다. Claude 표기는 [공식 skills 문서](https://code.claude.com/docs/en/skills)도 참고합니다.
 
 ## 저장소 주소로 설치
 
-Git 배포 package와 catalog가 저장소 main에 공개된 뒤 사용할 경로입니다. 현재 로컬 배포 준비와 실제 GitHub source 설치 성공은 구분하며, 공개 후 native 설치 검증을 별도로 수행합니다. 설치하는 사용자에게 ZIP 다운로드·수동 clone·Node 빌드를 요구하지 않습니다.
+저장소 main에 공개된 catalog와 완성된 package를 도구가 받아 설치합니다. 위 검증 상태의 공개 커밋에서 양쪽 source 등록·설치·목록 6개와 설치 cache 출처를 실제 확인했습니다. 설치하는 사용자에게 ZIP 다운로드·수동 clone·Node 빌드를 요구하지 않습니다.
 
 Codex CLI에서는 terminal에서 source를 등록하고 설치합니다.
 
@@ -39,9 +39,22 @@ Claude Code에서는 채팅창에 다음 두 요청을 입력한 뒤 새 세션�
 /plugin install grill-us@grill-us
 ~~~
 
+위 Claude 채팅 경로와 동등한 native CLI `claude plugin marketplace add june95/grill-us` → `claude plugin install grill-us@grill-us --scope user`로 시험했습니다. `--plugin-dir`로 수동 로드한 결과를 GitHub 설치 성공으로 대체하지 않았습니다.
+
 저장소의 HTTPS Git URL `https://github.com/june95/grill-us.git`도 source로 지정할 수 있습니다. catalog 이름은 `grill-us`, plugin 이름도 `grill-us`여서 selector는 `grill-us@grill-us`입니다. 실제 요청은 위 표의 `$grill-us:<skill>` 또는 `/grill-us:<skill>` 표기를 사용합니다.
 
-업데이트는 source를 새로 고친 뒤 설치된 version/실제 스킬 경로를 확인하세요. Codex는 `codex plugin marketplace upgrade grill-us`, Claude는 `claude plugin marketplace update grill-us`를 사용하고 필요하면 정확한 plugin만 제거·재설치합니다. 실제 버전 간 업데이트·공개 GitHub 설치 성공은 해당 시험 결과가 확인되기 전까지 미검증입니다. 개인 catalog/cache·설정이 변경될 수 있으며 다른 설치본을 일괄 제거하지 않습니다. [OpenAI package 문서](https://developers.openai.com/plugins/build/plugins), [Claude 설치 문서](https://code.claude.com/docs/en/discover-plugins)를 함께 확인하세요.
+업데이트는 source를 새로 고친 뒤 설치된 version/실제 스킬 경로를 확인하세요. Codex는 `codex plugin marketplace upgrade grill-us`, Claude는 `claude plugin marketplace update grill-us`를 사용하고 필요하면 정확한 plugin만 제거·재설치합니다. GitHub 최초 설치는 확인했지만 실제 버전 간 자동 업데이트는 미검증입니다. 개인 catalog/cache·설정이 변경될 수 있으며 다른 설치본을 일괄 제거하지 않습니다. [OpenAI package 문서](https://developers.openai.com/plugins/build/plugins), [Claude 설치 문서](https://code.claude.com/docs/en/discover-plugins)를 함께 확인하세요.
+
+제거할 때도 정확한 identity만 지정합니다. 아래 marketplace 제거는 다른 plugin을 추가하지 않은 개인 catalog에 한정하세요. Claude marketplace 제거는 그 catalog의 설치 항목에도 영향을 줄 수 있습니다.
+
+~~~powershell
+codex plugin remove grill-us@grill-us
+codex plugin marketplace remove grill-us
+claude plugin uninstall grill-us@grill-us --scope user
+claude plugin marketplace remove grill-us --scope user
+~~~
+
+시험에서 이 native 제거 경로와 설치 목록의 identity 제거를 확인했습니다. 사용 중인 별도 세션은 이전 version cache를 유지할 수 있습니다. 해당 세션을 종료하기 전에 cache를 수동 삭제하거나 사용 표식을 강제로 지우지 마세요. 기존의 동명 설치가 있으면 먼저 출처를 확인하며 일괄 덮어쓰기·제거하지 않습니다.
 
 ## 로컬 로드와 설치
 
@@ -56,7 +69,7 @@ cd C:/projects/your-project
 claude --plugin-dir C:/plugin-catalog/plugins/grill-us
 ~~~
 
-세션에서 `/grill-us:memory-explain 현재 작업을 설명해줘`처럼 요청합니다. `--plugin-dir` 세션 로드는 이 시험에서 실제 확인했으며 영구 marketplace 설치·업데이트는 시험하지 않았습니다. 상세 옵션은 [공식 CLI 문서](https://code.claude.com/docs/en/cli-reference)를 참고합니다.
+세션에서 `/grill-us:memory-explain 현재 작업을 설명해줘`처럼 요청합니다. `--plugin-dir` 세션 로드는 기존 로컬 시험에서 확인한 경로이고, GitHub native user 설치는 위 절에서 별도로 확인했습니다. 버전 간 자동 업데이트는 시험하지 않았습니다. 상세 옵션은 [공식 CLI 문서](https://code.claude.com/docs/en/cli-reference)를 참고합니다.
 
 ### Codex CLI 로컬 marketplace
 

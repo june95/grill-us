@@ -22,11 +22,11 @@
 - `dist/grill-us`: Git에서 제외하는 로컬 빌드.
 - `plugins/grill-us`: 같은 정본에서 생성하고 Git에 포함하는 배포 snapshot. 저장소 catalog는 이 경로를 가리키며 소비자는 별도 Node 빌드 없이 설치합니다.
 
-생성물은 수동 편집하지 않습니다. 배포 입력과 snapshot은 Git 속성으로 LF를 유지해 checkout 뒤에도 해시가 일치하게 합니다. `--publish`로 배포 snapshot을 갱신하고 `--check-published`로 source drift·누락·수동 변경을 쓰기 없이 확인하는 절차를 사용합니다. 실제 GitHub 직접 설치 성공 범위는 별도 검증 뒤 [호환성 안내](docs/plugin-compatibility.md)에 기록합니다.
+생성물은 수동 편집하지 않습니다. 배포 입력과 snapshot은 Git 속성으로 LF를 유지해 checkout 뒤에도 해시가 일치하게 합니다. `--publish`로 배포 snapshot을 갱신하고 `--check-published`로 source drift·누락·수동 변경을 쓰기 없이 확인하는 절차를 사용합니다. 2026-10-14 Windows의 Codex CLI 0.160.1·Claude Code 2.1.296에서 GitHub 직접 설치·목록 6개·설치 cache의 명시 설명 호출을 확인했습니다. 실제 공개 커밋과 한계는 [호환성 안내](docs/plugin-compatibility.md)에 기록합니다.
 
 포함 스킬·로컬 설치/세션 로드·명시 호출·업데이트·기존 사본 전환은 [패키지 사용자 안내](packaging/README.md)를 참고합니다. 이 안내도 빌드할 때 생성 패키지의 README로 복사됩니다. Windows의 Codex CLI 0.160.1과 Claude Code 2.1.296에서 6개 스킬 발견을 실제 확인했으며, 호출별 증거와 출력·표면별 한계는 [호환성 안내](docs/plugin-compatibility.md)에 구분합니다. 시험한 버전은 최소 지원 버전이 아닙니다.
 
-1. Git 배포 snapshot과 catalog가 공개된 저장소는 주소 `june95/grill-us`로 등록해 설치합니다. 소비자는 ZIP·수동 clone·Node 빌드가 필요하지 않습니다([저장소 주소 설치](packaging/README.md#저장소-주소로-설치)). 현재 준비된 배포 구성과 실제 GitHub 설치 성공은 [호환성 안내](docs/plugin-compatibility.md)에서 구분합니다.
+1. 주소 `june95/grill-us`를 marketplace에 등록해 설치합니다. 소비자는 ZIP·수동 clone·Node 빌드가 필요하지 않습니다([저장소 주소 설치](packaging/README.md#저장소-주소로-설치)). 실제 확인한 CLI 버전·공개 커밋·호출 범위는 [호환성 안내](docs/plugin-compatibility.md)에 있습니다.
 2. 로컬 시험은 기존 `dist/grill-us` 생성/Claude `--plugin-dir`/Codex local catalog 경로도 사용할 수 있습니다([로컬 구성](packaging/README.md#로컬-로드와-설치)). `$grill-us:memory-explain` 또는 `/grill-us:memory-explain`처럼 namespace를 명시하고 실제 읽은 plugin 경로를 확인합니다. 개발 원본 직접 로딩과 설치 plugin을 같은 시험 세션에서 혼용하지 않습니다.
 3. 사용자 프로젝트의 실제 root를 확인합니다. 설치 cache는 읽기 전용 스킬 위치이고 작업 기록은 사용자 프로젝트의 `.memory`에 둡니다. 대상이 혼동되면 쓰기 전에 확인합니다([작업공간 경계](.agents/skills/memory-execute/references/project-profile.md#skill-installation-and-workspace)). 기존 프로젝트 지침과 정본을 존중합니다.
 4. 대상 `.gitignore`에는 다음 기본 로컬 정책을 반영하고 기존 규칙을 유지합니다. 사용 프로젝트에는 이 저장소의 개발용 검증기나 특정 README/AGENTS 구조를 요구하지 않습니다.
@@ -236,7 +236,7 @@ node scripts/build-plugin.mjs
 
 `node scripts/validate-skills.mjs`는 생성기 회귀도 함께 실행합니다. 생성기 회귀만 확인하려면 `node --test tests/build-plugin.test.mjs`를 사용합니다. 이 검사는 재현성·포함/제외 범위·내부 참조·경로와 사용자 출력 보호를 확인하며 실제 에이전트 호출을 실행하지 않습니다.
 
-Claude Code 2.1.296에서 `claude plugin validate --strict dist/grill-us --json`의 manifest 정적 검증을 통과했습니다. Codex CLI 0.160.1에는 plugin validate 명령이 없어 공식 문서의 최소 manifest 필드·경로와 정적으로 대조했습니다. 전체 외부 Codex JSON Schema나 양쪽 host의 실제 발견·호출을 검증한 것은 아닙니다. 설치·지원 범위와 최소 지원 버전은 후속 T02의 실제 시험 결과로 확정합니다.
+Claude Code 2.1.296에서 manifest 정적 검증을 통과했습니다. Codex CLI 0.160.1에는 plugin validate 명령이 없어 공식 문서의 최소 manifest 필드·경로와 정적으로 대조했습니다. 이 정적 검사는 전체 외부 Codex JSON Schema나 실제 모델 호출의 검증을 대신하지 않습니다. 별도로 수행한 로컬·GitHub 설치와 양쪽 실제 발견·호출의 지원 범위는 [호환성 안내](docs/plugin-compatibility.md)를 확인하세요. 최소 지원 버전은 확정하지 않았습니다.
 
 ## 추가 도구
 
