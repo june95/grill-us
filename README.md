@@ -121,6 +121,10 @@ T01부터 T03까지 순서대로 진행해줘
 
 테스트만 실행하면서 새 테스트를 추가했다면 영향받은 리뷰를 `stale`로 표시하고 재리뷰 대상을 남깁니다. 재리뷰는 후속 리뷰 요청이나 전체 Task 실행에서 수행합니다. 테스트가 통과해도 기존 리뷰의 snapshot을 검토 없이 갱신하지 않습니다.
 
+적용 review와 재리뷰는 기본적으로 별도 에이전트에게 읽기 전용으로 위임합니다. 사용자 자체 리뷰 지시가 우선이며, 도구 부재·실패·미완료이면 사유를 알리고 자체 리뷰로 계속합니다. 보고에는 독립/자체 리뷰, 실제 시도·부분 결과·snapshot과 제한 수준을 구분합니다. Needs Changes나 확보한 finding은 대체 사유로 지우지 않습니다. 자세한 절차는 [Review Delegation](.agents/skills/memory-execute/references/review.md#review-delegation)을 따르며, skipped review를 새로 강제하거나 단독 review에서 자동 수정·완료하지 않습니다.
+
+같은 `.memory`를 변경하는 실행 담당은 한 번에 한 명입니다. 리뷰어는 결과만 반환하고 실행 담당만 보고·상태·제품·Git을 변경합니다. Codex/Claude Code 등 도구를 교체할 때 이전 실행을 끝내거나 멈추고 기록으로 순차 재개합니다. 단일 current를 유지하는 지침이며 자동 잠금이나 쓰기 권한의 기술적 차단을 제공하지 않습니다([State Ownership](.agents/skills/memory-execute/references/conventions.md#state-ownership)).
+
 새 요청 등록만으로 기존 활성 위치를 바꾸지 않습니다. 우선 처리 지시가 있으면 이전 재개 위치를 먼저 보존한 뒤 전환합니다. 커밋 실패나 검증 차단은 현재 Task에 남기며, 성공 커밋 뒤 기록이 끊기면 실제 커밋 내용을 확인해 상태를 복구합니다.
 
 검증 전에는 실제 작업 경로와 결과에 영향을 주는 도구·runtime 버전, lockfile·테스트 설정을 확인하고 [Environment Evidence](.agents/skills/memory-execute/references/conventions.md#environment-evidence)에 기록합니다. 관련 항목만 남기며 설정 파일 hash는 기존 Source Snapshot을 참조하고, 비밀 값이나 환경변수 전체 원문은 수집하지 않습니다. 근거 수집을 위해 도구 설치·업그레이드·설정을 자동 변경하지 않습니다.

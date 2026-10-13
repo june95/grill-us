@@ -14,6 +14,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | 증거·완료·조사 결과·환경 영향 | [Evidence and Completion](#evidence-and-completion), [Investigation Outcomes](#investigation-outcomes), [Environment Evidence](#environment-evidence) | 실패/stale 보존, 검사 결과와 목적 판정 구분 |
 | 보고 의미·일일 이력 | [Reporting](#reporting), [History](#history) | 실제 수행·근거·한계만 보고 |
 | 문서 형식 | [templates.md](templates.md#stage-report) | 적용 필드만 실제 자료로 채움 |
+| 리뷰 위임·자체 리뷰·finding 처리 | [Review Delegation](review.md#review-delegation) | 적용 review만 기본 위임, 불가 알림·자체 리뷰, finding 보존 |
 | 프로젝트·정본·명령 발견 | [project-profile.md](project-profile.md#discovery) | 실제 cwd/정본/명령 확인 |
 | Git 품질·후보·ignore·staging·intent | [commit-check.md](commit-check.md#quality-gate), [Staging](commit-check.md#staging), [Commit Intent](commit-check.md#commit-intent) | Task 후보와 사용자 index 분리 |
 | 재개·전환·복구 알고리즘 | [resume.md](resume.md#stale-evidence), [Switch](resume.md#switch), [Recovery](resume.md#recovery) | 미해결 intent 보존, 실제 결과 확인 후 재개 |
@@ -226,6 +227,7 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 
 ## State Ownership
 
+- 같은 `.memory`를 변경하는 실행 담당은 한 번에 한 명이다. 제품·Git·보고·Task/current/checkpoint/history 쓰기는 실행 담당이 수행하며, 별도 읽기 전용 리뷰어는 결과만 반환한다. Codex/Claude Code 등 도구를 교체할 때 기존 실행을 끝내거나 멈추고 기록을 확인해 순차 재개한다. 단일 current를 유지하며 자동 잠금 엔진·다중 current·자동 worktree 생성으로 구현하지 않는다. 리뷰 권한·결과 기록은 [Review Delegation](review.md#review-delegation)을 따른다.
 - Task의 Status·Workflow·Completion Check·Progress가 작업 상태의 정본이다.
 - current는 활성 Plan·Phase·Task와 Active Stage·Blocker·Next Step·정책의 책갈피다. 상세 청사진을 중복 보관하지 않는다.
 - current의 Checkpoint는 실제 활성 또는 보존한 Plan별 state 링크다. Last Completed Task는 활성 위치와 별개로 마지막 완료의 Plan ID·Task ID, 확인한 commit hash 또는 명시 no-commit/변경 없음 사유, 실제 완료 evidence를 가리킨다. 완료 이력이 없으면 없음으로 기록하고 가짜 경로·hash를 만들지 않는다. 과거 current에 이 정보가 없으면 Task/보고로 확인 가능한 범위만 읽는다.

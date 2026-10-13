@@ -39,6 +39,19 @@
 | S31 | 버그의 기대 권한/동작 정책에 중요한 미결정 | intake → grill-me | 부족한 분기 한 질문과 2~3개 추천 포함 선택지; 실행 청사진 확정 보류 | 원인 조사 부족과 제품 결정 부족을 구분 | 지침 walkthrough |
 | S32 | 기능·문서 Task 또는 과거 done Task | 조건부 형식 적용 확인 | nonbug에는 Bug Investigation 빈 표 없음; 과거 done 증거 불변 | Type/실제 scope로 판단, 소급 마이그레이션/Revision 일괄 증가 없음 | 지침 walkthrough |
 
+## Review Delegation Cases
+
+아래는 [Review Delegation](review.md#review-delegation) 계약의 수동 대조 사례다. 실제 위임 성공과 불가 경로의 walkthrough 결과를 보고에서 구분하며 운영 도구·설정을 훼손해 실패를 만들지 않는다.
+
+| Case | 입력 | 확인할 결과와 경계 | 수준 |
+| :--- | :--- | :--- | :--- |
+| R01 | 적용 review, 허용 내부 위임 기능 있음 | Task/AC/Revision·경로/snapshot/diff 전달, 읽기 전용 결과 반환, 실행 담당만 보고·상태 기록; 기술 제한 수준 명시 | 실제 가능한 위임 + 지침 대조 |
+| R02 | 기능 부재·상위 제한·호출 실패 또는 사용자 자체 리뷰 요청 | 전자는 원인·시도·알림 후 Self, 후자는 사용자 요청으로 미시도 구분; 독립 성공 주장·무한 재시도 없음 | 지침 walkthrough |
+| R03 | 중단·미완료 반환, 일부 finding 확보 | 원인/부분 결과 보존·알림, Self로 부족 검토; finding은 triage/재리뷰/gate에서 유지 | 지침 walkthrough |
+| R04 | Needs Changes/finding 또는 구현 근거 Blocked | 도구 불가로 취급하거나 자체 리뷰로 지우지 않음; 전체 Task만 승인 scope 수정, 완료 차단 유지 | 지침 walkthrough |
+| R05 | 반환 후 대상 snapshot 변경 | 영향 결과 stale, 원 발견 보존·기본 위임 선택에 따른 실제 재리뷰; 새 snapshot 자동 passed 없음 | 지침 walkthrough |
+| R06 | --stage review 또는 비활성 Task review | 기본 위임/불가 절차 동일, 실행 담당 보고·metadata만; 수정/commit/done/전진 없음, 기존 active 보존 | 지침 walkthrough |
+
 ## Validation Environment Cases
 
 | Case | 입력 | 확인할 결과와 경계 | 수준 |

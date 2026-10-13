@@ -44,6 +44,8 @@ description: Explain recorded designs, plans, progress, and completed work from 
 
 완료는 필요한 당시 보고/commit과 현재 코드로 대조한다. 현재 미확인이면 당시 결과로 한정하고, 정상 no-commit을 실패로 해석하지 않는다. prepared/hash 문자열만으로 성공을 확정하거나 불일치를 자동 복구하지 않고 별도 memory-execute 요청으로 연결한다.
 
+리뷰 설명은 [Review Delegation](../memory-execute/references/review.md#review-delegation)의 실제 Review Mode·Reviewer·Attempt·Fallback Reason·Reviewed Snapshot·Limitations를 읽어 독립/자체 리뷰와 부분 결과를 구분한다. 기록이 없으면 미확인으로 한정하고 독립 검토를 추정하지 않는다. 실행 담당만 상태를 쓴다는 [State Ownership](../memory-execute/references/conventions.md#state-ownership)을 설명하되 설명 호출에서 리뷰 위임이나 상태 쓰기를 새로 수행하지 않는다.
+
 ## Explanation Depth
 
 목표와 결론을 먼저 설명한다. 기본은 일반·간결, 비개발자는 사용자 동작/가치, 개발자 상세는 path::symbol·흐름/계약·검증 한계·의존 관계를 포함한다. 이유/비교는 기록된 근거를 우선하고 자료가 없는 비교는 제한한다. 작은 질문에 모든 항목을 출력하거나 설명 중 자동 재설계하지 않는다.

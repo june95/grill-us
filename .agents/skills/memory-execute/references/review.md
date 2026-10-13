@@ -4,11 +4,37 @@
 
 ## Compliance
 
+- 적용되는 review와 재리뷰는 아래 [Review Delegation](#review-delegation)을 따른다. 실행 담당만 보고·상태를 쓰고 리뷰어는 읽기 전용 결과만 반환한다.
 - review는 현재 구현/조사 산출물을 task.md의 Goal·I01/I02·AC·검증 의무와 대조한다. 수행하지 않은 구현 보고를 형식상 강제하지 않고 제품 코드를 수정하지 않는다.
 - 계획대로 수행/누락/부분 충족/불명확/범위 밖을 구분한다. 파일/동작 차이는 기록된 조정·승인과 결과 보고를 확인한다.
 - 관련 버그·회귀·권한·예외·주석·검증 공백을 찾고 일반 취향이나 무관한 기존 정리를 finding으로 확대하지 않는다.
 - 조사 대상 제품 실패와 조사 산출물 자체의 오류는 [Investigation Outcomes](conventions.md#investigation-outcomes)로 구분한다. 통과 목표 실패·필수 근거 부족은 완료 차단이며 후속 등록만으로 해소되지 않는다.
 - 필요한 승인·선행 evidence를 확인하고 aggregate gate를 만들지 않는다. review.md에 Pass / Pass with Issues / Needs Changes / Blocked, AC 대응·finding·한계·다음 행동을 [Stage Report](templates.md#stage-report)로 기록한다.
+
+## Review Delegation
+
+### Selection and Authority
+
+- 전체 Task 또는 `--stage review`에서 적용되는 review는 기본적으로 별도 에이전트에게 읽기 전용으로 위임한다. 사용자 자체 리뷰 지시가 우선이며, review가 skipped인 Task에 이 규칙만으로 새 단계를 강제하지 않는다. 실제 변경의 재리뷰도 같은 선택 규칙을 적용한다.
+- 현재 환경에서 허용된 내부 위임 기능과 상위 제약을 먼저 확인한다. 새로운 런타임 설치·모델 지정·외부 메시지 전송·자동 worktree 생성은 하지 않는다. 가능하면 읽기 전용 도구/샌드박스를 사용하고 실제 제한 수준을 기록한다. 지시문만으로 제한했다면 쓰기 권한이 기술적으로 차단됐다고 표현하지 않는다.
+- 실행 담당 한 명이 Task/current/checkpoint/history·보고·제품·Git 상태를 관리한다. 리뷰어는 아래 입력을 읽고 결과만 반환하며 하위 에이전트에 추가 위임하지 않는다. 단일 writer와 도구 교체는 [State Ownership](conventions.md#state-ownership)을 따른다.
+
+### Request and Result
+
+실행 담당은 대상 Task의 승인 scope·Goal/AC·Revision, 명시 대상 경로와 현재 SHA256 snapshot, 관련 diff·선행 evidence·필요한 정본 링크만 전달한다. 리뷰어 지시문에는 다음 경계를 명시한다.
+
+- 제품·`.memory`·Git·설정 쓰기, staging/commit·외부 전송·추가 위임 금지. 읽기 조회만 허용하며 테스트 실행과 파일 생성·설정 변경 등 부수 효과가 있는 명령을 실행하지 않는다. 기록·검증 실행은 실행 담당에게 반환한다.
+- 검토는 [Compliance](#compliance)/[Severity](#severity)를 따라 승인 scope와 AC에 한정한다. 결과를 채팅/도구 반환으로만 제공하며 `review.md`, current, checkpoint, history를 직접 작성하지 않는다.
+- 반환 항목: verdict, 유일한 finding ID·severity·계약 항목·path/실제 근거·AC 영향·권고, 검토 파일별 SHA256 snapshot, 실제 검토 범위·제한 수준·미검토/부분 결과. finding이 없으면 없음이라고 명시한다.
+
+실행 담당은 반환 범위·Revision·snapshot·근거와 현재 대상을 대조한다. 검토하지 않은 경로/AC를 통과로 확대하지 않으며 보고의 [조건부 review 필드](templates.md#stage-report)를 채우고 실제 결과에 맞게 workflow/history를 기록한다. 반환 이후 변경된 대상은 [Re-review](#re-review)와 기존 evidence 규칙을 적용한다.
+
+### Fallback and Findings
+
+- 기능 부재·상위 제약·실행 실패·중단·미완료 반환이면 원인·실제 시도·부분 결과를 보존하고, 사용자에게 사유와 자체 리뷰로 계속한다는 사실을 알린 뒤 실행 담당이 부족한 검토를 수행한다. 무한 재시도하지 않는다. Review Mode는 Self로 기록하며 확보된 별도 검토의 범위도 구분하고 독립 리뷰 완료를 주장하지 않는다. 사용자 자체 리뷰 요청은 위임 실패와 구분해 미시도 이유로 기록한다.
+- Needs Changes, 실제 finding, 구현/선행 근거의 Blocked 판정은 위임 도구 불가가 아니다. 자체 리뷰로 전환해 해당 결과를 지우거나 통과시키지 않는다. 일부 반환이라도 확보된 finding은 보존하고 [Triage](#triage)·실제 재리뷰·[Quality Gate](commit-check.md#quality-gate)로 처리한다.
+- 수정 또는 관련 snapshot 변경은 영향받은 결과를 stale로 판단하고 실제 재리뷰 근거를 추가한다. 원 발견·판정·시도 기록은 보존한다. snapshot 불일치만으로 도구 실패라고 꾸미거나 새 snapshot을 검토 없이 passed로 기록하지 않는다.
+- 전체 Task는 기존 승인 scope에서 review-action으로 수정할 수 있다. 단독 review는 결과와 해당 metadata만 기록하고 자동 수정·커밋·완료·포인터 전진을 하지 않는다. 비활성 대상의 기존 active 위치도 보존한다([Stage Isolation](conventions.md#stage-isolation)).
 
 ## Severity
 

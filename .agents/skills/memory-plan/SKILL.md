@@ -49,6 +49,8 @@ AI가 [Workflow](../memory-execute/references/conventions.md#workflow)의 필수
 
 생략으로 AC를 입증할 수 없으면 필요한 검증을 유지한다. 아직 실행할 버전/hash/결과를 미리 채우지 않고 [Environment Evidence](../memory-execute/references/conventions.md#environment-evidence)의 관련 확인 범위만 계획한다. 공유 변경에는 commit-check가 필요하며, 커밋 유무와 무관하게 전체 완료의 공통 품질·정책 판정을 남긴다.
 
+적용 review는 [Review Delegation](../memory-execute/references/review.md#review-delegation)의 기본 읽기 전용 위임과 불가 알림 후 자체 리뷰를 계획한다. 사용자 자체 리뷰 지시가 우선이며 이 규칙만으로 skipped review를 필수로 바꾸지 않는다. 실행 담당 한 명만 상태·보고를 쓰며 실제 시도·판정은 실행 전에 성공으로 채우지 않는다.
+
 ## Artifacts
 
 1. [Paths](../memory-execute/references/conventions.md#paths)에 맞춰 Plan(목표·scope·순서) → Phase(Tasks·실제 집계) → Task(상세 계약)를 작성한다. 독립 Decision ID의 기존 문서를 링크하며 같은 Plan/Task 계약을 별도 plan-N에 복제하지 않는다.

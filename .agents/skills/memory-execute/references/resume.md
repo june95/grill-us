@@ -39,6 +39,8 @@ Plan별 `.memory/state/{plan-id}.md`에 아래를 기록한다.
 
 과거 환경 근거 부재는 [Environment Evidence](conventions.md#environment-evidence)의 AC 영향·한계 판단을 따른다. 임의 실패/통과를 만들지 않으며 단독 단계의 부족한 선행 근거는 [Stage Isolation](conventions.md#stage-isolation)에 따라 다음 행동만 남긴다.
 
+review 중단 재개는 실제 반환·미완료 여부와 대상 snapshot을 확인하고 [Review Delegation](review.md#review-delegation)의 불가 알림·자체 리뷰 또는 실제 재리뷰 절차를 따른다. 부분 finding·이전 판정을 보존하며 중단을 passed로 바꾸지 않는다. 도구 교체는 [State Ownership](conventions.md#state-ownership)의 단일 writer와 순차 재개 경계를 지킨다.
+
 ## Switch
 
 - 전환 전에 단순 초기 placeholder와 실제 진행 링크 손상을 구분한다. 실재 진행 근거가 있으면 기존 Task·보고·Plan checkpoint와 필요한 실제 Git 결과를 대조해 이전 위치/재개 단계/미해결 intent를 먼저 복원한다. 근거가 불충분하거나 충돌하면 손상·필요한 다음 확인을 기록하고 새 active로 덮지 않는다. 이는 기존 위치 복구이며 새 Task 생성/완료 추정이 아니다.

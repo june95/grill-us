@@ -330,6 +330,15 @@ Candidate Snapshot 형식은 path·A/M/D·working SHA256·staged mode/blob다. �
 
 {실제 변경·판단·검증 근거, command/cwd/result 또는 필요한 대응표}
 
+{review 보고에만 아래 항목을 실제 시도 근거로 작성한다. 다른 단계에서는 제거한다. 재리뷰도 해당 시도와 검토 snapshot을 구분해 추가한다.}
+
+- Review Mode: {Delegated / Self}
+- Reviewer: {식별 가능한 내부 도구·리뷰어 ID 또는 실행 담당 역할}
+- Attempt: {위임 시도 여부·실제 호출/완료/실패/중단·부분 반환 근거; 미시도이면 이유}
+- Fallback Reason: {위임 불가 사유·사용자 알림 근거 또는 없음; 사용자 자체 리뷰 요청은 구분}
+- Reviewed Snapshot: {위 Source Snapshot 참조 또는 시도별 path/SHA256; 현재 대상과 일치 확인}
+- Limitations: {실제 도구/샌드박스 제한 수준·지침만의 제한, 부분 결과·미검토 범위}
+
 {조사 목적 Task에서 검사 결과와 목표 달성이 다를 수 있으면 아래 항목을 작성한다. 해당하지 않으면 제거한다.}
 
 - Observed Result: {실제 command/cwd/exit와 관측 실패/통과/미실행, 분류·근거}
