@@ -16,10 +16,10 @@
 
 공식 배포 경로는 공통 `.agents/skills` 정본에서 생성하는 `grill-us` plugin입니다. 메모리 5개와 visualize를 함께 포함하며 CodeBurn과 개발용 검증기는 포함하지 않습니다. 도구별 프로젝트 폴더의 수동 사본을 새 공식 배포 방식으로 관리하지 않고, 기존 설치본을 자동 삭제·변환하지 않습니다.
 
-포함 스킬·도구별 호출 표기·작업공간 경계와 현재 검증 한계는 [패키지 사용자 안내](packaging/README.md)를 참고합니다. 이 안내도 빌드할 때 생성 패키지의 README로 복사됩니다.
+포함 스킬·로컬 설치/세션 로드·명시 호출·업데이트·기존 사본 전환은 [패키지 사용자 안내](packaging/README.md)를 참고합니다. 이 안내도 빌드할 때 생성 패키지의 README로 복사됩니다. Windows의 Codex CLI 0.160.1과 Claude Code 2.1.296에서 6개 스킬 발견을 실제 확인했으며, 호출별 증거와 출력·표면별 한계는 [호환성 안내](docs/plugin-compatibility.md)에 구분합니다. 시험한 버전은 최소 지원 버전이 아닙니다.
 
 1. 저장소에서 `node scripts/build-plugin.mjs`로 `dist/grill-us` 패키지를 생성합니다. 생성물의 스킬 본문은 별도로 편집하거나 Git에 추적하지 않습니다.
-2. 사용하는 도구의 plugin 경로로 이 패키지를 제공합니다. 실제 host 발견·호출과 최소 지원 버전은 후속 검증에서 확정하며 현재는 미검증입니다. 개발 원본 직접 로딩과 설치 plugin을 같은 시험 세션에서 혼용하지 않습니다.
+2. Claude는 생성 package의 절대 경로를 `--plugin-dir`로 지정합니다. Codex CLI는 별도 local catalog에서 `plugin add`로 설치합니다([정확한 구성과 명령](packaging/README.md#로컬-로드와-설치)). `$grill-us:memory-explain` 또는 `/grill-us:memory-explain`처럼 도구에 맞는 namespace를 명시합니다. 개발 원본 직접 로딩과 설치 plugin을 같은 시험 세션에서 혼용하지 않습니다.
 3. 사용자 프로젝트의 실제 root를 확인합니다. 설치 cache는 읽기 전용 스킬 위치이고 작업 기록은 사용자 프로젝트의 `.memory`에 둡니다. 대상이 혼동되면 쓰기 전에 확인합니다([작업공간 경계](.agents/skills/memory-execute/references/project-profile.md#skill-installation-and-workspace)). 기존 프로젝트 지침과 정본을 존중합니다.
 4. 대상 `.gitignore`에는 다음 기본 로컬 정책을 반영하고 기존 규칙을 유지합니다. 사용 프로젝트에는 이 저장소의 개발용 검증기나 특정 README/AGENTS 구조를 요구하지 않습니다.
 
