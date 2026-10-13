@@ -58,11 +58,10 @@ Git이 없으면 프로젝트 root를 사용자 지시·실제 작업 폴더에�
 
 ## Validation Discovery
 
-- 명령 실행 전 실제 checkout/cwd와 결과에 관련된 runtime/tool 버전·lockfile·manifest·test/build 설정을 읽어 [Environment Evidence](conventions.md#environment-evidence)로 기록한다. 관련 없는 항목은 수집하지 않으며 비밀 아닌 설정 요약만 남긴다.
-- 존재하는 읽기 전용 버전 명령과 관련 파일 hash를 사용한다. 확인 불가 사유를 기록하며 값을 얻기 위해 도구 설치·업그레이드·설정을 자동 변경하지 않는다. 경로명/branch 변화와 실제 대상·환경 내용 변화를 구분한다.
 - 현재 manifest의 scripts, 언어별 프로젝트 설정, CI와 README를 확인해 최소 관련 command와 cwd를 선택한다.
+- 실제 checkout/cwd·관련 도구/설정은 [Environment Evidence](conventions.md#environment-evidence)로 확인·기록한다. 비밀/전체 환경 수집이나 근거 수집을 위한 자동 설치·설정 변경은 하지 않는다.
 - 테스트 파일은 기존 suite·이름·fixture 관례를 따른다. 프로젝트의 실행 가능한 테스트를 `.memory` 안에 새 harness로 만들지 않는다.
 - 위험과 완료 조건에 맞는 static/unit/integration/E2E를 선택한다. 새 테스트는 검증할 의미 있는 동작·회귀 위험이 있을 때 작성한다.
 - 문서 수정은 필요한 문구·링크·구문·diff 검사가 완료 근거가 될 수 있다. 특정 앱 명령을 실행한 것처럼 기록하지 않는다.
-- 검증 기록은 command, cwd, 실제 exit/result, 대상 Revision·파일 snapshot, 생략·차단 사유를 포함한다. 같은 대상의 유효한 결과는 재사용한다.
+- 기록/재사용 기준은 [Evidence and Completion](conventions.md#evidence-and-completion), 위험별 검증 수준은 [testing](testing.md#levels)을 따른다. 실제 실행 범위와 한계를 구분한다.
 - 없는 명령을 추측해서 성공으로 기록하지 않는다. 환경·서비스·credential 문제가 실제 검증을 막으면 그 제약과 가장 가까운 대체 확인을 구분해 기록한다.

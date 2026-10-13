@@ -50,6 +50,12 @@ git rm --cached -- .memory/current.md
 
 인터뷰는 질문 하나씩 2~3개 선택지와 추천안을 제공합니다. 이미 확정한 선택과 코드에서 확인할 내용을 반복해서 묻지 않습니다. 등록·계획 단계에서는 제품 코드를 구현하거나 Git 커밋을 만들지 않습니다.
 
+## 정본과 읽기 범위
+
+공통 상세 규칙은 [Rule Ownership](.agents/skills/memory-execute/references/conventions.md#rule-ownership)에 연결된 소유 문서 한곳에서 관리합니다. 상태·증거·완료 의미는 공통 규약, Git 절차는 commit-check, 재개·복구는 resume, 형식은 templates, 실제 경로·정본·명령 발견은 project-profile입니다. 각 스킬·단계에는 고유 절차와 핵심 제한 요약을 남깁니다.
+
+요청과 존재하는 Task/결정·공통 규약부터 읽고, 실행·재개에는 현재 checkpoint와 resume을 확인합니다. 이후 선택한 단계 지침과 필요한 템플릿 섹션만 추가합니다. 관련 없는 단계·시나리오 전체를 매번 읽을 필요는 없습니다. 요약으로 실패/단독 실행/사용자 index 같은 경계를 생략하지 않으며, 상태 판정과 실제 근거는 정본에 따라 확인합니다.
+
 ## 사용 예시
 
 ~~~text

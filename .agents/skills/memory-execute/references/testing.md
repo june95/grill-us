@@ -1,50 +1,38 @@
 # Task Testing
 
-test 단계가 적용되거나 사용자가 요청한 경우에 읽는다. [프로젝트 확인](project-profile.md), [공통 규약](conventions.md), [보고 템플릿](templates.md)을 사용한다.
+test가 적용되거나 요청됐을 때만 읽는다. [공통 규약](conventions.md)과 [Validation Discovery](project-profile.md#validation-discovery)를 사용한다.
 
 ## Discovery
 
-- 실행할 검사에 관련된 runtime/tool·lockfile·test/build 설정과 실제 cwd를 먼저 확인한다. [Environment Evidence](conventions.md#environment-evidence)에 따라 확인 불가 이유를 남기고 환경 근거 수집을 위한 설치·업그레이드·설정 변경은 자동 수행하지 않는다.
-- Task 완료 조건·검증 의무·현재 구현·해결된 finding과 실제 테스트 구조를 확인한다.
-- manifest·CI·README의 command/cwd, 근접 suite·fixture·이름을 따른다. 특정 앱 디렉터리나 테스트 프레임워크를 강제하지 않는다.
-- 적용되는 선행 구현·리뷰의 유효 evidence가 필요하다. review가 해당 없음이면 승인된 생략 이유와 Task 내 근거를 읽으며 review.md 부재만으로 차단하지 않는다.
-- 필요한 선행 증거가 실제 부족하면 test report에 blocker를 기록한다. 단독 test 요청에서 선행 구현·리뷰를 자동 수행하지 않는다.
+- 사전 AC·현재 구현·finding과 실제 suite/fixture/명령을 확인한다. 해당 검사에 필요한 [Environment Evidence](conventions.md#environment-evidence)를 실행 전에 읽고 기록한다.
+- 적용 선행 구현/리뷰는 유효한 evidence가 필요하다. review 생략은 실제 이유·Task 근거로 판단하며 파일 부재만으로 차단하지 않는다. 단독 test는 부족한 선행 단계를 자동 실행하지 않는다.
 
 ## Coverage
 
-- 사전 목표가 검사 통과인지 기존 검사 결과 조사·실패 분류인지 확인한다. 후자는 [Investigation Outcomes](conventions.md#investigation-outcomes)에 따라 실제 검사 실패와 조사 단계 목적 달성을 분리한다. 실패 후 조사 목표로 바꾸어 완료 판정을 우회하지 않는다.
-- 각 완료 조건·회귀 위험을 검증 방법과 연결한다. 유효한 기존 결과가 있으면 재사용한다.
-- 새로운 테스트가 의미 있게 오류·회귀를 잡을 때 기존 프로젝트 suite에 추가한다. 구현을 그대로 반복하는 검사나 불필요한 대형 suite를 만들지 않는다.
-- 제품 실행 테스트를 Task 문서 폴더의 새 harness로 옮기지 않는다. Task 폴더에는 보고·비실행 증거만 둔다.
-- test 단계에서 테스트를 작성하면 그 파일도 Task 변경에 포함하고, 영향을 받은 review를 stale로 표시한다. 전체 Task 모드에서는 실제 테스트 내용을 재검토한 뒤 review snapshot·결과를 갱신한다.
-- 단독 test 모드에서는 별도 review를 실행하지 않는다. stale 사유와 재리뷰할 파일을 Task의 Next Action에 남기고, 검토하지 않은 snapshot을 passed로 갱신하지 않는다. test 결과는 실제 실행 범위에서 기록하며 test passed가 남은 review stale를 해소하지 않는다. 기존 current/checkpoint Position, Task done, commit은 자동 변경하지 않는다.
+[Investigation Outcomes](conventions.md#investigation-outcomes)에 따라 검사 통과 목표와 결과 조사 목표를 구분한다. 각 AC/회귀 위험에 방법을 연결하고 유효 결과는 재사용한다.
+
+새 테스트는 의미 있는 오류/회귀를 검출할 때 기존 suite에 추가하며 .memory에 제품 harness를 만들지 않는다. 새/변경 테스트가 review에 영향을 주면 내용을 실제 재리뷰해야 한다. 단독 test는 review stale·대상·다음 행동만 남기고 검토하지 않은 snapshot을 passed로 갱신하지 않는다.
 
 ## Levels
 
-| Level | Selection |
+| Level | 선택 기준 |
 | :--- | :--- |
-| Static / Basic | 관련 typecheck/lint/build/import/문서·링크·구문 확인 |
-| Unit | 변경 동작·예외·회귀를 좁게 입증하는 기존/필요한 새 테스트 |
-| Integration | 실제 구성 요소·API·서비스 경계가 영향을 받는 경우 |
-| E2E | 전체 사용자 흐름의 확인이 필요하고 안전한 로컬 tooling이 있는 경우 |
+| Static / Basic | 관련 typecheck/lint/build/import 또는 문서·링크·구문 |
+| Unit | 변경 동작·예외·회귀를 좁게 입증 |
+| Integration | 구성 요소·API·서비스 경계 영향 |
+| E2E | 전체 흐름 확인이 필요하고 안전한 로컬 tooling 존재 |
 
-변경 위험과 완료 조건에 맞는 수준을 선택한다. 이미 충분한 검증을 단계 이름 때문에 확대·반복하지 않는다. 새 변경·실패·미해결 위험이 생기면 필요한 확인을 추가한다.
+위험과 AC를 입증하는 최소 수준을 선택한다. 단계 이름 때문에 충분한 검사를 반복/확대하지 않으며 새 변경·실패·미해결 위험만 추가 확인한다.
 
 ## Failures
 
-- 제품 실패, 테스트 설정 실패, 환경 blocker, 의도적 생략을 구분한다. 필수 실패를 생략으로 바꿔 완료하지 않는다.
-- 하위 실패가 막는 상위 검사는 Blocked로 기록하고 독립적으로 가능한 확인은 수행할 수 있다.
-- 단독 test 단계에서는 제품 결함을 보고하고 구현을 자동 수정하지 않는다. 전체 Task 모드에서도 수정이 사전 scope에 있을 때만 수정 단계로 돌아간다. 조사 전용이면 대상 결함·영향·권고를 기록하고 자동 수정·후속 등록하지 않는다.
-- 파괴적 setup·production 변경·불명확한 credential 사용을 평범한 로컬 검증으로 실행하지 않는다. 실제 필요한 승인·안전한 입력 경로를 확인한다. 비밀 값을 보고나 채팅에 남기지 않는다.
-- 필수 검증을 실행할 수 없으면 실제 한계·영향·가장 가까운 대체 확인을 기록한다. 대체가 완료 조건을 충족하지 못하면 blocked 상태를 유지한다.
+- 제품 실패·setup 실패·환경 blocker·생략을 구분하고 하위 실패가 막는 검사는 Blocked로 남긴다. 독립 확인은 계속할 수 있다.
+- 단독 test는 제품 결함을 보고한다. 전체 Task도 사전 scope에 수정이 있을 때만 구현으로 돌아가며 조사 전용은 대상 결함/권고만 남긴다.
+- 파괴적 setup·production 변경·불명확한 credential은 평범한 로컬 검증으로 실행하지 않는다. 실제 승인/안전한 입력을 확인하고 비밀을 노출하지 않는다.
+- 필수 검증이 불가하면 한계·AC 영향·가까운 대체 확인을 기록한다. 대체로 AC를 충족하지 못하면 blocked를 유지한다. 실패 후 목표를 완화해 완료하지 않는다.
 
 ## Evidence
 
-test.md에 `Pass / Pass with Issues / Fail / Blocked`, 완료 조건별 coverage, 새·수정 테스트 파일, command/cwd/실제 exit/result, 생략·환경 제약, 다음 행동을 적는다.
+test.md의 Pass / Pass with Issues / Fail / Blocked는 해당 목적의 결과다. [Stage Report](templates.md#stage-report)에 AC coverage·새/변경 테스트·실제 command/cwd/exit·제약·다음 행동을 기록한다. 조사 목적에는 관측 실패와 Objective Assessment를 함께 표시해 검사 통과로 오해하지 않게 한다.
 
-조사 목적에서는 Details에 Observed Result(실제 exit·통과/실패/미실행·분류·근거)와 Objective Assessment(사전 조사 AC별 충족·한계·권고)를 기록한다. 상단 Result는 예를 들어 "조사 목적 Pass, 대상 검사 Fail(exit 1)"처럼 두 판단을 함께 밝힌다. 이 경우 workflow passed는 조사 목적 달성을 뜻하며 검사 실패 자체를 passed로 바꾸는 것이 아니다. 검사 통과 목표의 실패나 필수 조사/근거 부족은 Fail/Blocked와 미달성으로 남긴다. 무조건 성공을 초기값으로 두지 않는다.
-
-- 수행한 범위의 Revision·Covered Files·Source Snapshot·Checked At을 기록한다.
-- Environment Evidence에는 관련 Tool Versions, Relevant Files의 snapshot 참조, Non-secret Settings와 Scope / Reason·Checked At만 조건부로 기록한다. 재사용 시 현재 값과 비교해 해당 검사에 영향을 주는 변경만 stale/재검증하고 과거 기록 부재는 실제 완료 조건 영향·한계로 판단한다. 단독 test는 선행 stale 사유·대상·Next Action을 남기며 선행 단계 자동 실행이나 active Position 변경을 하지 않는다.
-- 수동 walkthrough·실제 command 실행·자동 모델/제품 테스트를 구분한다. 예시 command나 예정 결과를 실행한 성공처럼 쓰지 않는다.
-- test passed는 Task done·commit·포인터 전진을 의미하지 않는다. 전체 완료는 공통 판정과 실행 모드에 따른다.
+증거/환경 재사용은 [Evidence and Completion](conventions.md#evidence-and-completion), test-only의 review stale·포인터 보존은 [Stage Isolation](conventions.md#stage-isolation)을 따른다. 실제 명령·수동 대조·모델 실행을 구분하며 test passed만으로 Task done/commit/전진하지 않는다.

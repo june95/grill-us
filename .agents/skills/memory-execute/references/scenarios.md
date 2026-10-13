@@ -82,11 +82,7 @@
 
 ## Expected State
 
-- 표의 expected는 시험할 계약이며 실제 실행 결과가 아니다. Task report에 case별 실제 관찰·근거·결과와 확인 수준을 기록한다.
-- 상태 정본은 Task의 workflow·Completion Check다. current는 활성 위치, checkpoint는 복구 정보, Phase/Plan은 집계다.
-- skipped에는 이유, passed에는 유효 증거, failed/blocked/stale에는 재개 행동이 필요하다.
-- ready는 완료 정책 처리 준비 판정이다. Task 범위 변경이 있으면 auto commit 성공, none/변경 없음이면 사유 있는 정책 처리를 확인한 뒤 전체 실행에서 done과 pointer 전진을 기록한다.
-- 단독 stage 요청에서 현재 활성 Task가 아닌 대상은 해당 결과만 갱신하고 active Position을 보존한다.
+표의 expected는 시험할 계약이며 실행 결과가 아니다. case별 실제 관찰·근거·확인 수준을 Task report에 기록한다. 상태/증거/완료의 상세는 [공통 규약](conventions.md#rule-ownership), 비활성 대상·단독 단계의 Position 보존은 [Stage Isolation](conventions.md#stage-isolation)을 대조한다. skipped/passed/failed를 근거 없이 바꾸거나 ready를 done으로 해석하지 않는다.
 
 ## Verification Level
 

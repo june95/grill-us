@@ -32,15 +32,16 @@ Plan별 `.memory/state/{plan-id}.md`에 아래를 기록한다.
 
 1. 명시 Task 경로 또는 current Active Task를 확인하고 Task의 Revision·Status·workflow·Resume Stage를 읽는다.
 2. 필요한 관련 파일과 적용 단계의 evidence를 확인한다. placeholder·없는 링크·실제 done Task를 새로 구현하지 않는다.
-3. Evidence Revision과 실제 covered 파일 snapshot 및 [Environment Evidence](conventions.md#environment-evidence)를 비교한다. 관련 runtime/tool·lockfile·runner 설정 변경이 결과에 주는 영향을 기록하고 영향받은 결과만 stale로 표시한다. 같은 내용의 HEAD/branch·PC 경로명 변화나 무관한 설정만으로 전체 retest하지 않는다. 실제 checkout/cwd와 대상은 확인한다.
+3. [Evidence and Completion](conventions.md#evidence-and-completion)의 Revision/snapshot 및 관련 환경을 현재 대상과 비교하고 영향받은 결과만 stale로 판정한다. 실제 checkout/cwd를 확인하며 HEAD/경로 이름만 바뀐 동일 내용은 무효화하지 않는다.
 4. 같은 내용의 코드가 커밋되어 HEAD만 바뀐 것은 내용 검증 실패가 아니다. 준비 시 Base HEAD는 commit recovery에 사용하고 내용 유효성은 파일 snapshot으로 판단한다.
 5. stale/failed/blocked를 passed나 skipped로 자동 변환하지 않는다. 실제 필요한 단계로 재개한다. 환경·설계 blocker가 해결되지 않으면 근거를 남기고 멈춘다.
 6. stage-only 요청은 선행 증거가 부족해도 전체 workflow를 자동 실행하지 않는다. 필요한 다음 행동을 보고한다.
 
-과거 환경 근거가 없으면 현재/기존 로그로 필요한 사실을 확인하되 현재 값을 과거 값으로 간주하지 않는다. 근거 부재만으로 자동 실패/통과하지 않고 재검증 가능성·완료 조건 영향·한계를 기록한다. 필요한 동일성을 입증할 수 없어 완료 조건을 막을 때만 blocked다. 과거 done 기록은 보존하며 단독 단계는 선행 stale의 사유·대상·Next Action만 남기고 요청하지 않은 단계·제품 수정·commit/finalize와 active Position 변경을 수행하지 않는다.
+과거 환경 근거 부재는 [Environment Evidence](conventions.md#environment-evidence)의 AC 영향·한계 판단을 따른다. 임의 실패/통과를 만들지 않으며 단독 단계의 부족한 선행 근거는 [Stage Isolation](conventions.md#stage-isolation)에 따라 다음 행동만 남긴다.
 
 ## Switch
 
+- 전환 전에 단순 초기 placeholder와 실제 진행 링크 손상을 구분한다. 실재 진행 근거가 있으면 기존 Task·보고·Plan checkpoint와 필요한 실제 Git 결과를 대조해 이전 위치/재개 단계/미해결 intent를 먼저 복원한다. 근거가 불충분하거나 충돌하면 손상·필요한 다음 확인을 기록하고 새 active로 덮지 않는다. 이는 기존 위치 복구이며 새 Task 생성/완료 추정이 아니다.
 - 새 요청 등록은 현재 진행 중 Task를 유지한다. 활성 작업이 없으면 첫 실행 가능한 새 Task를 활성화할 수 있다.
 - 사용자 우선 처리 지시가 있으면 old Task Resume Stage·Blocker·Next Step과 Plan checkpoint를 먼저 저장하고 new current를 기록한다.
 - 상세 상태는 old Task에 유지한다. current를 전환했다고 해당 작업을 done 또는 blocker 해결로 바꾸지 않는다.
@@ -77,9 +78,7 @@ Plan별 `.memory/state/{plan-id}.md`에 아래를 기록한다.
 
 ## Completion
 
-- 전체 실행은 사전 AC·유효 근거·공통 품질을 확인해 ready로 판정하고, auto+Task 범위 변경이면 commit 성공, 명시적 none 또는 Task 범위 변경 없음이면 사유 있는 생략까지 확인한 뒤 Task done으로 기록한다. unrelated 사용자 working/index가 있다는 이유로 커밋을 요구하지 않는다. 별도 commit-check가 해당 없음이어도 공통 완료 판정은 남긴다.
-- 조사 결과를 재사용할 때도 [관측 결과와 목표 평가](conventions.md#investigation-outcomes)를 구분한다. 관측 실패가 보존된 조사 단계 passed를 검사 통과로 해석하지 않는다. 사전 통과 목표 실패·필수 조사 근거 부족·stale 증거는 조사 완료로 덮지 않으며 기존 실패 및 과거 done 기록을 보존한다.
-- stage-only 또는 check_only 요청은 완료 조건을 채웠더라도 자동 포인터 전진을 하지 않는다.
+- [완료 의미](conventions.md#evidence-and-completion)와 [Quality Gate](commit-check.md#quality-gate)로 준비·커밋 정책 결과를 확인한 전체 실행만 finalize한다. 관측 실패/조사 목적은 구분하며 stage-only/check_only는 자동 done·전진하지 않는다.
 - done Task를 근거로 Phase Tasks 표·done count를 갱신하고 Plan 요약을 갱신한 뒤 current를 다음 Task로 전진한다.
 - 다음 Task는 같은 Plan의 순서와 실제 Dependencies를 확인한다. 완료되지 않은 선행 Task를 건너뛰어 검증 실패를 숨기지 않는다.
 - 마지막 Task 완료 시 Phase와 Plan done, current Active Task·Active Stage 없음. 다른 pending Plan을 임의로 시작하지 않는다.

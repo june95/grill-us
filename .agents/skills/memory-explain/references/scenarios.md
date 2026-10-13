@@ -20,6 +20,8 @@
 
 ## Walkthrough Method
 
+상태/증거/완료 의미는 [공통 규약](../../memory-execute/references/conventions.md#rule-ownership), 설명 자체의 읽기 경계·깊이·근거 선택은 [설명 스킬](../SKILL.md#boundaries)이 소유한다. 아래 사례는 정본과 소비 지침의 대응을 대조하는 자료다.
+
 1. 입력·읽을 근거·예상 설명·금지 부작용을 SKILL.md의 해당 절과 대조한다. 사실·기록된 의도·추론·미확인을 구분하는지 확인한다.
 2. 실제 완료 Task를 자료로 쓸 때는 해당 task/report와 확인할 commit을 명시한다. 현재 구현과 당시 결과를 읽기 비교하며 기록을 수정하지 않는다. 가상 pending/blocked/no-commit 사례는 가상이라고 표시한다.
 3. 읽기 대조 전후 current, 기존 checkpoint, 사용한 과거 Task/report의 명시 파일 hash 및 Git working/index 상태를 비교한다. 구현 Task 자체의 보고·상태 쓰기는 이 읽기 대조 구간 밖에서 수행한다.

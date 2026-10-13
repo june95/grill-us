@@ -1,49 +1,38 @@
 # Task Analysis
 
-reference 단계가 실제 필요하거나 요청된 경우에 읽는다. 이미 충분한 조사·확정 결정이 있으면 Task에 근거를 연결하고 같은 조사를 반복하지 않는다. 경로와 보고 형식은 [공통 규약](conventions.md), [프로젝트 확인](project-profile.md), [템플릿](templates.md)을 따른다.
+reference를 실행할 때만 읽는다. 충분한 기존 조사·결정은 재사용한다. [공통 규약](conventions.md), 경로 확인이 필요하면 [Discovery](project-profile.md#discovery), 보고 작성에는 [Stage Report](templates.md#stage-report)를 사용한다.
 
 ## Problem
 
-- Task의 요청 결과, 현재 현상, 재현 조건, 완료 조건과 scope를 구분한다. 증상과 원인을 같은 것으로 단정하지 않는다.
-- 관련 코드·설정·테스트·기존 이슈·정본을 먼저 읽는다. 원하는 동작이 명확한 버그는 구현 원인을 조사하고 사용자에게 원인을 추측하게 요구하지 않는다.
-- 실제 필요한 재현 정보가 없으면 누락 정보 하나를 묻는다. 중요한 동작·계약 분기는 한 질문씩 추천안을 포함하여 확인한다.
-- 프로젝트에서 사용하는 용어·패턴을 우선한다. 이 단계에서는 제품 코드나 공유 가이드를 수정하지 않는다.
-- 버그는 [Bug Investigation](conventions.md#bug-investigation)의 입력·절차/실제 command·cwd·기대/실제 결과·시도/출처·확인 시각을 정리한다. Reproduction Status와 Cause Confidence는 독립적으로 선택하고, 코드 사실·미확정 후보·관련 path::symbol·환경·한계·다음 검증을 대응한다. 사용자의 자료와 직접 실행한 관찰을 구분한다.
+- 요청 결과·현재 현상·기대 동작·scope·AC를 분리하고 관련 코드/설정/기존 자료로 조사한다. 증상과 원인은 같다고 단정하지 않는다.
+- 버그 관찰은 [Bug Investigation](conventions.md#bug-investigation)에 따른다. 직접 관측·사용자 자료·후보와 확신을 구분하고 필요한 재현 정보만 질문한다.
+- 중요한 선택은 [Change Boundaries](conventions.md#change-boundaries)를 적용한다. 명확한 버그 원인은 코드로 조사하며 제품/공유 정본을 수정하지 않는다.
 
 ## Evidence
 
-독립 분석 Task라면 사전 목표가 후보·근거·한계 조사인지 원인 확정인지 확인한다. [Investigation Outcomes](conventions.md#investigation-outcomes)에 따라 실제 관측·가설을 Observed Result에, AC 충족·한계·권고를 Objective Assessment에 구분한다. 후보 조사 목표는 충분한 근거와 한계 정리로 달성할 수 있지만 원인 확정 목표는 후보만으로 완료하지 않는다. 필수 조사 자체가 수행 불가하거나 자료가 부족하면 그 미달성을 남긴다.
+reference.md에는 다음 조사 산출물을 남긴다.
 
-reference.md에 다음을 기록한다.
-
-| Item | Content |
+| Item | 내용 |
 | :--- | :--- |
-| Source / Outcome | 원 요청·기존 이슈·기대 결과·완료 조건 |
-| Current Context | 관련 파일·심볼·흐름·프로젝트 제약 |
-| Findings | 확인된 사실·가설을 구분한 근거와 영향 |
-| Options | 현재 계약 안의 권장안, 의미 있는 대안과 이유 |
-| Verification | 실제로 입증할 조건과 검증 경로 |
-| Open Questions | scope·동작·데이터·순서에 영향을 주는 미결정 |
+| Source / Outcome | 원 요청·기대 결과·사전 완료 조건 |
+| Current Context | 실제 파일/심볼·흐름·제약 |
+| Findings | 사실·가설·근거·영향 |
+| Options | 현재 계약 안의 권장안·의미 있는 대안과 이유 |
+| Verification | 입증할 조건과 실제 검증 경로 |
+| Open Questions | scope/동작/순서 등에 필요한 미결정 |
 
-- 불확실하거나 버전 민감한 외부 동작을 확인해야 할 때만 해당 자료를 조사하고 출처·버전·관련 사실을 남긴다. 로컬에서 확인되는 사실은 직접 읽는다.
-- [Stage Report](templates.md)의 Revision·Covered Files·Source Snapshot·시각·결과·다음 행동을 포함한다.
-- Task 밖 문제는 별도 발견 사항으로 보고한다. 아직 승인되지 않은 설계 대안을 권장 구현으로 확정하지 않는다.
+[Investigation Outcomes](conventions.md#investigation-outcomes)로 관측과 사전 목적 달성을 구분한다. 후보 조사 목표와 원인 확정 목표는 다르며, 필수 근거 부족을 완료로 포장하지 않는다. [증거·보고](conventions.md#evidence-and-completion)에 실제 수행 범위·한계를 기록한다.
+
+불확실한 외부 동작은 필요한 출처/버전을 확인하고 로컬 사실은 직접 읽는다. 범위 밖 발견은 권고만 보고하며 승인되지 않은 대안을 구현으로 확정하지 않는다.
 
 ## Alignment
 
-reference의 정합성은 `Aligned / Approved Design Change / Design Change Required / Blocked`로 표현할 수 있다. Task의 실행 Alignment와 구분한다.
+조사 verdict는 Aligned / Approved Design Change / Design Change Required / Blocked이며 Task 실행 Alignment와 구분한다. 앞의 둘은 기존 정본 안 또는 실제 승인 근거가 있는 접근이다. 뒤의 둘은 필요한 설계 문제를 해소하기 전 제품 구현을 진행하지 않는다.
 
-- Aligned는 현재 정본 안의 접근이다. Task의 Compliant를 뒷받침한다.
-- Approved Design Change는 명시 승인과 영향 계약·정본 목록이 있는 경우다. 필요한 design-guide-update는 의존 구현 전에 완료해야 한다.
-- Design Change Required 또는 Blocked이면 그 문제를 해소하기 전에 제품 구현을 진행하지 않는다. 일반 구현 옵션의 확인을 새로운 기반 설계 변경 승인으로 과대 해석하지 않는다.
-- 설계 변경 필요라는 조사 결론과 조사 작업의 완료 여부는 별개다. 사전 조사 목표가 충족됐는지 평가하며, 그 결론만으로 조사 Task를 자동 차단하거나 제품 구현을 승인하지 않는다. 전체 Task 완료는 공통 판정·커밋 정책을 확인하며 단독 reference는 자동 finalize하지 않는다.
-- 현재 코드의 drift·외부 best practice·미확정 가정으로 정본과 blocker를 덮어쓰지 않는다. 특정 예시 문서가 없는 것과 실제 필요한 정본이 누락된 것을 구분한다.
+설계 변경 필요라는 조사 결론만으로 조사 목표 달성을 부정하거나 구현을 승인하지 않는다. 정본 권한은 [Authority](project-profile.md#authority), 완료 의미는 공통 규약을 따른다.
 
 ## Reference Sync
 
-- 확정된 계획·scope·검증 선택이 reference를 대체하면 해당 결론을 갱신하고 변경 이유·날짜를 적는다. 유용한 과거 분석은 보존하거나 superseded로 표시한다.
-- 청사진의 의미 있는 변경은 Blueprint Revision과 Change Log에 반영하고 관련 evidence를 재평가한다. 미확정 가정을 confirmed 결정으로 기록하지 않는다.
-- reference 동기화를 정본 가이드 재작성으로 사용하지 않는다. 설계 변경은 별도 승인된 가이드 단계에서 처리한다.
-- 실제 동작·scope·원인 확인 조건·검증 경로가 부족하여 실행 가능한 청사진을 만들 수 없으면 그 부족분과 가장 작은 다음 조사·질문을 기록한다.
+새 확정 결론이 이전 분석을 대체하면 날짜/이유와 superseded 근거를 보존한다. 청사진 의미 변경의 Revision/증거 재평가는 [Task Fields](conventions.md#task-fields)를 따른다. reference 갱신으로 정본을 임의 재작성하지 않는다.
 
-실행 재현을 하지 않은 코드 조사나 재현 불가 자체는 명확한 버그 등록의 blocker가 아니다. 원하는 동작·scope·완료 조건·검증 경로가 충분하면 확인되지 않은 원인은 그대로 기록하고 원인 확인을 첫 실행 단위로 계획한다. 확인할 근거/조건·그 결과에 따른 수정 범위가 실제로 정해지지 않아 실행 가능한 청사진을 만들 수 없을 때만 그 부족분을 차단 사유로 남긴다. 일반 기능·문서 조사에는 버그 표를 강제하지 않는다.
+실제 확인 조건·수정 범위가 부족하면 필요한 다음 조사를 남긴다. 재현 불가만으로 명확한 등록을 막지 않으며 단독 reference는 다른 단계·완료를 자동 수행하지 않는다.

@@ -2,6 +2,24 @@
 
 Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다. 상세 문서 형식은 [templates.md](templates.md), 프로젝트 확인은 [project-profile.md](project-profile.md), 완료·Git 판정은 [commit-check.md](commit-check.md), 재개는 [resume.md](resume.md)를 따른다. 전역 task-* 스킬이나 특정 프로젝트의 문서·폴더를 실행 의존성으로 두지 않는다.
 
+## Rule Ownership
+
+같은 규칙의 상세는 아래 소유 문서 한곳에서 관리한다. 소비 스킬·단계는 고유 절차와 핵심 경계 요약을 남기고 해당 anchor로 연결한다. 형식 예시·시나리오는 이 계약을 설명하는 자료이며 별도 동작 계약을 만들지 않는다.
+
+| 공통 규칙 | 상세 소유자 | 소비자가 남길 요약 |
+| :--- | :--- | :--- |
+| ID·로컬 경로·상태·활성 위치 | [Paths](#paths), [Task Fields](#task-fields), [State Ownership](#state-ownership) | 실제 대상과 현재/마지막 완료를 구분, 사용자 위치 보존 |
+| 등록·분할·확정 선택 | [Registration and Planning](#registration-and-planning), [Change Boundaries](#change-boundaries) | 계획/등록 구현 금지, 미결정만 질문 |
+| 단계 선택·단독 실행 경계 | [Workflow](#workflow), [Stage Isolation](#stage-isolation) | 요청한 단계만 수행, 자동 완료/전진 금지 |
+| 증거·완료·조사 결과·환경 영향 | [Evidence and Completion](#evidence-and-completion), [Investigation Outcomes](#investigation-outcomes), [Environment Evidence](#environment-evidence) | 실패/stale 보존, 검사 결과와 목적 판정 구분 |
+| 보고 의미·일일 이력 | [Reporting](#reporting), [History](#history) | 실제 수행·근거·한계만 보고 |
+| 문서 형식 | [templates.md](templates.md#stage-report) | 적용 필드만 실제 자료로 채움 |
+| 프로젝트·정본·명령 발견 | [project-profile.md](project-profile.md#discovery) | 실제 cwd/정본/명령 확인 |
+| Git 품질·후보·ignore·staging·intent | [commit-check.md](commit-check.md#quality-gate), [Staging](commit-check.md#staging), [Commit Intent](commit-check.md#commit-intent) | Task 후보와 사용자 index 분리 |
+| 재개·전환·복구 알고리즘 | [resume.md](resume.md#stale-evidence), [Switch](resume.md#switch), [Recovery](resume.md#recovery) | 미해결 intent 보존, 실제 결과 확인 후 재개 |
+
+기본 읽기는 요청·존재하는 대상 Task/결정과 이 공통 규약이다. 실행·재개에는 현재 checkpoint와 resume을 확인하고, 선택한 단계의 지침만 추가한다. 형식 작성에는 해당 templates 섹션, 경로/정본/명령이 불명확하면 project-profile, 최종 품질·커밋에는 commit-check를 읽는다. 관련 없는 단계·시나리오 전체를 매번 로드하지 않으며 이미 확인한 같은 내용은 재사용한다.
+
 ## Paths
 
 | 역할 | 저장 위치 |
@@ -17,6 +35,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | 선택적 프로젝트 설정 | `.memory/project.md` |
 
 - Plan ID는 `YYYY-MM-DD-{slug}`, Phase ID는 `P01-{slug}`, Task 폴더는 `T01-{slug}` 형식이다. 날짜는 새 Plan 생성일이며 기존 Plan 추가 시 바꾸지 않는다.
+- 같은 날짜·slug의 Plan ID가 있으면 기존 내용·목표를 먼저 확인한다. 같은 목표는 등록 규칙에 따라 연결/재사용하고 다른 신규 목표가 충돌하면 구별되는 ID를 선택한다. 기존 Plan 파일·ID를 새 요청으로 덮어쓰지 않는다.
 - Decision ID는 결정 문서 생성일 기준 `YYYY-MM-DD-{topic}`이며 Plan ID와 독립적이다. Plan 생성 전 인터뷰나 기존 Plan의 후속 결정도 자체 ID를 유지한다. Plan/Task에서 실제 결정 문서를 링크하며 여러 Plan이 같은 결정을 참조할 수 있다. 같은 ID가 있으면 내용과 연결 범위를 먼저 확인하고, 기존 파일명·링크는 이동·통합·재번호하지 않는다.
 - Task ID는 Plan 안에서 유일한 `P01-T01` 형식이다. 다른 Plan의 같은 Task ID는 Plan ID와 함께 식별한다.
 - 새 커밋 메시지의 마지막 블록은 `Plan: {Plan ID}`, `Phase: {전체 Phase ID}`, `Task: {metadata Task ID}`다. 설명 본문은 이 블록보다 앞에 둔다. Task 폴더명과 Task ID를 구분하며, 과거 메시지의 호환 판정은 [재개 규약](resume.md#commit-message-identity)을 따른다.
@@ -56,6 +75,15 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | Blocker | string 또는 없음 | 해결되지 않은 원인과 다음 행동 |
 
 Revision은 계약의 버전이다. 단순 문구 정리, stage 상태·보고 기록·커밋 해시 갱신은 계약 변경이 아니면 증가시키지 않는다. scope 또는 검증 의무를 바꿨다면 Revision을 증가시키고 영향을 받는 증거를 다시 확인한다.
+
+## Registration and Planning
+
+- 관련 목표는 기존 Phase에 새 T, 독립 목표는 새 Plan으로 둔다. 파일 하나가 겹친다는 이유만으로 목표를 합치지 않는다. 동일 미완료 요청은 재사용하고, done 결과가 여전히 충족되면 안내한다. 완료 뒤 재발·추가 수정은 과거 근거를 보존하며 새 T로 기록한다.
+- 명확함은 Source·동작·scope·완료 조건·검증 경로로 판단하며 decisions 문서를 형식상 강제하지 않는다. 중요한 동작/권한/API/데이터 결정만 인터뷰로 연결한다. 버그 원인 미확정·재현 불가 자체는 등록 차단이 아니지만 실제 조사/수정 조건이 불충분하면 그 부족분을 남긴다.
+- 기본은 P01 하나와 독립 완료·검증 가능한 Task다. 서로 다른 도메인/마일스톤일 때만 Phase를 늘리고 단독 완료할 수 없는 미세 단위는 한 Task의 I01/I02로 묶는다. 후속 Task를 기다리는 aggregate gate나 의도적으로 깨진 구현을 다음 Task로 넘기지 않는다.
+- 상세 정본은 task.md 하나다. 실제 path::symbol/문서 절·적용 타입/필드/흐름·AC·Dependencies·command/cwd·workflow·커밋 정책을 실행 가능한 수준으로 적는다. 조사/검증 절차도 Implementation에 쓸 수 있으며 적용되지 않는 API/DTO·버그 표를 강제하지 않는다.
+- 분석·테스트 실행의 사전 Goal/AC는 조사·분류인지 원인 확정/검사 통과인지 구분한다. Type만으로 완료나 커밋 생략을 정하지 않는다. 계획/등록에서는 제품·테스트 코드·공유 정본·staging·commit을 변경하지 않는다.
+- 등록만으로 기존 활성 위치를 바꾸지 않는다. 활성 없음이면 첫 실행 가능한 Task를 연결하고, 우선 처리 전환은 [Switch](resume.md#switch)의 기존 위치/의도 보존 절차를 따른다. 실제 시작 전 새 Task는 pending이다.
 
 ## Bug Investigation
 
@@ -125,18 +153,43 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 - final-review.md는 필수 공통 산출물이 아니다. 최종 품질 판정은 Task의 Completion Check에 기록한다. 의미 있는 리팩토링은 현재 Task 변경 표면과 동작 보존 범위에 한정한다.
 - 보고서 자체 verdict와 workflow Status는 다른 의미다. Pass with Issues 등의 보고가 있으면 finding 처리와 완료 조건을 확인해 단계 passed 여부를 판단한다. 수행한 작업 자체의 Needs Changes/Fail/Blocked 또는 현재 완료 조건을 막는 미해결 Critical/High를 통과로 바꾸지 않는다. 조사 대상에서 관측한 실패는 조사 목적 달성과 별도로 보존한다.
 
+### Stage Isolation
+
+명시한 단계 선택이 우선이다. 독립 분석/테스트 Task 전체 실행은 완료 정책까지 수행하지만 기존 Task의 해당 단계만 요청하면 그 단계에서 끝낸다. 실제 의도가 모호할 때만 질문한다.
+
+| 단독 단계 | 허용되는 결과 | 자동 수행하지 않는 일 |
+| :--- | :--- | :--- |
+| reference | 조사·분석 보고 | 제품/공유 정본 수정 |
+| implementation/review-action/refactor | 승인 scope 변경과 최소 검증·보고 | 별도 단계나 커밋·완료·전진 |
+| review | 검토 결과·해당 Task metadata | 제품 수정·review-action |
+| test | scope 내 테스트 작성/실행·보고 | 선행 구현/리뷰·제품 결함 수정 |
+| design-guide-update/guide-update | 요청 모드의 정본/사용 안내 | 제품 구현 |
+| commit-check | 품질·후보·현재 index 읽기와 판정 | 코드 수정·staging·commit |
+| commit | 유효한 선행 판정에 따른 후보 staging·intent·실제 commit | 부족한 증거를 만드는 전체 workflow |
+
+모든 단독 단계/check_only는 Task done·포인터 전진을 자동 수행하지 않는다. 비활성 대상은 그 결과만 갱신하고 기존 current/checkpoint Position을 보존한다. 의도의 Target Task는 정확히 기록하며 미해결 prepared/failed를 다른 대상으로 덮지 않는다.
+
+단독 test에서 새/변경 테스트가 review에 영향을 주면 stale 사유·대상 파일·재리뷰 Next Action만 남긴다. 검토하지 않은 snapshot을 passed로 바꾸지 않으며 test passed가 review stale를 해소하지 않는다. 실제 재리뷰는 후속 review 요청이나 전체 Task 실행에서 한다. 단독 implementation/review-action/refactor의 최소 검증도 필요한 별도 재리뷰/test를 대신하지 않는다.
+
+단독 commit 성공 뒤 전체 실행으로 재개하면 [Recovery](resume.md#recovery)로 동일 commit을 확인하고 누락 finalize만 수행한다. 성공 결과를 현재 diff 없음이라는 이유로 skipped로 덮지 않는다.
+
 ## Evidence and Completion
 
 - 검증의 기록·재사용에는 아래 Environment Evidence를 조건부로 적용한다. Revision·내용 snapshot과 함께 결과에 실제 영향을 주는 환경의 동일성 또는 변경 영향을 확인한다.
 - 실행한 보고에는 Task, Stage, Blueprint Revision, Covered Files, Source Snapshot, Checked At, Result, Blockers, Next Action을 포함한다.
 - 현재 파일의 SHA256은 `Get-FileHash` 등의 읽기 전용 도구로 확인한다. 새 파일도 포함하고 삭제된 경로는 deleted로 기록한다. 원문·비밀 값 대신 필요한 hash만 기록한다.
 - HEAD 식별자는 checkpoint의 Base HEAD와 별도로 기록한다. source snapshot은 covered 파일 내용이므로 커밋으로 HEAD가 달라졌다는 이유만으로 동일 내용의 검증을 무효화하지 않는다.
-- 커밋 의도의 Candidate Snapshot에는 working-tree hash와 별도로 staged Git mode/blob ID를 기록한다. Git의 줄바꿈·clean filter 정규화가 로컬 bytes를 바꿀 수 있으므로 commit tree의 성공 여부는 staged Git entry와 비교한다. 삭제는 entry 없음으로 기록하고 전환 index 삭제는 로컬 보존 여부를 따로 확인한다.
+- 검증 freshness의 working SHA256과 커밋 복구의 staged mode/blob는 역할이 다르다. Candidate Snapshot과 줄바꿈/삭제 대조 절차는 [Staging](commit-check.md#staging) 및 [Recovery](resume.md#recovery)를 따른다.
 - 추가 테스트 파일이나 구현 조정이 생기면 실제 변경 scope와 해당 증거를 갱신한다. 변경된 내용에 영향을 받는 단계만 stale로 표시하고 재수행한다.
 - Completion Check는 `pending / ready / blocked`를 사용한다. ready에는 현재 Revision·snapshot, 완료 조건별 근거, 적용 단계 판정, 남은 위험, Git 경계를 기록한다.
 - ready는 현재 근거로 완료 정책 처리에 진입할 수 있다는 공통 준비 판정이며 done은 아니다. auto이고 Task 범위의 커밋 대상 변경이 있으면 커밋 가능 판정을 포함하며 성공 commit 후 done이다. auto여도 Task 범위 변경이 없으면 이유를 기록하고 commit을 skipped로 처리할 수 있다. 명시적 none도 사용자 지시·남은 미커밋 변경을 기록하고 완료 조건·품질 판정 후 done 가능하다. check_only 및 단계 단독 실행은 자동 finalize하지 않는다.
 - 전체 Task 실행은 사전 목표·완료 조건 → 적용 단계의 유효 근거·품질 확인 → Task 범위 Git 변경 및 커밋 정책 처리 → done/finalize 순서다. 별도 commit-check 단계가 해당 없음이어도 공통 품질·완료 정책 판정을 Task의 Completion Check에 남긴다. 새 단계나 enum은 만들지 않는다.
 - Git 변경 없음은 Task 범위 후보를 기준으로 판단하며 저장소 전체 clean을 요구하지 않는다. unrelated 사용자 working/index는 보존한다. 조사나 로컬 보고만 만든 Task는 기본 로컬 .memory를 후보로 삼거나 빈 커밋을 만들지 않는다. 테스트 코드·공유 가이드를 작성했다면 그 변경에는 일반 커밋 정책을 적용한다.
+- 현재 요청과 해당 Task에 유효한 사용자 커밋 지시가 우선한다. 명시한 커밋 금지는 취소될 때까지 보존하고, 단독 단계 실행을 Task의 auto 정책이 영구 check_only로 바뀐 것으로 해석하지 않는다.
+
+### Reporting
+
+실제로 수행한 단계만 보고하고 [Stage Report](templates.md#stage-report) 형식을 사용한다. 완료/차단 결과는 아래 History에 기록하며, 실행하지 않은 단계의 빈 보고서를 만들지 않는다. 채팅에는 무엇·왜, 실제 검증과 한계, commit/정책 결과·다음 위치/행동, 범위 밖 발견의 영향·권고를 간결히 설명한다. 필요한 짧은 코드/계약 인용은 근거를 돕는 범위로 쓰고 처음 쓰는 패턴/API는 한 줄로 설명한다. 발견이 없으면 특이사항 없음이라고 적는다. 설명만 하는 호출은 보고·이력 작성 의무를 적용하지 않는다.
 
 ### Investigation Outcomes
 
@@ -178,7 +231,7 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 - current의 Checkpoint는 실제 활성 또는 보존한 Plan별 state 링크다. Last Completed Task는 활성 위치와 별개로 마지막 완료의 Plan ID·Task ID, 확인한 commit hash 또는 명시 no-commit/변경 없음 사유, 실제 완료 evidence를 가리킨다. 완료 이력이 없으면 없음으로 기록하고 가짜 경로·hash를 만들지 않는다. 과거 current에 이 정보가 없으면 Task/보고로 확인 가능한 범위만 읽는다.
 - Phase의 done count와 Plan의 요약은 Task 실제 상태로 갱신한다. 커밋 실패 전에 done을 쓰지 않는다.
 - 새 등록은 기존 활성 작업을 유지한다. 우선 처리 지시가 있을 때만 Task 재개 상태와 Plan checkpoint를 먼저 보존하고 current를 전환한다.
-- placeholder·누락 링크·실제 완료된 Task를 유효한 진행 중 작업으로 취급하지 않는다.
+- 초기 placeholder·실제 작업 없는 링크·완료 Task를 진행 중으로 취급하지 않는다. 실제 진행 위치가 손상됐다는 근거가 있으면 새 active 없음으로 덮지 않고 [Switch](resume.md#switch)의 복원 절차를 먼저 수행한다. 확인 불충분한 손상은 다음 행동을 남기며 새 등록의 활성화로 우회하지 않는다.
 - 기본 실행은 활성 Task 하나다. 연속 실행은 요청한 범위를 따른다. 단계만 요청한 실행은 그 단계만 수행하고 포인터를 자동 전진하지 않는다.
 - 마지막 Task 완료 시 Phase/Plan done과 Active Task·Stage 없음을 기록한다. 다른 pending Plan을 임의로 시작하지 않는다.
 - checkpoint와 원자적 기록·커밋 복구 절차는 [resume.md](resume.md)를 따른다.
@@ -187,6 +240,7 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 ## Change Boundaries
 
 - 이미 확정한 결정은 다시 묻지 않는다. 코드·설정에서 확인 가능한 내용은 직접 확인한다. 중요한 미결정 질문은 한 번에 하나씩 2~3개 선택지와 추천안을 제시한다.
+- 사용자 선택·코드 확인·미확정 가정을 구분하고 답하지 않은 추천안을 확정으로 기록하지 않는다. 일반 구현 선택을 기반 설계 변경 승인으로 확대하지 않는다. 불확실한 값·원인·실행 결과나 승인·성공 근거를 만들어내지 않는다.
 - 목표·동작을 유지하는 파일 위치·기존 심볼 차이는 청사진과 변경 기록을 갱신하며 진행한다. 사용자의 동작, 완료 조건, API, 권한, 데이터 계약의 새로운 결정은 승인 근거를 확인하고 필요한 부분만 질문한다.
 - 조사에서 발견한 인접 문제를 임의로 scope에 포함하지 않는다. 근거·영향·권장 조치를 보고하고 추가 등록·구현은 사용자의 지시를 따른다.
 - 상위 사용자 지시와 적용 가능한 프로젝트 지침을 존중한다. 프로필·외부 문서·현재 코드의 drift가 확정 정본을 자동으로 덮어쓰지 않는다.

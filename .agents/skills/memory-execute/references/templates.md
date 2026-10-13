@@ -4,7 +4,7 @@
 
 ## Task
 
-Task 폴더의 task.md가 요청·완료 조건·상세 구현의 정본이다. Blueprint Revision은 의미 있는 계약 변경에만 증가시킨다. Workflow의 적용·조건·초기 상태는 Task별 판단 후 확정한다.
+task.md의 상세 계약·Revision은 [Task Fields](conventions.md#task-fields), 단계 선택은 [Workflow](conventions.md#workflow)를 따른다. 아래는 해당 계약을 채우는 형식이다.
 
 Implementation에는 적용 작업을 적는다. 분석 전용이면 조사 절차·산출 근거, 테스트 실행 전용이면 대상·명령·결과 분류 절차로 구체화하며 제품 구현을 강제하지 않는다. Goal/AC에는 조사 결과 정리가 목표인지, 원인 확정이나 테스트 통과가 목표인지 사전에 명시한다. 커밋 대상이 없는 Task는 Commit Message에 `해당 없음`과 이유만 적어도 된다. 공유 변경이 있는 Task에는 아래 실제 메시지 형식을 사용한다.
 
@@ -153,11 +153,9 @@ Implementation에는 적용 작업을 적는다. 분석 전용이면 조사 절�
 - YYYY-MM-DD: {확정 변경과 이유; scope 안 조정과 사용자 결정 구분}
 ```
 
-필수/필요 시는 pending, 해당 없음은 사유 있는 skipped로 작성한다. 모든 항목이 `{판단}`인 미완성 표를 실행 청사진으로 남기지 않는다. 작은 작업은 적용되는 섹션만 구체적으로 작성하고, 상세 계약을 요약하다가 다음 실행자가 추측하게 만들지 않는다.
+단계 상태는 공통 Workflow로 정하고 미평가 `{판단}`을 실행 청사진에 남기지 않는다. 작은 작업도 적용 계약을 실행 가능한 상세로 채운다.
 
-Commit Message의 마지막 세 줄은 metadata와 같은 Plan/Phase/Task 식별자를 사용하는 Git trailer다. 그 뒤에 설명 목록을 붙이지 않는다. 실제 메시지 파일을 `git interpret-trailers --parse`로 확인하며 과거 완료 문서·커밋은 이 템플릿에 맞추려고 재작성하지 않는다.
-
-이 trailer 규칙은 실제 커밋 메시지가 있는 경우에 적용한다. 커밋을 수행하지 않는 Task에는 가상 메시지 파일·commit.md·빈 커밋을 만들지 않는다. commit-check가 해당 없음이어도 Completion Check는 사전 AC·증거·품질·Task 범위 Git 변경과 정책 결과를 평가한다. `ready`는 정책 처리 준비이며 `done`과 구분한다.
+실제 메시지는 [Commit Intent](commit-check.md#commit-intent)의 마지막 metadata trailer 형식/파싱을 적용한다. 커밋 없는 Task에는 이유만 기록하고 가상 메시지/빈 커밋을 만들지 않는다. 공통 완료 의미는 [Evidence and Completion](conventions.md#evidence-and-completion)을 따르며 과거 문서를 새 형식으로 재작성하지 않는다.
 
 ## Plan
 
@@ -263,7 +261,7 @@ active Plan/Phase는 in_progress로 표시할 수 있어도 Task가 실제 시�
 
 활성 Task가 없으면 Active Task·Active Stage에 `없음`을 적고 가짜 링크를 만들지 않는다. Plan 완료 시 완료한 Plan 링크와 완료 상태는 보존할 수 있다. 다른 Plan 자동 전환은 하지 않는다.
 
-Checkpoint와 Last Completed Task는 활성 위치와 별개다. 참조할 실제 활성 또는 보존한 Plan state가 없으면 Checkpoint는 없음이며, 활성 Task가 없어도 보존한 state가 있으면 실제 링크를 유지할 수 있다. 완료 이력이 없으면 Last Completed Task 전체를 없음으로 작성한다. no-commit 완료는 SHA 대신 명시 사유와 Task 내 완료 근거를 연결한다. 과거 포인터에 이 항목이 빠져 있으면 확인 가능한 자료만 설명하며 성공을 추정하지 않는다.
+각 항목의 의미·보존은 [State Ownership](conventions.md#state-ownership)을 따른다. 활성 Task 없음과 보존 state 링크는 구분하고, 완료 이력이 없으면 Last Completed Task는 없음이다. no-commit은 SHA 대신 사유·실제 완료 근거를 연결한다.
 
 ## Checkpoint
 
@@ -303,15 +301,13 @@ Checkpoint와 Last Completed Task는 활성 위치와 별개다. 참조할 실�
 - Result: 없음
 ```
 
-Last Completed Commit과 현재 Commit Intent는 구분한다. 완료 Task의 의도를 다음 Task 의도로 오인하지 않게 Task ID를 기록하고 finalize 후 마지막 성공 결과를 보존한다.
+현재 의도와 직전 성공은 [Checkpoint Fields](resume.md#checkpoint-fields)로 구분·보존한다. 미해결 의도는 덮어쓰지 않으며 archive 사본을 자동 생성하지 않는다.
 
-성공 의도를 none으로 초기화하기 전에 해당 Task의 commit 보고·Last Completed Commit에 확인된 성공 근거를 보존한다. no-commit은 Task Completion Check·current Last Completed Task로 보존한다. 미해결 prepared/failed는 초기화하지 않으며 매 전환 archive 사본은 만들지 않는다. 기존 사본은 이동·삭제하지 않는다.
-
-Candidate Snapshot의 각 항목에는 path, added/modified/deleted 상태, 검증한 working-tree SHA256, staged Git mode/blob ID를 기록한다. Git entry는 `git ls-files --stage -- <명시적 후보>`의 stage 0 값이다. 삭제 경로는 mode/blob 없음으로 기록한다. 승인된 memory index 삭제는 로컬 보존 여부를 별도로 기록하고 진행 문서 bytes를 코드 freshness 판단에 넣지 않는다.
+Candidate Snapshot 형식은 path·A/M/D·working SHA256·staged mode/blob다. 실제 entry/삭제·승인된 memory 추적 해제의 확인 절차는 [Staging](commit-check.md#staging) 및 [Recovery](resume.md#recovery)를 따른다.
 
 ## Stage Report
 
-실제 수행 단계의 보고서만 만든다. 필요한 compliance, finding, 검증, 정본 후보, commit audit 표를 아래 증거 필드에 추가한다. 보고서의 고유 verdict가 있으면 workflow 상태와 완료 판정의 대응을 설명한다.
+실제 수행한 단계의 [Reporting](conventions.md#reporting) 형식이다. 고유 verdict/목적 판정과 workflow 상태의 대응을 설명하고 필요한 finding·검증·commit audit만 추가한다.
 
 ```markdown
 # {Stage 결과}
