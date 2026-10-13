@@ -20,6 +20,22 @@ metadata:
 
 Turn any idea, data, or content into a stunning single-file HTML visualization.
 
+## References by Need
+
+Keep this file and the complete skeleton as the output contract. Read only the references needed for the current format or issue; these references do not replace the required theme/menu/Chart.js/output boundaries below.
+
+| Need | Read |
+| :--- | :--- |
+| Every output: complete template and integration rules | [skeleton](references/skeleton.md) |
+| Detailed typography, palette, spacing, accessibility | [design system](references/design-system.md) |
+| Format selection and structural patterns | [types](references/types.md); applicable [format recipes](references/recipes.md#format-recipes) |
+| Chart construction, configuration, debugging | [chart lifecycle](references/recipes.md#chart-lifecycle-example); [debugging](references/recipes.md#critical-debugging-patterns) |
+| Adapting theme/menu, PNG export, print or slide capture | [menu](references/menu.md) — replace the existing component, do not add another |
+| Entrance/reveal/counter motion | [animations](references/animations.md) — adapt examples to the skeleton's top-level var/lifecycle/reduced-motion rules |
+| Advanced CSS or optional libraries | [CSS techniques](references/css-techniques.md), [libraries](references/libraries.md), [Reveal.js navigation](references/recipes.md#revealjs-navigation) |
+| Manual visual quality review | [evaluation rubric](references/eval.md) |
+| Maintained source, attribution and selective updates | [provenance](references/provenance.md) |
+
 ## After Creating a File
 
 **Always do BOTH of these after writing the HTML file:**
@@ -33,27 +49,27 @@ Created your visualization! Opening in browser now...
 [my-dashboard.html](my-dashboard.html)
 ```
 
-## Critical Requirements (NON-NEGOTIABLE)
+## Required Output Contract
 
-⚠️ **EVALUATION FAILURE GUARANTEED WITHOUT THESE 8 ELEMENTS** ⚠️
+The following output requirements remain mandatory. The [evaluation rubric](references/eval.md) is a manual quality guide, not an executable evaluation protocol or a guarantee of automatic checks.
 
 **EVERY file MUST start from the skeleton template in [references/skeleton.md](references/skeleton.md) — copy the ENTIRE template, then add your content.**
 
-1. **CSS Custom Properties:** Exact names required: `--bg, --surface, --surface-hover, --border, --text, --text-secondary, --accent, --accent-secondary, --positive, --negative, --warning` — NO other names (not --bg-primary, not --text-primary). **CRITICAL:** These exact property names are required for evaluation system compatibility.
-2. **Utility Menu System (MANDATORY):** Complete `.viz-menu` element with `.viz-menu-toggle` button, `.viz-menu-dropdown` container, download PNG button (`onclick="downloadImage()"`), print button (`onclick="window.print()"`), and html-to-image CDN script (`<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>`). **EVALUATION CRITICAL:** Menu system is automatically checked and WILL CAUSE FAILURES if missing.
-3. **Theme Classes (EVALUATION CRITICAL):** Must explicitly define BOTH `.theme-light` and `.theme-dark` classes in stylesheet with complete custom property definitions. **EXAMPLE REQUIRED:**
+1. **CSS Custom Properties:** Exact names required: `--bg, --surface, --surface-hover, --border, --text, --text-secondary, --accent, --accent-secondary, --positive, --negative, --warning` — NO other names (not --bg-primary, not --text-primary).  These exact property names are required for the required output contract.
+2. **Utility Menu System (MANDATORY):** Complete `.viz-menu` element with `.viz-menu-toggle` button, `.viz-menu-dropdown` container, download PNG button (`onclick="downloadImage()"`), print button (`onclick="window.print()"`), and html-to-image CDN script (`<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>`).  The complete menu remains required.
+3. **Theme Classes (required):** Must explicitly define BOTH `.theme-light` and `.theme-dark` classes in stylesheet with complete custom property definitions. **EXAMPLE REQUIRED:**
 ```css
 :root { /* base properties */ }
 .theme-light { --bg: #ffffff; --surface: #f8f9fa; --text: #1a1a1a; /* etc */ }
 .theme-dark { --bg: #0a0a0a; --surface: #1a1a1a; --text: #ffffff; /* etc */ }
 ```
-**NEVER rely on just `:root` or `@media (prefers-color-scheme)` — evaluation system checks for class-based themes.**
-4. **Semantic HTML:** `<main id="main-content">` element, **MANDATORY: Multiple `<section>` elements for major content blocks** (header, metrics, charts, etc.), skip-to-content link. Each distinct content area must be wrapped in semantic `<section>` tags.
-5. **Chart.js Requirements (EVALUATION CRITICAL):** MUST include `<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>` before closing `</head>`. **MANDATORY:** IMMEDIATELY after Chart.js script, add `<script>Chart.defaults.animation = false;</script>` (prevents animation glitches and is automatically checked by evaluation system). **MANDATORY CHART VALIDATION:** Every chart function MUST start with `if (typeof Chart === 'undefined') { console.error('Chart.js not loaded'); return; }`. **CHART ACCESSIBILITY:** Every canvas element MUST have `role="img"` and descriptive `aria-label` attributes. **CRITICAL CHART CONFIG:** Set `maintainAspectRatio: false`, `responsive: true`, and `plugins: { tooltip: { enabled: true } }` for accessibility. **NEVER disable tooltips** - evaluation system checks for enabled tooltips. **CHART RELIABILITY SYSTEM:** Use dedicated ChartManager pattern for bulletproof integration:
-Use the single [Chart Lifecycle Example](#chart-lifecycle-example) below. Copy its manager, DOM-ready binding, and theme hook once; other chart sections provide configuration details.
+**NEVER rely on just `:root` or `@media (prefers-color-scheme)` — class-based themes are required.**
+4. **Semantic HTML:** `<main id="main-content">` element, **Multiple `<section>` elements for major content blocks** (header, metrics, charts, etc.), skip-to-content link. Each distinct content area must be wrapped in semantic `<section>` tags.
+5. **Chart.js Requirements (required):** MUST include `<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>` before closing `</head>`.  IMMEDIATELY after Chart.js script, add `<script>Chart.defaults.animation = false;</script>` (prevents animation glitches). **MANDATORY CHART VALIDATION:** Every chart function MUST start with `if (typeof Chart === 'undefined') { console.error('Chart.js not loaded'); return; }`. **CHART ACCESSIBILITY:** Every canvas element MUST have `role="img"` and descriptive `aria-label` attributes. **CRITICAL CHART CONFIG:** Set `maintainAspectRatio: false`, `responsive: true`, and `plugins: { tooltip: { enabled: true } }` for accessibility. **NEVER disable tooltips** - tooltips must remain enabled. **CHART RELIABILITY SYSTEM:** Use dedicated ChartManager pattern for bulletproof integration:
+Use the single [Chart Lifecycle Example](references/recipes.md#chart-lifecycle-example). Copy its manager, DOM-ready binding, and theme hook once; other chart sections provide configuration details.
 Use `ChartManager.safeInit()` instead of raw `new Chart()`. **CRITICAL CHART CONFIG:** Set `maintainAspectRatio: false`, `responsive: true`, and `plugins: { tooltip: { enabled: true } }` for accessibility. **CHART CONTAINER DIMENSIONS:** Container must have explicit `height` >= 300px for charts to render properly. Use theme-aware colors with CSS custom properties, never static hex colors. **NEVER use import/export syntax with Chart.js CDN** — use standard var declarations only.
 
-**CHART.JS TROUBLESHOOTING (CRITICAL):** If charts appear as blank white spaces:
+**CHART.JS TROUBLESHOOTING:** If charts appear as blank white spaces:
 - Verify Chart.js CDN is included before `</head>`
 - Verify `Chart.defaults.animation = false;` is immediately after CDN
 - Verify chart initialization is in DOMContentLoaded event listener
@@ -61,7 +77,7 @@ Use `ChartManager.safeInit()` instead of raw `new Chart()`. **CRITICAL CHART CON
 - Verify ChartManager.safeInit() pattern is used correctly
 - Verify canvas has `role="img"` and `aria-label` attributes
 
-6. **Responsive Design:** Section spacing ≥48px, **CRITICAL: NO horizontal overflow at 375px viewport** (MANDATORY: add `@media (max-width: 375px) { body { overflow-x: hidden; } }` to prevent horizontal scroll), **MANDATORY FONT-SIZE HIERARCHY:** h1 ≥ 2.5rem, h2 ≥ 2rem, h3 ≥ 1.5rem, body = 1rem. **SLIDE DECK REQUIREMENTS:** Title slide h1 ≥ 3rem, content slide titles ≥ 2.5rem, clear visual distinction between heading levels. **SLIDE SECTION SPACING:** Major sections within slides must have ≥48px spacing (title-to-content, content-to-charts, charts-to-navigation). **Test all layouts at 375px width — dashboards especially prone to chart container overflow.** **CSS CONTAINER QUERIES:** For advanced responsiveness, use container-based queries:
+6. **Responsive Design:** Section spacing ≥48px, **CRITICAL: NO horizontal overflow at 375px viewport** (add `@media (max-width: 375px) { body { overflow-x: hidden; } }` to prevent horizontal scroll), **MANDATORY FONT-SIZE HIERARCHY:** h1 ≥ 2.5rem, h2 ≥ 2rem, h3 ≥ 1.5rem, body = 1rem. **SLIDE DECK REQUIREMENTS:** Title slide h1 ≥ 3rem, content slide titles ≥ 2.5rem, clear visual distinction between heading levels. **SLIDE SECTION SPACING:** Major sections within slides must have ≥48px spacing (title-to-content, content-to-charts, charts-to-navigation). **Test all layouts at 375px width — dashboards especially prone to chart container overflow.** **CSS CONTAINER QUERIES:** For advanced responsiveness, use container-based queries:
 ```css
 .chart-container { container-type: inline-size; }
 @container (max-width: 400px) { 
@@ -71,10 +87,10 @@ Use `ChartManager.safeInit()` instead of raw `new Chart()`. **CRITICAL CHART CON
 ```
 This provides true component-level responsiveness beyond viewport media queries.
 7. **Print & Accessibility:** `@media print` styles, `@media (prefers-reduced-motion: reduce)` with disabled animations
-8. **Entrance Animations (MANDATORY):** Must include entrance animations via `.animate` classes, `data-reveal` attributes, or CSS `@keyframes`. **EVALUATION CRITICAL:** Animation presence is automatically detected and required.
+8. **Entrance Animations (MANDATORY):** Must include entrance animations via `.animate` classes, `data-reveal` attributes, or CSS `@keyframes`.  Entrance animations remain required.
 9. **JavaScript Functions:** `cycleTheme()`, `toggleMenu()`, top-level variables use `var` not `let`/`const`
 
-**🔥 CRITICAL: Copy skeleton.md exactly → Replace "YOUR CONTENT HERE" with visualization content → Save file**
+Copy the complete skeleton → add visualization content in "YOUR CONTENT HERE" → save the file.
 
 ## Core Principles
 
@@ -105,24 +121,7 @@ Users invoke this **mid-conversation** with Claude Code. Use the full conversati
   - **D3.js** — `https://cdn.jsdelivr.net/npm/d3@7` (complex/custom data viz, force graphs)
   - **Mermaid** — `https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js` (flowcharts, sequence diagrams)
   - **Three.js** — 3D when appropriate
-  - **Reveal.js** — full-featured slide engine when needed. **CRITICAL:** Must set `html, body { height: 100%; overflow: hidden; }` and give the `.reveal` container `height: 100%`. Config MUST use numeric dimensions: `Reveal.initialize({ width: 1280, height: 720, center: true, controls: false })` — NEVER use string percentages like `'100%'` which cause zero-height viewport and blank slides. **MANDATORY: Disable Reveal.js default controls** (`controls: false`) — the default `<` `>` arrow overlays are ugly. Instead, add a custom minimal bottom nav bar:
-```html
-<nav class="slide-nav" aria-label="Slide navigation">
-  <button onclick="prevSlide()" aria-label="Previous slide">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-  </button>
-  <span class="slide-counter" id="slideCounter">1 / 8</span>
-  <button onclick="nextSlide()" aria-label="Next slide">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-  </button>
-</nav>
-```
-```css
-.slide-nav { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; z-index: 9998; }
-.slide-nav button { width: 28px; height: 28px; border-radius: 6px; background: transparent; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.3; transition: opacity 0.2s; }
-.slide-nav button:hover { opacity: 0.7; }
-.slide-counter { font-size: 12px; color: var(--text-secondary); font-weight: 400; min-width: 40px; text-align: center; opacity: 0.35; }
-```
+  - **Reveal.js** — use numeric dimensions (1280×720), full-height containers, and custom navigation with default controls disabled. Read the complete [Reveal.js navigation recipe](references/recipes.md#revealjs-navigation) before implementing it.
   - **Leaflet** — maps and geospatial data (`https://unpkg.com/leaflet@1.9/dist/leaflet.js` + CSS). **Required for geographic data** — never hand-draw SVG continent shapes. Use OpenStreetMap tiles or a minimal tile provider.
 - SVG for icons and simple graphics — never use external image URLs unless user provides them
 - Prefer CSS animations over JS when possible
@@ -135,20 +134,20 @@ Apply these defaults. They are opinionated and tested — override only when use
 
 **Full design system reference:** See [references/design-system.md](references/design-system.md) for complete typography, color, spacing, animation, accessibility, and visual polish specifications.
 
-Key highlights (consult reference for full details):
+Key requirements (read the reference for full details):
 
 ### Design Notes
 
-**Theming System (CRITICAL):**
+**Theming System:**
 - Use **class-based theming ONLY** — `<html class="theme-dark">` or `<html class="theme-light">`
 - Use the skeleton's `applyTheme()` and `cycleTheme()` to replace only theme classes, preserving other root classes and the existing chart theme hook.
 - Save `dark` or `light` under `viz-theme`. Legacy `0`/`1` restore dark/light; `2` and invalid values use the OS preference through `resolveTheme()`.
-- **Never use `data-theme` attributes** — the evaluation system expects class-based themes
-- **Required CSS custom properties:** `--bg, --surface, --text, --accent, --border` (minimum set for evaluation compatibility)
+- **Never use `data-theme` attributes** — the output contract requires class-based themes
+- **Required CSS custom properties:** `--bg, --surface, --text, --accent, --border` (minimum set for the output contract)
 
 **Typography:**
 - **Inter font mandatory** — `https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap`
-- **MANDATORY font weight hierarchy:** h1 ≥ 700, h2 ≥ 600, h3 ≥ 500, body = 400 (critical evaluation requirement)
+- **MANDATORY font weight hierarchy:** h1 ≥ 700, h2 ≥ 600, h3 ≥ 500, body = 400 (required typography hierarchy)
 - -0.03em tracking on headings
 - **KOREAN TYPOGRAPHY EXCELLENCE:** For Korean content, use Noto Sans KR for body text with Inter for UI elements. Apply `line-height: 1.6` for Korean (vs 1.4 for Latin). Korean Medium weight maps to Western Regular (400). Include: `https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap`
 
@@ -160,9 +159,9 @@ Key highlights (consult reference for full details):
 - **Animations:** CSS @keyframes for page-load (.animate + .delay-N), data-reveal + IntersectionObserver for scroll, data-count for counters. Content visible by default. **Above-fold content must NEVER use data-reveal** — use `.animate` classes instead. Use `data-reveal` sparingly (max 3-4 sections) for below-fold content only.
 - **Accessibility:** Skip-to-content, aria-labels, landmark roles, :focus-visible, sr-only for chart data. See reference for full checklist.
 - **Icons:** Inline SVG only, never emojis. Lucide-style 24x24, stroke-based.
-- **Chart.js (MANDATORY PATTERNS):** `Chart.defaults.animation = false;` at top of script, destroy+recreate on theme toggle, explicit rgba() colors, tooltips always enabled, `maintainAspectRatio: false` on all chart options. **Accessibility: Wrap canvas in div with `role="img"` and descriptive `aria-label`**. **Guard pattern:** Use `chartsBuilt` flag — `onThemeChange()` must check `if (chartsBuilt)` before rebuilding. **Chart containers need min-height: 360px for substantial presence.**
+- **Chart.js (required patterns):** `Chart.defaults.animation = false;` at top of script, destroy+recreate on theme toggle, explicit rgba() colors, tooltips always enabled, `maintainAspectRatio: false` on all chart options. **Accessibility: Wrap canvas in div with `role="img"` and descriptive `aria-label`**. **Guard pattern:** Use `chartsBuilt` flag — `onThemeChange()` must check `if (chartsBuilt)` before rebuilding. **Chart containers need min-height: 360px for substantial presence.**
 - **Chart.js customization:** Apply professional styling beyond defaults — custom padding (`layout: { padding: 30 }`), remove excessive gridlines (opacity ≤ 0.04), use rounded corners (`borderRadius: 4`), thoughtful color palettes that match theme. Chart containers need 12px border radius, 40px internal padding, and 360px minimum height for substantial presence. Avoid library defaults that look auto-generated.
-- **Typography hierarchy:** MANDATORY descending font-size scale: h1 > h2 > h3 > body text. **REQUIRED MINIMUMS:** h1: ≥3rem (48px), h2: ≥2rem (32px), h3: ≥1.5rem (24px), body: 1rem (16px). **EVALUATION CRITICAL:** Each heading level must be visibly smaller than the previous level with at least 0.5rem difference between levels. Example valid hierarchy: h1: 3rem, h2: 2.5rem, h3: 1.5rem, body: 1rem.
+- **Typography hierarchy:** MANDATORY descending font-size scale: h1 > h2 > h3 > body text. **REQUIRED MINIMUMS:** h1: ≥3rem (48px), h2: ≥2rem (32px), h3: ≥1.5rem (24px), body: 1rem (16px).  Each heading level must be visibly smaller than the previous level with at least 0.5rem difference between levels. Example valid hierarchy: h1: 3rem, h2: 2.5rem, h3: 1.5rem, body: 1rem.
 - **Visual restraint:** No floating orbs, gradient borders, gradient text on headings, scale transforms, glow effects, decorative animations.
 - **Stat value colors:** Colored numbers must have semantic meaning (green/positive = good metric, red/negative = bad metric, accent = primary/neutral highlight). If no clear semantic meaning, use `var(--text)`. Never randomly colorize stat values. **For KPI grids with 4+ cards:** use at most 2 accent colors for values — `var(--accent)` for the single most important metric and `var(--text)` for all others. Reserve `var(--positive)`/`var(--negative)` only for delta indicators (arrows, percentages), not the main card value.
 - **Background atmosphere:** One subtle technique per file (radial gradient, noise texture, or dot grid). **Adapt the atmosphere to the content** — a game dashboard should feel different from a financial report. Adjust accent colors and gradient hues to match the subject matter.
@@ -173,7 +172,7 @@ Key highlights (consult reference for full details):
 
 ## Critical Implementation Requirements
 
-**MANDATORY: Use the skeleton template** — see [references/skeleton.md](references/skeleton.md) for complete copy-paste HTML with all requirements built-in.
+**Use the skeleton template** — see [references/skeleton.md](references/skeleton.md) for complete copy-paste HTML with all requirements built-in.
 
 **JavaScript Implementation Rules:**
 - **All top-level variables MUST use `var`** (not `let`/`const`) to avoid TDZ errors with function hoisting
@@ -234,159 +233,9 @@ Choose the right format. See [references/types.md](references/types.md) for deta
 | **Data Story** | Narrative + data | Scrollytelling, charts woven with narrative text |
 | **Product Card** | Feature highlight, launch | Hero image area, feature pills, CTA |
 
-### Carousel Card Rules
+### Format Recipes
 
-Carousel cards are huge for social media. Get these right:
-
-- **Square format** — `1080×1080px` (or configurable via CSS var)
-- **One idea per card** — bold headline + 1-2 supporting points max
-- **Swipe nav** — arrows + dots + touch swipe + keyboard
-- **Card counter** — "3 / 8" visible
-- **Download all** — PNG export of individual cards or full set
-- **Typography dominates** — headline at 2.5-4rem, minimal body text
-- **Color-coded** — each card can have a subtle accent shift
-- **Print layout** — grid of all cards for printing
-- **Max 10 cards** — keep it focused
-
-### Event Poster Rules
-
-- **Portrait orientation** — A4/letter ratio or square
-- **Visual hierarchy** — Event name (largest) → Date/Time → Location → Description → CTA
-- **Bold headline** — 3-5rem, max 6 words
-- **Date/time prominent** — styled as a badge or highlighted block
-- **QR code area** — placeholder box for registration link
-- **Print-first** — looks great printed, dark or light theme
-
-### Quote Card Rules
-
-- **Large quotation marks** — decorative " " in accent color, oversized
-- **Quote text** — 1.5-2.5rem, serif or italic weight for contrast
-- **Attribution** — name, title, company below quote
-- **Square or portrait** — optimized for social sharing
-- **Minimal design** — quote is the hero, everything else is subtle
-
-### Single-Screen / Mobile-Fit Rules (Posters, Cards, One-Pagers)
-
-When the user asks for something that fits "one screen," "phone screen," "9:16," or "mobile-fit," create a **fixed-dimension single-viewport** visualization — NOT a scrolling page.
-
-**Dimensions:**
-- **9:16 portrait (phone):** `width: 1080px; height: 1920px;` — standard Instagram Story / phone screen
-- **1:1 square:** `width: 1080px; height: 1080px;` — Instagram post
-- **4:5 portrait:** `width: 1080px; height: 1350px;` — Instagram portrait post
-- **16:9 landscape:** `width: 1920px; height: 1080px;` — presentation slide
-
-**Critical CSS pattern:**
-```css
-body {
-  width: 1080px; height: 1920px; /* or chosen ratio */
-  overflow: hidden; /* MUST — prevents scroll, enforces single screen */
-  display: flex; flex-direction: column; /* Flex column fills canvas completely */
-}
-.poster-header { padding: 44px 48px 0; }
-.poster-grid { flex: 1; padding: 24px 48px 0; } /* flex:1 expands to fill remaining space */
-.poster-footer { padding: 16px 48px 36px; }
-```
-
-**Layout rules:**
-- `overflow: hidden` on body — this is what makes it "one screen." Non-negotiable.
-- `justify-content: space-between` on the main container — distributes sections evenly with NO dead gaps.
-- **Use `flex: 1` on the main content area** (grid, body, etc.) so it expands to fill ALL remaining space between header and footer. Never use fixed `height` values that leave dead space.
-- Wrap each logical section in a `<div>` so flexbox distributes them as blocks.
-- **Zero dead space rule:** The poster canvas should be 100% utilized. No large empty margins at bottom or sides. If there's visible empty space, either expand content to fill it or reduce padding. Content should feel like it "fits" the frame perfectly.
-- **Test mentally:** count your sections, divide 1920px among them. Each section gets ~200-300px. If content is sparse, make elements bigger (larger fonts, more padding, bigger icons).
-- **No hamburger menu** for fixed-dimension posters — it wastes space and the poster is meant for screenshot/export, not interaction.
-
-**Content density for 9:16:**
-- Hero (title + subtitle): ~25% of height
-- 2-3 content sections: ~55% of height
-- Footer/CTA: ~10% of height
-- Breathing room (gaps): ~10% of height
-- **If it looks empty, your content is too small.** Scale up fonts, add more grid items, use larger icons.
-
-**Font sizing for 1080px-wide posters:**
-- Hero h1: `68-80px` (bigger than web — this is a poster)
-- Section labels: `15-18px` uppercase, letter-spacing `0.06em`
-- Card text: `16-20px`
-- Body: `20-24px`
-
-**Common mistake:** Making a scrolling page and screenshotting it. That's NOT a poster — it's a webpage screenshot. A poster is a fixed canvas where every pixel is intentional.
-
-## Slide Deck Rules
-
-Slides are the most common request. Get these right:
-
-- **16:9 aspect ratio** — `100vw × 100vh`, content centered
-- **Responsive breakpoints** — Use `clamp()` and container queries for mobile-friendly slides:
-  ```css
-  .slide-container { container-type: inline-size; }
-  .slide-title { font-size: clamp(2rem, 8vw, 4rem); }
-  @container (width < 768px) { .slide-content { padding: 1rem; } }
-  ```
-- **One idea per slide** — if you need a second thought, make a second slide
-- **Max 40 words per slide** — more than that, split or use visuals
-- **Headlines max 6 words** — short, punchy, memorable
-- **Big number + small label** for stat slides — number at 3-5rem, label at 0.875rem
-- **Keyboard nav** — ← → arrows, Space, Enter
-- **Touch nav** — swipe left/right
-- **Click nav** — left third = prev, right two-thirds = next
-- **Progress bar** — thin gradient bar at top showing position
-- **Slide counter** — "3 / 12" in bottom nav
-- **Mobile navigation prominence** — Ensure navigation controls are clearly visible on mobile. Use larger touch targets (min 44px), contrasting colors, and backdrop-blur for floating nav
-- **Smooth transitions** — `transform: translateX()` with 500ms cubic-bezier
-- **Entrance animations** — elements within slides animate in with staggered delays
-- **Speaker notes** — `data-notes` attribute, visible in print only
-
-### High-Impact Presentation Slides (Business Context)
-For investor presentations, startup pitches, and executive briefings:
-- **Hero slide visual weight** — Use stronger gradients, larger typography (4-6rem), and compelling statistics prominently displayed
-- **Value proposition clarity** — Hero should communicate core value in under 5 seconds
-- **Professional credibility** — Ensure typography, spacing, and color choices match enterprise/investment-grade expectations
-- **Data storytelling** — Each chart slide should have clear insight callouts, not just raw data visualization
-
-### Theme-Aware Slide Gradients (CRITICAL)
-
-Slide decks MUST look visually distinct in dark vs light themes. Gradient backgrounds must change:
-
-```css
-/* Dark theme: deep, saturated gradients */
-.theme-dark .slide-title { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e3a5f 100%); }
-.theme-dark .slide-content { background: var(--bg); }
-
-/* Light theme: soft, pastel gradients */
-.theme-light .slide-title { background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 50%, #dbeafe 100%); }
-.theme-light .slide-content { background: var(--bg); }
-```
-
-Rules:
-- Title/section slides: use theme-specific gradient pairs (dark=deep+saturated, light=soft+pastel). **Choose gradient colors that evoke the content's subject matter** — a tech pitch uses cool blues, a game pitch uses vibrant purples/cyans, a healthcare deck uses calming greens/teals.
-- Content slides: use `var(--bg)` or `var(--surface)` — NOT hardcoded dark backgrounds
-- Data cards on slides: use `var(--surface)` with `var(--border)` — they auto-adapt
-- Never hardcode `#1a1a2e` or similar dark colors on slide content — use CSS variables
-- Test: toggle theme and every slide should look intentionally designed for that mode
-
-### Slide Types
-1. **Title** — theme-aware gradient background, big headline, subtitle. Center aligned.
-2. **Content** — heading + bullets OR heading + visual. Never text-heavy.
-3. **Section divider** — full-bleed accent color, section title only.
-4. **Stat** — one big number, one label, one insight sentence.
-5. **Chart** — Chart.js visualization with title and key takeaway. MUST use chart-container wrapper class.
-6. **Two-column** — split layout for comparisons, text+visual.
-7. **Quote** — large pull quote with attribution.
-8. **Closing** — CTA, contact info, or summary + social links.
-
-### Slide Deck Chart Requirements (CRITICAL)
-Chart slides in presentations MUST follow the same container standards as dashboards:
-```html
-<div class="chart-slide-container">
-  <h2>Chart Title</h2>
-  <div class="chart-container" style="height: 400px; padding: 40px; border-radius: 12px; background: var(--surface);">
-    <canvas id="slideChart" role="img" aria-label="Description"></canvas>
-  </div>
-</div>
-```
-- **Use chart-container class** — maintains evaluation consistency across formats
-- **Minimum height 400px** for slide charts — larger than dashboard charts for presentation readability
-- **maintainAspectRatio: false** — required for proper sizing in slide layouts
+Read the applicable [format recipes](references/recipes.md#format-recipes) when creating carousel cards, event/quote posters, fixed-dimension single-screen outputs, or slide decks. Keep their sizing, navigation, theme-specific gradients, content density, and chart requirements.
 
 ## Data Ingestion
 
@@ -409,7 +258,7 @@ This skill is used mid-conversation. Leverage everything:
 
 Always use real content. Never generate placeholder data when real context exists.
 
-## Type-Specific Interactivity (Mandatory)
+## Type-Specific Interactivity
 
 Every file MUST have at least ONE meaningful interaction beyond theme toggle + menu. Static-feeling pages score low on interactivity.
 
@@ -429,7 +278,7 @@ Every file MUST have at least ONE meaningful interaction beyond theme toggle + m
 
 If a type isn't listed, add at minimum: a filter, search, sort, or expand/collapse interaction.
 
-## Layout Variation (CRITICAL)
+## Layout Variation
 
 Every file must feel like a UNIQUE design, not a template with different text. Vary these per file type:
 - **Grid structure**: Mix 1-col, 2-col, 3-col. Use CSS Grid `span 2` for featured cards. **CRITICAL: Always test at 768px and 375px - no horizontal overflow allowed.**
@@ -500,7 +349,7 @@ The skeleton provides:
 
 ### Skeleton Rules
 - Use `var` for all top-level JS variables (prevents TDZ errors)
-- MANDATORY: Use `data-reveal` for scroll animation OR `.animate.delay-N` for page-load entrance. Add JavaScript scroll observer for `.reveal` classes.
+- Use `data-reveal` for scroll animation OR `.animate.delay-N` for page-load entrance. Add JavaScript scroll observer for `.reveal` classes.
 - Define `function onThemeChange() {}` to re-render charts on theme toggle
 - Use semantic HTML: `<main>`, `<section>`, `<header>`, `<article>`
 - Don't use `let`/`const` at script top level
@@ -531,227 +380,11 @@ Elements must be large enough to read and feel substantial:
 - NEVER set text color to a value close to the background color
 - Test mentally: "would this text be visible on BOTH dark (#030712) and light (#f8fafc) backgrounds?"
 
-## Chart.js Integration Rules (CRITICAL — MOST COMMON FAILURE)
+## Chart Integration and Debugging
 
-Charts are the second most common failure. These rules are MANDATORY for every chart:
+For charts, read [Chart.js Integration Rules](references/recipes.md#chartjs-integration-rules-critical--most-common-failure) and use the single [Chart Lifecycle Example](references/recipes.md#chart-lifecycle-example). Copy its complete manager, canvas/container, DOM-ready binding, and theme hook once; keep its related configuration and retry/cleanup context together.
 
-### 1. Container Structure (REQUIRED)
-```html
-<!-- MANDATORY PATTERN FOR EVERY CHART -->
-<div role="img" aria-label="Detailed description of chart data and insights">
-  <div class="chart-container" style="height: 360px; padding: 40px; border-radius: 12px; background: var(--surface);">
-    <canvas id="myChart" role="img" aria-label="Detailed description of chart data and insights"></canvas>
-  </div>
-</div>
-```
-
-### 2. Canvas Dimensions (REQUIRED)
-- **Container must have explicit height:** minimum 360px for dashboards, 300px for other types
-- **Canvas element needs no sizing** — Chart.js handles this when `maintainAspectRatio: false`
-- **Container padding:** 40px internal padding for professional spacing
-- **Container border-radius:** 12px for modern card appearance
-
-### 3. Chart.js Initialization (MANDATORY PATTERN)
-
-Use the [Chart Lifecycle Example](#chart-lifecycle-example) as the only full initialization pattern. Keep the same canvas, destroy the previous instance, and rebuild with current theme colors. Do not add a second manager, canvas-reset function, or DOM/load listener.
-
-### Chart Lifecycle Example
-
-This complete classic-script example manages one canvas named `myChart`. Paste it once below the skeleton's menu/theme setup, and replace the empty `chartData` with the user's data. For multiple charts, add their configuration calls inside this same `buildCharts()`; keep one manager and one lifecycle binding.
-
-`ChartManager.safeInit()` owns chart construction. `buildCharts()` prevents duplicate initialization, while `onThemeChange()` destroys managed instances before rebuilding. A missing library/canvas or failed construction returns no instance and leaves initialization retryable. If destruction fails, retain that reference and stop rebuilding until it can be cleaned up.
-
-```javascript
-var chartsBuilt = false;
-var chartLifecycleBound = false;
-var chartData = { labels: [], datasets: [] }; // Fill with the user's data.
-
-var ChartManager = {
-  charts: new Map(),
-  safeInit: function(canvasId, config) {
-    if (typeof Chart === 'undefined') {
-      console.error('Chart.js not loaded');
-      return null;
-    }
-    var canvas = document.getElementById(canvasId);
-    try {
-      var previous = this.charts.get(canvasId) || (canvas && Chart.getChart(canvas));
-      if (previous) {
-        previous.destroy();
-        this.charts.delete(canvasId);
-      }
-      if (!canvas) {
-        console.error('Canvas element not found: ' + canvasId);
-        return null;
-      }
-      canvas.setAttribute('role', 'img');
-      if (!canvas.getAttribute('aria-label')) {
-        canvas.setAttribute('aria-label', 'Chart data');
-      }
-      var chart = new Chart(canvas, config);
-      this.charts.set(canvasId, chart);
-      return chart;
-    } catch (error) {
-      // A constructor can register an instance before throwing.
-      var partial = canvas && Chart.getChart(canvas);
-      if (partial) {
-        this.charts.set(canvasId, partial);
-        try {
-          partial.destroy();
-          this.charts.delete(canvasId);
-        } catch (cleanupError) {
-          console.error('Chart cleanup failed:', cleanupError);
-        }
-      }
-      console.error('Chart initialization failed for ' + canvasId + ':', error);
-      return null;
-    }
-  },
-  destroyAll: function() {
-    var complete = true;
-    this.charts.forEach(function(chart, canvasId, charts) {
-      try {
-        chart.destroy();
-        charts.delete(canvasId);
-      } catch (error) {
-        complete = false;
-        console.error('Chart destruction failed:', error);
-      }
-    });
-    return complete;
-  }
-};
-
-function getChartColors() {
-  var style = getComputedStyle(document.documentElement);
-  return {
-    text: style.getPropertyValue('--text').trim(),
-    textSecondary: style.getPropertyValue('--text-secondary').trim(),
-    border: style.getPropertyValue('--border').trim(),
-    accent: style.getPropertyValue('--accent').trim()
-  };
-}
-
-function buildCharts() {
-  if (typeof Chart === 'undefined') {
-    console.error('Chart.js not loaded');
-    return;
-  }
-  if (chartsBuilt) return;
-  var colors = getChartColors();
-  Chart.defaults.animation = false;
-  Chart.defaults.color = colors.textSecondary;
-  var chart = ChartManager.safeInit('myChart', {
-    type: 'bar',
-    data: chartData,
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: false,
-      plugins: {
-        legend: { labels: { color: colors.textSecondary } },
-        tooltip: { enabled: true, mode: 'index', intersect: false, padding: 12, cornerRadius: 8 }
-      },
-      scales: {
-        x: { ticks: { color: colors.textSecondary, maxRotation: 0 }, grid: { color: colors.border } },
-        y: { ticks: { color: colors.textSecondary }, grid: { color: colors.border } }
-      },
-      layout: { padding: 20 }
-    }
-  });
-  chartsBuilt = Boolean(chart);
-}
-
-function onThemeChange() {
-  if (typeof Chart === 'undefined') return;
-  if (!chartsBuilt) return; // Also guards the skeleton's first applyTheme() call.
-  if (!ChartManager.destroyAll()) return;
-  chartsBuilt = false;
-  buildCharts();
-}
-
-function bindChartLifecycle() {
-  if (chartLifecycleBound) return;
-  chartLifecycleBound = true;
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', buildCharts, { once: true });
-  } else {
-    buildCharts();
-  }
-}
-
-bindChartLifecycle();
-```
-
-Keep `Chart.defaults.animation = false;` immediately after the required Chart.js CDN script in `<head>` as specified above. The lifecycle example repeats the setting after checking library availability. It is valid JavaScript on its own; the full chart requires the skeleton, Chart.js, a sized canvas, and actual data.
-
-### Styling and Configuration Details
-
-- **MANDATORY: Hover tooltips enabled** — never disable Chart.js tooltips. The example already enables them.
-- **Minimum chart height:** 300px on desktop, 250px on mobile; use the larger dashboard/slide minimum where applicable.
-- **Font size defaults:** Axis tick labels at 13px minimum, axis titles at 14px, chart titles at 16px minimum. Legend at 13px.
-- **Chart padding:** Use `layout.padding` to give labels breathing room.
-- **Axis tick config:** `maxRotation: 0` keeps labels horizontal; use `maxTicksLimit` when needed.
-- **Grid lines:** Very faint — `rgba(255,255,255,0.04)` in dark, `rgba(0,0,0,0.06)` in light.
-- **Tooltip styling:** `padding: 12`, `cornerRadius: 8`, title font 14px and body font 13px.
-- **Point radius:** 0 by default, 6 on hover for line charts.
-- **Theme colors:** Read CSS variables during construction. Rebuild through the existing theme hook to apply new colors.
-- **Legend:** 'top' for horizontal charts; 'right' where vertical space allows.
-- **Donut/pie charts:** Include percentage labels on segments.
-- **Responsive:** Use `responsive: true`, `maintainAspectRatio: false`, and explicit container dimensions.
-- **Accessibility:** Keep descriptive canvas `aria-label` values and distinguish data series by color.
-
-The following is a configuration fragment for the existing chart, not a standalone script. Do not add a second initializer around it.
-
-<!-- skill-check: fragment — Chart.js options property to merge into the existing configuration. -->
-```javascript
-options: {
-  plugins: {
-    tooltip: { enabled: true, mode: 'index', intersect: false }
-  }
-}
-```
-
-## Critical Debugging Patterns
-
-### Counter Animation Debug Pattern
-If KPI values show "0%" instead of animating, add this debug pattern:
-```javascript
-// DEBUG: Add after counter observer setup to verify intersection
-var counterEl = document.querySelector('[data-count]');
-if (counterEl) {
-  console.log('Counter element found:', counterEl); // DEBUG
-  var cObs = new IntersectionObserver(function(entries) {
-    console.log('Counter intersection triggered:', entries); // DEBUG
-    entries.forEach(function(e) { 
-      if (e.isIntersecting) { 
-        console.log('Starting counter animation'); // DEBUG
-        animateCounters(); 
-        cObs.disconnect(); 
-      } 
-    });
-  }, { threshold: 0.3 });
-  cObs.observe(counterEl);
-} else {
-  console.warn('No [data-count] elements found'); // DEBUG
-}
-```
-
-### Chart.js Integration Safety Pattern
-
-Use the [Chart Lifecycle Example](#chart-lifecycle-example) above instead of copying another initializer. Check that the canvas ID matches, the library is loaded, and only one `bindChartLifecycle()` call path owns DOM-ready initialization. Theme changes must reach the same `onThemeChange()` hook. Inspect initialization or destruction errors before retrying; do not suppress them by replacing the canvas.
-
-### Menu Outside-Click Fix
-Ensure menu closes when clicking outside by strengthening the event handler:
-```javascript
-document.addEventListener('click', function(e) { 
-  var menu = document.querySelector('.viz-menu');
-  var dropdown = document.getElementById('vizMenuDropdown');
-  if (!e.target.closest('.viz-menu') && dropdown) {
-    dropdown.classList.remove('open');
-  }
-});
-```
+For counter, chart, or menu issues, read [debugging patterns](references/recipes.md#critical-debugging-patterns). Adapt the corresponding skeleton component; do not duplicate an initializer.
 
 ## Process
 
@@ -773,8 +406,8 @@ document.addEventListener('click', function(e) {
    - [ ] `.card:hover` has transform effect?
    - [ ] All top-level JS variables use `var` (not `let`/`const`)?
    - [ ] Charts use `var` declarations + `onThemeChange` hook?
-   - [ ] **MANDATORY:** All charts wrapped with `role="img" aria-label="..."`?
-   - [ ] **MANDATORY:** All charts have hover tooltips enabled (never disabled)?
+   - [ ]  All charts wrapped with `role="img" aria-label="..."`?
+   - [ ]  All charts have hover tooltips enabled (never disabled)?
    - [ ] Animated number counters use `data-count` where stats exist?
    - [ ] Semantic HTML: `<main>`, `<section>`, `<header>`, `<article>`?
    - [ ] All charts have explicit container sizing (≥300px height)?

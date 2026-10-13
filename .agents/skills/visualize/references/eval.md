@@ -1,6 +1,8 @@
 # Evaluation Rubric — Quick Reference
 
-Condensed scoring guide. Full protocol in `eval/SKILL.md`.
+This file is the available manual scoring rubric. No separate executable evaluation protocol is included or required. Read the current [output contract](../SKILL.md#required-output-contract) and evaluate only checks you actually performed; do not claim an automatic checker ran from these scores alone.
+
+The score labels and target below describe visual quality goals. They do not authorize publishing, promotion, external messages, installation changes, or a release. Static repository validation and actual browser/model observations must be reported separately.
 
 ## 8 Dimensions
 

@@ -294,7 +294,7 @@
     }
 
     // === Chart lifecycle ===
-    // Paste the single Chart Lifecycle Example from SKILL.md here.
+    // Paste the single Chart Lifecycle Example from recipes.md here.
     // It supplies ChartManager, buildCharts, onThemeChange, and one DOM-ready binding.
     // Replace chartData and the canvas ID; do not add another load/DOMContentLoaded handler.
 
@@ -312,7 +312,7 @@
 - Use `data-count="77" data-suffix="%"` for animated number counters
 - Use `.animate.delay-N` classes for page-load entrance animations
 - Use CSS `:hover` for hover effects (baked into `.card` already)
-- For charts, use the complete [Chart Lifecycle Example](../SKILL.md#chart-lifecycle-example) once; it defines the theme hook and DOM-ready binding.
+- For charts, use the complete [Chart Lifecycle Example](recipes.md#chart-lifecycle-example) once; it defines the theme hook and DOM-ready binding.
 - Use `<main>`, `<section>`, `<header>`, `<article>` for semantic HTML
 - Keep all chart variables as `var` (not `let`/`const`) at script top level
 
@@ -322,4 +322,3 @@
 - Don't use `let`/`const` for variables that might be referenced before declaration
 - Don't use `.finished` Promise chains for sequencing — use `setTimeout`
 - Don't put animation logic that could crash before nav/chart setup code
-

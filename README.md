@@ -211,6 +211,8 @@ CodeBurn과 visualize는 필요할 때 독립적으로 사용할 수 있습니�
 
 시각화는 [visualize 스킬](.agents/skills/visualize/SKILL.md)로 요청합니다.
 
+visualize는 이 저장소의 수정본을 정본으로 관리합니다. 원 author/license/version 고지, 확인한 로컬 변경과 미확인 upstream 정보는 [출처 기록](.agents/skills/visualize/references/provenance.md)에 구분합니다. 외부 업데이트는 차이를 검토해 승인 범위의 필요한 부분만 반영하며, 개인 설치본이나 외부·전역 원본을 자동 변경하지 않습니다.
+
 ~~~text
 /visualize 설명할 내용
 ~~~
