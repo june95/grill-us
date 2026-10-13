@@ -1,0 +1,13 @@
+{
+  "name": "grill-us",
+  "description": "Project memory workflows and HTML visualization skills from one maintained source.",
+  "owner": {
+    "name": "grill-us"
+  },
+  "plugins": [
+    {
+      "name": "grill-us",
+      "source": "./plugins/grill-us"
+    }
+  ]
+}

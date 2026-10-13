@@ -19,6 +19,30 @@ Windows에서 Codex CLI **0.160.1**과 Claude Code **2.1.296**의 실제 plugin 
 
 호출 표기는 에이전트에 입력하는 요청이며 터미널 실행 파일이 아닙니다. 동명 개인 스킬이 있으면 namespace를 포함하고, 실제 읽은 경로가 이 plugin의 `skills/`인지 확인합니다. 시험에서는 Codex 설치 cache와 Claude 세션 package에서 본문·형제 references를 읽었습니다. 모든 이름 충돌 조합이나 암묵적 자동 선택까지 검증한 것은 아닙니다. Claude 표기는 [공식 skills 문서](https://code.claude.com/docs/en/skills)도 참고합니다.
 
+## 저장소 주소로 설치
+
+Git 배포 package와 catalog가 저장소 main에 공개된 뒤 사용할 경로입니다. 현재 로컬 배포 준비와 실제 GitHub source 설치 성공은 구분하며, 공개 후 native 설치 검증을 별도로 수행합니다. 설치하는 사용자에게 ZIP 다운로드·수동 clone·Node 빌드를 요구하지 않습니다.
+
+Codex CLI에서는 terminal에서 source를 등록하고 설치합니다.
+
+~~~powershell
+codex plugin marketplace add june95/grill-us
+codex plugin add grill-us@grill-us
+cd C:/projects/your-project
+codex
+~~~
+
+Claude Code에서는 채팅창에 다음 두 요청을 입력한 뒤 새 세션을 시작합니다.
+
+~~~text
+/plugin marketplace add june95/grill-us
+/plugin install grill-us@grill-us
+~~~
+
+저장소의 HTTPS Git URL `https://github.com/june95/grill-us.git`도 source로 지정할 수 있습니다. catalog 이름은 `grill-us`, plugin 이름도 `grill-us`여서 selector는 `grill-us@grill-us`입니다. 실제 요청은 위 표의 `$grill-us:<skill>` 또는 `/grill-us:<skill>` 표기를 사용합니다.
+
+업데이트는 source를 새로 고친 뒤 설치된 version/실제 스킬 경로를 확인하세요. Codex는 `codex plugin marketplace upgrade grill-us`, Claude는 `claude plugin marketplace update grill-us`를 사용하고 필요하면 정확한 plugin만 제거·재설치합니다. 실제 버전 간 업데이트·공개 GitHub 설치 성공은 해당 시험 결과가 확인되기 전까지 미검증입니다. 개인 catalog/cache·설정이 변경될 수 있으며 다른 설치본을 일괄 제거하지 않습니다. [OpenAI package 문서](https://developers.openai.com/plugins/build/plugins), [Claude 설치 문서](https://code.claude.com/docs/en/discover-plugins)를 함께 확인하세요.
+
 ## 로컬 로드와 설치
 
 먼저 개발 저장소에서 `node scripts/build-plugin.mjs`로 생성한 `dist/grill-us` 전체를 별도 배포 위치에 복사합니다. 이 README만 받은 경우에도 manifest와 `skills/`가 함께 있어야 합니다.

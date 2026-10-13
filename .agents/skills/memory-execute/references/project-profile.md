@@ -23,6 +23,8 @@ Git이 없으면 프로젝트 root를 사용자 지시·실제 작업 폴더에�
 
 공식 배포는 공통 원본에서 생성한 plugin 경로로 제공한다. 저장소 `.agents/skills`는 개발 정본이며 수동으로 복제한 도구별 프로젝트 스킬 폴더를 별도 공식 배포 방식으로 관리하지 않는다. 개발 원본 직접 로딩과 설치 plugin을 같은 시험 세션에서 혼용하지 않는다. 기존 설치본은 자동 삭제·변환·덮어쓰지 않는다.
 
+이 저장소의 배포 관리에서는 ignored `dist/grill-us`를 로컬 빌드로, tracked `plugins/grill-us`를 Git 배포 snapshot으로 구분한다. 양쪽은 `.agents/skills`·packaging 정본에서 생성하며 snapshot을 새 편집 정본으로 취급하지 않는다. 배포 입력/생성물은 LF로 유지하고 `node scripts/build-plugin.mjs --publish` 및 `--check-published`로 갱신/무쓰기 최신성을 확인한다. 이 명령·Git 추적 예외는 이 배포 저장소에 한정하며 설치 대상 사용자 프로젝트에 요구하지 않는다.
+
 ## Optional Profile
 
 `.memory/project.md`는 선택적인 Markdown 설정이다. 파일 없이도 Discovery로 동작한다. 설정을 만들거나 바꿀 필요가 없다면 빈 설정을 생성하지 않는다.

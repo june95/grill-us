@@ -16,10 +16,18 @@
 
 공식 배포 경로는 공통 `.agents/skills` 정본에서 생성하는 `grill-us` plugin입니다. 메모리 5개와 visualize를 함께 포함하며 CodeBurn과 개발용 검증기는 포함하지 않습니다. 도구별 프로젝트 폴더의 수동 사본을 새 공식 배포 방식으로 관리하지 않고, 기존 설치본을 자동 삭제·변환하지 않습니다.
 
+배포 정본과 생성물은 다음과 같이 구분합니다.
+
+- `.agents/skills`와 `packaging/grill-us.json`·`packaging/README.md`: 편집 정본.
+- `dist/grill-us`: Git에서 제외하는 로컬 빌드.
+- `plugins/grill-us`: 같은 정본에서 생성하고 Git에 포함하는 배포 snapshot. 저장소 catalog는 이 경로를 가리키며 소비자는 별도 Node 빌드 없이 설치합니다.
+
+생성물은 수동 편집하지 않습니다. 배포 입력과 snapshot은 Git 속성으로 LF를 유지해 checkout 뒤에도 해시가 일치하게 합니다. `--publish`로 배포 snapshot을 갱신하고 `--check-published`로 source drift·누락·수동 변경을 쓰기 없이 확인하는 절차를 사용합니다. 실제 GitHub 직접 설치 성공 범위는 별도 검증 뒤 [호환성 안내](docs/plugin-compatibility.md)에 기록합니다.
+
 포함 스킬·로컬 설치/세션 로드·명시 호출·업데이트·기존 사본 전환은 [패키지 사용자 안내](packaging/README.md)를 참고합니다. 이 안내도 빌드할 때 생성 패키지의 README로 복사됩니다. Windows의 Codex CLI 0.160.1과 Claude Code 2.1.296에서 6개 스킬 발견을 실제 확인했으며, 호출별 증거와 출력·표면별 한계는 [호환성 안내](docs/plugin-compatibility.md)에 구분합니다. 시험한 버전은 최소 지원 버전이 아닙니다.
 
-1. 저장소에서 `node scripts/build-plugin.mjs`로 `dist/grill-us` 패키지를 생성합니다. 생성물의 스킬 본문은 별도로 편집하거나 Git에 추적하지 않습니다.
-2. Claude는 생성 package의 절대 경로를 `--plugin-dir`로 지정합니다. Codex CLI는 별도 local catalog에서 `plugin add`로 설치합니다([정확한 구성과 명령](packaging/README.md#로컬-로드와-설치)). `$grill-us:memory-explain` 또는 `/grill-us:memory-explain`처럼 도구에 맞는 namespace를 명시합니다. 개발 원본 직접 로딩과 설치 plugin을 같은 시험 세션에서 혼용하지 않습니다.
+1. Git 배포 snapshot과 catalog가 공개된 저장소는 주소 `june95/grill-us`로 등록해 설치합니다. 소비자는 ZIP·수동 clone·Node 빌드가 필요하지 않습니다([저장소 주소 설치](packaging/README.md#저장소-주소로-설치)). 현재 준비된 배포 구성과 실제 GitHub 설치 성공은 [호환성 안내](docs/plugin-compatibility.md)에서 구분합니다.
+2. 로컬 시험은 기존 `dist/grill-us` 생성/Claude `--plugin-dir`/Codex local catalog 경로도 사용할 수 있습니다([로컬 구성](packaging/README.md#로컬-로드와-설치)). `$grill-us:memory-explain` 또는 `/grill-us:memory-explain`처럼 namespace를 명시하고 실제 읽은 plugin 경로를 확인합니다. 개발 원본 직접 로딩과 설치 plugin을 같은 시험 세션에서 혼용하지 않습니다.
 3. 사용자 프로젝트의 실제 root를 확인합니다. 설치 cache는 읽기 전용 스킬 위치이고 작업 기록은 사용자 프로젝트의 `.memory`에 둡니다. 대상이 혼동되면 쓰기 전에 확인합니다([작업공간 경계](.agents/skills/memory-execute/references/project-profile.md#skill-installation-and-workspace)). 기존 프로젝트 지침과 정본을 존중합니다.
 4. 대상 `.gitignore`에는 다음 기본 로컬 정책을 반영하고 기존 규칙을 유지합니다. 사용 프로젝트에는 이 저장소의 개발용 검증기나 특정 README/AGENTS 구조를 요구하지 않습니다.
 
@@ -36,6 +44,19 @@ git ls-files -- .memory
 # 아래는 실제로 tracked인 파일 하나에 대한 예시
 git rm --cached -- .memory/current.md
 ~~~
+
+## 배포 저장소 관리
+
+아래는 배포 유지보수 명령이며 스킬을 설치하는 사용자에게 요구하지 않습니다.
+
+~~~powershell
+node scripts/build-plugin.mjs
+node scripts/build-plugin.mjs --publish
+node scripts/build-plugin.mjs --check-published
+node scripts/validate-skills.mjs
+~~~
+
+첫 명령은 ignored `dist/grill-us`, `--publish`는 tracked `plugins/grill-us`를 생성합니다. `--check-published`는 파일을 쓰지 않고 현재 source·목록·hash·참조를 대조하며 누락·stale·수동 변경이면 exit 1입니다. 생성물에 알 수 없는 파일/디렉터리·변조·링크가 있으면 재생성도 덮어쓰지 않습니다. 두 catalog와 배포 snapshot을 같은 commit으로 검토하고 저장소에 push한 뒤 실제 주소 설치를 확인합니다. 자동 push·vendor store 등록은 이 절차에 포함하지 않습니다.
 
 스킬 호출 표기는 사용하는 에이전트 도구에 맞춥니다. 아래 /스킬명은 작업 요청 예시이며, 도구가 $스킬명 또는 자연어 지정을 지원하면 그 방식으로 같은 스킬을 선택할 수 있습니다. 이 표기와 선택적 입력은 에이전트 요청 형식이며 새로운 터미널 CLI가 아닙니다.
 

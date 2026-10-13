@@ -62,7 +62,10 @@ function roots(repoRoot, outDir) {
     if (!fs.statSync(marker).isFile() || readJSON(marker).purpose !== fixturePurpose) throw new Error('test fixture 소유 표식 불일치');
   }
   const output = path.resolve(outDir ?? path.join(repository, 'dist', 'grill-us'));
-  if (isRepo && path.relative(path.join(repository, 'dist', 'grill-us'), output) !== '') throw new Error('저장소 출력은 dist/grill-us만 허용');
+  const fixedOutputs = ['dist', 'plugins'].map(parent => path.join(repository, parent, 'grill-us'));
+  if (isRepo && !fixedOutputs.some(fixed => path.relative(fixed, output) === '')) {
+    throw new Error('저장소 출력은 dist/grill-us 또는 plugins/grill-us만 허용');
+  }
   if (!within(repository, output) || output === repository ||
       ['.agents', 'packaging', 'scripts', 'tests', '.git', '.memory', '.codeburn'].some(name => within(path.join(repository, name), output))) {
     throw new Error('출력 경로가 원본/저장소 root/허용 범위 밖을 가리킴');
@@ -198,6 +201,11 @@ function packageLinks(directory, bundle) {
   if (failures.length) throw new Error('패키지 내부 문서 참조 실패: ' + failures.map(d => d.message).join('; '));
 }
 
+/** 두 출력이 같은 bundle 목록·hash·직렬화를 사용하도록 소유 표식 생성을 한곳에 둔다. */
+function ownershipMarker(bundle) {
+  return { formatVersion: 1, generator, name: 'grill-us', files: Object.fromEntries([...bundle].map(([file, bytes]) => [file, sha(bytes)])) };
+}
+
 /** @param {{repoRoot?:string,outDir?:string}} options 원본 root/허용 출력. 파일 생성은 호출 때만 수행한다. */
 export function buildPlugin({ repoRoot = defaultRepoRoot, outDir } = {}) {
   const { repository, output, parent } = roots(repoRoot, outDir);
@@ -206,7 +214,7 @@ export function buildPlugin({ repoRoot = defaultRepoRoot, outDir } = {}) {
   fs.mkdirSync(parent, { recursive: true });
   noLinks(parent);
   const staging = fs.mkdtempSync(path.join(parent, '.grill-us-build-'));
-  const marker = { formatVersion: 1, generator, name: 'grill-us', files: Object.fromEntries([...bundle].map(([file, bytes]) => [file, sha(bytes)])) };
+  const marker = ownershipMarker(bundle);
   let backup = null;
   try {
     fs.writeFileSync(path.join(staging, ownerMarker), json(marker));
@@ -240,10 +248,36 @@ export function buildPlugin({ repoRoot = defaultRepoRoot, outDir } = {}) {
   }
 }
 
+/**
+ * @param {{repoRoot?:string}} options 실제 저장소 또는 표식 있는 build test fixture.
+ * @returns {{outputRoot:string,files:string[],sourceSnapshot:object}} 현재 source와 일치하는 Git 배포 snapshot.
+ * 읽기만 수행한다. missing/stale/tampered/링크/unknown 파일은 오류이며 자동 재생성하지 않는다.
+ */
+export function checkPublishedPlugin({ repoRoot = defaultRepoRoot } = {}) {
+  const { repository, output, parent } = roots(repoRoot, path.join(repoRoot, 'plugins', 'grill-us'));
+  const { bundle, sourceSnapshot } = inputs(repository);
+  if (!exists(output)) throw new Error('Git 배포 snapshot 누락: --publish로 생성해야 함');
+  owned(output, parent);
+  const expected = new Map(bundle);
+  expected.set(ownerMarker, json(ownershipMarker(bundle)));
+  for (const [relative, bytes] of expected) {
+    if (!fs.readFileSync(path.join(output, ...relative.split('/'))).equals(bytes)) {
+      throw new Error('Git 배포 snapshot stale: ' + relative + ' (--publish 필요)');
+    }
+  }
+  packageLinks(output, bundle);
+  return { outputRoot: output, files: [...expected.keys()].sort(), sourceSnapshot };
+}
+
 if (process.argv[1] && path.resolve(process.argv[1]) === scriptPath) {
   try {
-    if (process.argv.length !== 2) throw new Error('사용법: node scripts/build-plugin.mjs (CLI 옵션 없음)');
-    const result = buildPlugin();
-    console.log('Built ' + result.outputRoot + ': ' + result.files.length + ' files, 6 skills. Host support verification pending.');
+    const args = process.argv.slice(2);
+    if (args.length > 1 || args.length === 1 && !['--publish', '--check-published'].includes(args[0])) {
+      throw new Error('사용법: node scripts/build-plugin.mjs [--publish | --check-published]');
+    }
+    const checking = args[0] === '--check-published';
+    const result = checking ? checkPublishedPlugin() : buildPlugin(args[0] === '--publish'
+      ? { outDir: path.join(defaultRepoRoot, 'plugins', 'grill-us') } : {});
+    console.log((checking ? 'Verified ' : 'Built ') + result.outputRoot + ': ' + result.files.length + ' files, 6 skills. Native GitHub installation is verified separately.');
   } catch (error) { console.error(error.message); process.exitCode = 1; }
 }

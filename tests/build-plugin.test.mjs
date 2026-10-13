@@ -6,7 +6,7 @@ import os from 'node:os';
 import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { buildPlugin } from '../scripts/build-plugin.mjs';
+import { buildPlugin, checkPublishedPlugin } from '../scripts/build-plugin.mjs';
 
 const repository = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const moduleURL = new URL('../scripts/build-plugin.mjs', import.meta.url).href;
@@ -250,4 +250,134 @@ test('import has no filesystem or stdout side effects and CLI rejects unsupporte
   assert.equal(fs.existsSync(owner) ? fs.statSync(owner).mtimeMs : null, previousMtime);
   const cli = spawnSync(process.execPath, [fileURLToPath(moduleURL), '--invalid'], { cwd: root, encoding: 'utf8' });
   assert.equal(cli.status, 1); assert.match(cli.stderr, /사용법/);
+});
+
+const publishedAt = root => path.join(root, 'plugins', 'grill-us');
+const publish = root => buildPlugin({ repoRoot: root, outDir: publishedAt(root) });
+function fileSnapshot(root) {
+  const files = {};
+  function visit(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const file = path.join(dir, entry.name);
+      if (entry.isSymbolicLink()) { files[path.relative(root, file)] = 'link'; continue; }
+      if (entry.isDirectory()) visit(file);
+      else files[path.relative(root, file)] = { sha: sha(file), mtime: fs.statSync(file).mtimeMs };
+    }
+  }
+  visit(root); return files;
+}
+
+test('published and local bundles are identical, with a read-only freshness check', t => {
+  const root = fixture(t), local = buildPlugin({ repoRoot: root }), released = publish(root);
+  assert.deepEqual(released.files, local.files);
+  for (const file of local.files) assert.equal(sha(path.join(local.outputRoot, file)), sha(path.join(released.outputRoot, file)));
+  const before = fileSnapshot(root);
+  assert.deepEqual(checkPublishedPlugin({ repoRoot: root }), released);
+  assert.deepEqual(fileSnapshot(root), before);
+  const again = publish(root);
+  assert.deepEqual(again.sourceSnapshot, released.sourceSnapshot);
+});
+
+test('freshness rejects missing and changed sources without creating or editing output', t => {
+  const root = fixture(t), beforeMissing = fileSnapshot(root);
+  assert.throws(() => checkPublishedPlugin({ repoRoot: root }), /snapshot 누락/);
+  assert.deepEqual(fileSnapshot(root), beforeMissing);
+  buildPlugin({ repoRoot: root }); publish(root);
+  const localBefore = fileSnapshot(outputAt(root));
+  fs.appendFileSync(path.join(root, '.agents/skills/memory-plan/SKILL.md'), '\nFixture source change.\n');
+  const beforeStale = fileSnapshot(root);
+  assert.throws(() => checkPublishedPlugin({ repoRoot: root }), /stale/);
+  assert.deepEqual(fileSnapshot(root), beforeStale);
+  publish(root); assert.doesNotThrow(() => checkPublishedPlugin({ repoRoot: root }));
+  assert.deepEqual(fileSnapshot(outputAt(root)), localBefore);
+});
+
+test('published output protects unowned files, unknown directories, edits and missing files', t => {
+  for (const mode of ['unmarked', 'unknown-file', 'empty-directory', 'edit', 'missing', 'marker-forgery']) {
+    const root = fixture(t), target = publishedAt(root);
+    if (mode === 'unmarked') fs.mkdirSync(target, { recursive: true }); else publish(root);
+    const readme = path.join(target, 'README.md');
+    if (mode === 'unmarked' || mode === 'unknown-file' || mode === 'marker-forgery') {
+      fs.writeFileSync(path.join(target, 'user.txt'), 'KEEP_USER');
+    }
+    if (mode === 'empty-directory') fs.mkdirSync(path.join(target, 'user-directory'));
+    if (mode === 'edit') fs.writeFileSync(readme, 'KEEP_EDIT');
+    if (mode === 'missing') fs.unlinkSync(readme);
+    if (mode === 'marker-forgery') {
+      const marker = manifest(target, '.grill-us-build.json');
+      marker.files['user.txt'] = sha(path.join(target, 'user.txt'));
+      fs.writeFileSync(path.join(target, '.grill-us-build.json'), JSON.stringify(marker));
+    }
+    const before = fileSnapshot(root);
+    assert.throws(() => publish(root), /ENOENT|보호|표식|수동 변경/);
+    assert.throws(() => checkPublishedPlugin({ repoRoot: root }), /ENOENT|보호|표식|수동 변경/);
+    assert.deepEqual(fileSnapshot(root), before);
+    if (mode === 'empty-directory') assert(fs.existsSync(path.join(target, 'user-directory')));
+  }
+});
+
+test('published junctions and owner links are refused, leaving targets intact', t => {
+  for (const mode of ['parent', 'owner']) {
+    const root = fixture(t), outside = fixture(t), sentinel = path.join(outside, 'sentinel.txt');
+    fs.writeFileSync(sentinel, 'KEEP');
+    let link;
+    if (mode === 'parent') link = path.join(root, 'plugins');
+    else { publish(root); link = path.join(publishedAt(root), '.grill-us-build.json'); fs.unlinkSync(link); }
+    fs.symlinkSync(outside, link, process.platform === 'win32' ? 'junction' : 'dir');
+    assert.throws(() => publish(root), /심볼릭 링크/);
+    assert.throws(() => checkPublishedPlugin({ repoRoot: root }), /심볼릭 링크/);
+    assert.equal(fs.readFileSync(sentinel, 'utf8'), 'KEEP');
+  }
+});
+
+test('failed published references retain the original bundle and unrelated sibling', t => {
+  const root = fixture(t); publish(root);
+  const sibling = path.join(root, 'plugins', 'user-plugin'); fs.mkdirSync(sibling); fs.writeFileSync(path.join(sibling, 'note.txt'), 'KEEP');
+  const before = fileSnapshot(path.join(root, 'plugins'));
+  fs.appendFileSync(path.join(root, 'packaging/README.md'), '\n[broken](missing.md)\n');
+  assert.throws(() => publish(root), /패키지 내부 문서 참조 실패/);
+  assert.deepEqual(fileSnapshot(path.join(root, 'plugins')), before);
+  assert.deepEqual(fs.readdirSync(path.join(root, 'plugins')).sort(), ['grill-us', 'user-plugin']);
+});
+
+test('a failed staging rename restores either fixed output and clears only its staging tree', t => {
+  for (const parent of ['dist', 'plugins']) {
+    const root = fixture(t), output = path.join(root, parent, 'grill-us');
+    buildPlugin({ repoRoot: root, outDir: output });
+    const before = fileSnapshot(output), originalRename = fs.renameSync;
+    let injected = false;
+    try {
+      fs.renameSync = (from, to) => {
+        if (path.basename(from).startsWith('.grill-us-build-') && path.relative(output, to) === '') {
+          injected = true; const error = new Error('fixture staging rename failure'); error.code = 'EACCES'; throw error;
+        }
+        return originalRename(from, to);
+      };
+      assert.throws(() => buildPlugin({ repoRoot: root, outDir: output }), /fixture staging rename failure/);
+    } finally { fs.renameSync = originalRename; }
+    assert(injected); assert.deepEqual(fileSnapshot(output), before);
+    assert.deepEqual(fs.readdirSync(path.dirname(output)), ['grill-us']);
+  }
+});
+
+test('published target user files and unsupported CLI options remain protected', t => {
+  const root = fixture(t), output = publishedAt(root); fs.mkdirSync(path.dirname(output)); fs.writeFileSync(output, 'KEEP');
+  assert.throws(() => publish(root), /디렉터리/); assert.throws(() => checkPublishedPlugin({ repoRoot: root }), /디렉터리/);
+  assert.equal(fs.readFileSync(output, 'utf8'), 'KEEP');
+  assert.throws(() => buildPlugin({ outDir: path.join(repository, 'plugins', 'other') }), /출력/);
+  for (const args of [['--publish', '--check-published'], ['--out', output]]) {
+    const result = spawnSync(process.execPath, [fileURLToPath(moduleURL), ...args], { encoding: 'utf8' });
+    assert.equal(result.status, 1); assert.match(result.stderr, /사용법/);
+  }
+});
+
+test('published CLI creates only its fixed target and check remains read-only', t => {
+  const root = fixture(t), script = path.join(root, 'scripts/build-plugin.mjs'); fs.mkdirSync(path.dirname(script));
+  for (const file of ['build-plugin.mjs', 'validate-skills.mjs']) fs.copyFileSync(path.join(repository, 'scripts', file), path.join(root, 'scripts', file));
+  const missing = spawnSync(process.execPath, [script, '--check-published'], { encoding: 'utf8' });
+  assert.equal(missing.status, 1); assert(!fs.existsSync(path.join(root, 'plugins')));
+  const released = spawnSync(process.execPath, [script, '--publish'], { encoding: 'utf8' });
+  assert.equal(released.status, 0, released.stderr); assert(!fs.existsSync(path.join(root, 'dist')));
+  const before = fileSnapshot(root), checked = spawnSync(process.execPath, [script, '--check-published'], { encoding: 'utf8' });
+  assert.equal(checked.status, 0, checked.stderr); assert.deepEqual(fileSnapshot(root), before);
 });

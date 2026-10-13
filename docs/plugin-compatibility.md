@@ -4,6 +4,8 @@
 
 ## 표면과 로드 경로
 
+Git 주소 설치용 배포 준비는 기존 로컬 host 시험과 별도입니다. 저장소의 `.agents/plugins/marketplace.json`·`.claude-plugin/marketplace.json`은 generated `plugins/grill-us`를 가리키며, 이 snapshot과 catalog가 main에 공개되면 `june95/grill-us` source 등록/설치 경로를 사용할 수 있습니다. 소비자는 ZIP·수동 clone·Node 빌드를 하지 않습니다. 현재의 생성/freshness·Git clone·manifest 검사 성공을 **실제 GitHub native 설치 성공으로 표시하지 않습니다**. 공개된 commit을 대상으로 양쪽 설치를 별도로 확인한 뒤 성공 범위를 갱신합니다.
+
 | 항목 | Codex CLI | Claude Code CLI |
 | :--- | :--- | :--- |
 | 실제 버전 / OS | 0.160.1 / Windows | 2.1.296 / Windows |

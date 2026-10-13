@@ -1,0 +1,10 @@
+# Canonical package inputs and Git delivery must keep identical bytes after checkout.
+/.agents/skills/grill-me/** text eol=lf
+/.agents/skills/memory-intake/** text eol=lf
+/.agents/skills/memory-plan/** text eol=lf
+/.agents/skills/memory-execute/** text eol=lf
+/.agents/skills/memory-explain/** text eol=lf
+/.agents/skills/visualize/** text eol=lf
+/packaging/grill-us.json text eol=lf
+/packaging/README.md text eol=lf
+/plugins/grill-us/** text eol=lf
