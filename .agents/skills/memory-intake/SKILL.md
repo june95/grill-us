@@ -37,9 +37,11 @@ description: Register a clear change, bug, or issue as a .memory task without im
 
 ## Registration
 
+분석·기존 테스트 실행 자체를 목표로 하는 요청도 독립 Task로 등록할 수 있다. 사전 Goal/AC에 조사·결과 분류의 산출물과 필요한 근거·한계를 적고 원인 확정/검사 통과 목표와 구분한다. Type만으로 성공·커밋 생략을 정하지 않으며, 조사 요청을 제품 수정·후속 자동 등록으로 확대하지 않는다.
+
 1. [memory-plan](../memory-plan/SKILL.md)의 공통 계획 절차로 Plan·Phase·folder/task.md를 생성한다. 관련 문서 번호는 그대로 두고 Phase의 기존 최대 T 번호 다음을 사용한다.
 2. 신규 Plan은 생성일 YYYY-MM-DD-feature ID를 사용한다. 기존 Plan에 추가하면 ID·날짜를 유지한다. 같은 날짜 slug 충돌은 기존 의미를 확인하고 다른 요청에는 구별되는 이름을 쓴다.
-3. [공통 규약](../memory-execute/references/conventions.md)의 상세 구현·Dependencies·workflow·완료 조건·실제 검증·커밋 메시지를 작성한다. stub만 남기고 구현을 시작하게 만들지 않는다.
+3. [공통 규약](../memory-execute/references/conventions.md)의 상세 작업(구현 또는 조사/검증 절차)·Dependencies·workflow·완료 조건·검증 경로를 작성한다. 커밋 대상이 없으면 Commit Message는 해당 없음과 이유로 기록하며, 공유 변경을 계획하면 실제 메시지를 적는다. stub만 남기고 실행하게 만들지 않는다.
 4. 상세 조사 기록이 필요한 경우에만 reference.md를 만들고, 이미 충분한 근거는 Task와 결정 링크로 재사용한다. 해당 없음 단계의 빈 보고서는 생성하지 않는다.
 5. 새 버그 Task는 [조건부 템플릿](../memory-execute/references/templates.md#task)의 Bug Investigation에 조사 결과를 보존한다. nonbug에는 빈 버그 표를 만들지 않고, 이미 완료된 Task에는 소급 추가하지 않는다. 수정 전 실패/수정 후 기대 동작을 입증할 회귀 검증 경로를 적되 제품 수정·새 테스트 작성은 실행 단계에 둔다.
 

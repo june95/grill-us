@@ -52,12 +52,40 @@
 | E07 | 비밀 설정 또는 버전 도구 부재 | 비밀 아닌 동작 요약·확인 불가 이유만 기록; env 전체/토큰 수집 및 자동 설치·업그레이드·설정 변경 없음 | 지침 walkthrough |
 | E08 | 설정 파일이 Source Snapshot에 이미 포함 | Relevant Files에서 같은 snapshot 참조; 다른 hash 사본 관리 없음, missing/deleted는 사실대로 기록 | 지침 walkthrough |
 
+## Investigation Task Blueprints
+
+아래 네 가지는 가상 미니 청사진이며 실제 실행 결과·활성 Task가 아니다. 공통 규약의 단계 이름과 상태를 그대로 사용한다. 어떤 유형도 Type 문자열만으로 자동 통과하지 않는다.
+
+| Blueprint | Goal / 사전 AC | 적용 단계와 생략 이유 | Commit Policy / 완료 경로 | 전체 실행과 단독 단계 |
+| :--- | :--- | :--- | :--- | :--- |
+| B01 분석 전용 | 지연 원인 후보·관련 코드 근거·확신·한계·다음 확인을 정리. 원인 확정/수정은 목표 아님 | reference 필수, review는 근거 정합성 확인에 필수. 제품 수정·검사 실행·가이드 영향 없어 implementation/test/design-guide-update/guide-update/refactor 생략. actionable finding 없으면 review-action 생략 | auto, 로컬 보고만이면 commit skipped. 커밋 대상·별도 점검 요청이 없어 commit-check 단계 생략 가능하나 Completion Check의 AC/품질/정책 판정은 수행 | Task 전체는 AC/품질 충족 후 done 가능; --stage reference는 분석 결과만 기록하고 done/전진 없음 |
+| B02 기존 테스트 조사 | 지정 suite 실행, 실제 실패 분류·근거·한계·권고 정리. 필수 실행 로그와 분류 근거 확보 | test 필수. 이미 검토된 기존 suite를 읽기 실행하고 코드/테스트를 변경하지 않아 별도 review/review-action은 생략하며, 조사 산출물 정합성은 공통 품질 판정에서 확인. 충분한 사전 조사로 reference 생략; 수정/가이드 영향 없어 implementation/design-guide-update/guide-update/refactor 생략 | auto, 관측 실패 보존·조사 목적 달성 판정 후 공통 품질 확인. Task 변경 없으면 commit skipped; 별도 commit-check는 B01과 같은 이유로 생략 가능 | 전체는 사전 조사 AC 충족 시 done 가능. 같은 검사가 실패해도 통과 목표 Task라면 미완료. --stage test는 조사 성공 여부와 무관하게 자동 done 없음 |
+| B03 테스트 코드 작성 | 누락 회귀를 검출하는 테스트 작성 및 지정 검증 통과 | implementation/review/test/commit-check/commit 필수. 조사·정본 근거 충분해 reference/design-guide-update 생략, 사용법 영향 없어 guide-update 생략, 별도 정리 없어 refactor 생략. review-action은 finding 있을 때 | auto, 테스트 코드 공유 변경을 검토·검증하고 커밋 성공 뒤 done. 실패는 조사 완료로 전환 불가 | 전체는 완료 정책 처리까지; --stage test는 테스트 결과·필요 review stale 기록만, 커밋/전진 없음 |
+| B04 명시 no-commit | 요청한 문서 수정과 링크 검증, 사용자가 커밋 금지 | implementation/review/test/commit-check 필수. 기존 계약 내 수정이라 design-guide-update 생략, 별도 조사/가이드 동기화/리팩터 불필요하여 reference/guide-update/refactor 생략. finding 없으면 review-action 생략 | none, 품질 충족과 사용자 지시·미커밋 변경 기록, commit skipped. 빈 commit.md 생성 없음 | 전체는 사유 있는 정책 완료 뒤 done 가능; --stage commit-check는 ready라도 done/전진 없음 |
+
+각 사례는 실제 적용 이유가 있을 때만 사용한다. 특히 B02의 review 생략은 새 테스트/제품 변경 없는 기존 suite 조사에 한정한다. 필수 선행 evidence가 부족한 실행을 예외로 통과시키는 뜻이 아니다.
+
+## Completion Cases
+
+| Case | 입력 / 대조 | 기대 판정·보존 경계 | 수준 |
+| :--- | :--- | :--- | :--- |
+| C01 | 원인 후보 조사 vs 원인 확정 목표, 후보만 확보 | 전자는 근거·한계 AC로 평가, 후자는 확정 미충족이면 완료 불가 | 지침 walkthrough |
+| C02 | 사전 테스트 조사 목표 충족, 대상 검사 exit 1 | Observed Result는 Fail/exit 1 보존, Objective Assessment는 조사 AC 충족; workflow passed가 검사 통과 아님 | 지침 walkthrough |
+| C03 | 같은 exit 1이나 목표가 검사 통과 | test 실패 및 AC 미충족으로 완료 불가 | 지침 walkthrough |
+| C04 | 도구/환경 실패로 필수 로그·근거 없음 | 사유·영향·다음 행동, 필수 AC 미충족을 조사 완료로 포장 금지 | 지침 walkthrough |
+| C05 | auto, Task는 로컬 조사 보고뿐, unrelated staged 존재 | Task 후보 기준 변경 없음, commit skipped·공통 판정 후 전체 완료 가능. index 보존·전체 commit 금지 | 지침 walkthrough; 실제 사용자 index 조작 없음 |
+| C06 | 테스트 코드 작성 공유 변경 있음 | auto 일반 검증·리뷰·성공 commit 필요 | 지침 walkthrough |
+| C07 | none, 품질 충족한 미커밋 변경 | 사용자 지시·남은 변경 기록 후 전체 완료 가능 | 지침 walkthrough |
+| C08 | --stage test 또는 check_only에서 목적 달성 | stage-only/check_only는 ready/결과만 기록, 자동 done/포인터 전진 없음 | 지침 walkthrough |
+| C09 | 실패 후 목표를 조사로 완화 또는 후속 Task로 이전 | 승인/Revision/재검증 없이 실패 gate 우회 금지. 기존 실패 보존 | 지침 walkthrough |
+| C10 | old done·prepared intent·환경 변경 뒤 재개 | 과거 계약 불변, 성공 tree 확인 복구 및 영향 증거 최신성 규칙 유지 | 지침 walkthrough |
+
 ## Expected State
 
 - 표의 expected는 시험할 계약이며 실제 실행 결과가 아니다. Task report에 case별 실제 관찰·근거·결과와 확인 수준을 기록한다.
 - 상태 정본은 Task의 workflow·Completion Check다. current는 활성 위치, checkpoint는 복구 정보, Phase/Plan은 집계다.
 - skipped에는 이유, passed에는 유효 증거, failed/blocked/stale에는 재개 행동이 필요하다.
-- ready는 Git 실행 전 판정이다. 실제 성공 commit 또는 명시 완료 정책을 확인한 뒤 done과 pointer 전진을 기록한다.
+- ready는 완료 정책 처리 준비 판정이다. Task 범위 변경이 있으면 auto commit 성공, none/변경 없음이면 사유 있는 정책 처리를 확인한 뒤 전체 실행에서 done과 pointer 전진을 기록한다.
 - 단독 stage 요청에서 현재 활성 Task가 아닌 대상은 해당 결과만 갱신하고 active Position을 보존한다.
 
 ## Verification Level

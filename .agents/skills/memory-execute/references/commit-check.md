@@ -2,12 +2,14 @@
 
 [공통 규약](conventions.md)을 기준으로 최종 리뷰의 핵심과 Git 경계를 함께 확인한다. 별도 final-review.md가 없는 Task도 완료 조건과 적용 단계의 유효한 증거를 확인해야 한다.
 
+전체 Task 완료 전에는 커밋 유무와 별도 commit-check 단계의 적용 여부에 관계없이 아래 Quality Gate와 완료 정책을 평가해 Task Completion Check에 남긴다. `ready`는 이 정책 처리 준비 판정이다. auto+Task 범위 변경이 있을 때 커밋 가능 의미를 포함하며, ready만으로 done이 되지 않는다.
+
 ## Quality Gate
 
-1. Task Goal·Scope·Acceptance Criteria·Alignment와 현재 관련 변경을 대조한다. 범위 밖 변경, 누락된 완료 조건, 명백한 결함·회귀 위험을 확인한다.
+1. 사전에 정한 Task Goal·Scope·Acceptance Criteria·Alignment와 실제 산출물(변경 또는 조사/검증 근거)을 대조한다. 범위 밖 변경, 누락된 완료 조건, 명백한 결함·회귀 위험을 확인한다.
 2. commit-check **이전**의 적용 단계만 평가한다. 필수 단계는 passed와 현재 유효한 증거, 필요 시는 조건 평가 후 passed 또는 이유 있는 skipped, 해당 없음은 이유 있는 skipped여야 한다. 아직 수행 전인 commit과 running 상태의 이 점검 자체는 선행 완료 조건이 아니다.
 3. Evidence Revision, 실제 Covered Files·Source Snapshot과 [Environment Evidence](conventions.md#environment-evidence)를 확인한다. 관련 도구 버전·lockfile·테스트 설정의 현재 값과 기존 근거를 비교하여 영향받은 결과만 stale로 판단한다. 과거 환경 기록 부재는 확인 가능한 사실·한계·완료 조건 영향으로 평가하며 일괄 차단하거나 자동 통과하지 않는다. 문서가 존재한다는 이유만으로 유효하다고 보지 않는다. 실패·환경 차단·stale 증거를 생략으로 덮지 않는다.
-4. unresolved current-scope Critical/High, 승인되지 않은 계약 변경, 충족하지 못한 완료 조건이 있으면 blocked다. 후속 Task로 옮긴 사실만으로 blocking finding을 해소하지 않는다. 다른 수준의 finding도 완료 조건을 막으면 차단한다.
+4. 현재 Task 산출물 자체의 미해결 Critical/High, 승인되지 않은 계약 변경, 충족하지 못한 완료 조건이 있으면 blocked다. 조사 대상에서 발견한 결함은 [Investigation Outcomes](conventions.md#investigation-outcomes)의 Observed Result와 Objective Assessment로 구분하여 심각도·실패·영향을 보존한다. 조사 AC를 충족했다는 이유를 기록할 수는 있지만 통과 목표 실패나 필수 조사/근거 부족을 완료로 바꾸지 않는다. 후속 Task로 옮긴 사실만으로 blocking finding을 해소하지 않는다. 다른 수준의 finding도 완료 조건을 막으면 차단한다.
 5. 필요한 정본은 승인된 계약 및 현재 구현·검증과 일치해야 한다. 정본 갱신이 해당 없음이면 그 근거를 읽고 빈 guide-update.md를 요구하지 않는다.
 6. Task Completion Check에 `Verdict: ready / blocked`, Revision·snapshot, 완료 조건별 근거, 단계 적용·판정, blocking finding, 남은 검증 한계를 적는다.
 
@@ -50,7 +52,7 @@ ready 판정과 staged 내용 확인 후, [resume.md](resume.md)의 checkpoint�
 
 - `none`: 사용자 지시에 따라 commit을 생략한다. Task 완료 조건과 품질 판정은 수행하고 명시 생략 사유·남은 미커밋 변경을 기록한 뒤 전체 실행에서 done 처리할 수 있다.
 - `check_only`: 품질·커밋 가능 상태만 점검한다. staging, commit, Task done, 포인터 전진을 자동 수행하지 않는다.
-- 실제 Git 변경 없음: 로컬 조사·보고만 있으면 빈 commit을 만들지 않는다. 변경 없음과 완료 근거를 기록하고 전체 실행에서 finalize할 수 있다.
+- Task 범위 Git 변경 없음: auto여도 로컬 조사·보고만 있으면 빈 commit을 만들지 않는다. Task 후보 기준의 변경 없음·완료 근거와 commit skipped를 기록하고 전체 실행에서 finalize할 수 있다. 저장소 전체 clean을 조건으로 삼지 않으며 unrelated 사용자 working/index는 그대로 보존한다. 테스트 코드·공유 가이드 변경이 있다면 일반 커밋 정책을 적용한다. 기본 로컬 .memory를 억지로 공유 후보에 넣지 않는다.
 - 이미 성공한 동일 Task 커밋이 있으면 변경 없음을 새 skipped 결과로 덮지 않는다. 성공 증거를 보존하고 [재개 규약](resume.md)대로 상태만 복구한다.
 - 실행하지 않은 commit.md를 생성하지 않는다. 공통 점검과 정책 생략 근거는 Task 표·Completion Check에 기록할 수 있다.
 

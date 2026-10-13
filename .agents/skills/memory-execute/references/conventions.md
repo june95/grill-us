@@ -118,11 +118,11 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 - 해당 없음은 이유를 적은 skipped로 초기화한다. 필수와 필요 시는 실행 전 pending이다.
 - 필요 시는 실제 조건을 확인해 수행하거나 skipped와 사유로 정리한다. 조건 미평가 상태를 완료로 간주하지 않는다.
 - 실패·환경 차단·오래된 증거를 skipped로 바꿔 미완료를 숨기지 않는다. 현재 완료 조건을 막는 finding은 후속 Task 등록만으로 해결되지 않는다.
-- passed는 유효한 Evidence Revision·Source Snapshot과 실제 결과가 있을 때만 사용한다. 파일이 존재한다는 사실만으로 passed를 만들지 않는다.
+- passed는 해당 단계의 사전 목적을 충족하고 유효한 Evidence Revision·Source Snapshot과 실제 근거가 있을 때만 사용한다. 검사 대상의 성공 여부와 단계 목적 달성은 아래 Investigation Outcomes에 따라 구분한다. 파일 존재만으로 passed를 만들지 않는다.
 - 선행 조건은 이 Task에 적용되는 단계의 증거로 판단한다. 생략한 review.md/test.md/guide-update.md가 없다는 이유만으로 일률 차단하지 않는다.
 - 커밋 전 점검은 **선행** 단계만 검사한다. commit-check 자신과 아직 수행 전인 commit의 passed를 미리 요구하지 않는다. Task done 판정은 점검 이후의 커밋 정책 결과까지 확인한다.
 - final-review.md는 필수 공통 산출물이 아니다. 최종 품질 판정은 Task의 Completion Check에 기록한다. 의미 있는 리팩토링은 현재 Task 변경 표면과 동작 보존 범위에 한정한다.
-- 보고서 자체 verdict와 workflow Status는 다른 의미다. Pass with Issues 등의 보고가 있으면 finding 처리와 완료 조건을 확인해 단계 passed 여부를 판단한다. Needs Changes/Fail/Blocked 또는 current-scope 미해결 Critical/High를 통과로 바꾸지 않는다.
+- 보고서 자체 verdict와 workflow Status는 다른 의미다. Pass with Issues 등의 보고가 있으면 finding 처리와 완료 조건을 확인해 단계 passed 여부를 판단한다. 수행한 작업 자체의 Needs Changes/Fail/Blocked 또는 현재 완료 조건을 막는 미해결 Critical/High를 통과로 바꾸지 않는다. 조사 대상에서 관측한 실패는 조사 목적 달성과 별도로 보존한다.
 
 ## Evidence and Completion
 
@@ -133,8 +133,24 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 - 커밋 의도의 Candidate Snapshot에는 working-tree hash와 별도로 staged Git mode/blob ID를 기록한다. Git의 줄바꿈·clean filter 정규화가 로컬 bytes를 바꿀 수 있으므로 commit tree의 성공 여부는 staged Git entry와 비교한다. 삭제는 entry 없음으로 기록하고 전환 index 삭제는 로컬 보존 여부를 따로 확인한다.
 - 추가 테스트 파일이나 구현 조정이 생기면 실제 변경 scope와 해당 증거를 갱신한다. 변경된 내용에 영향을 받는 단계만 stale로 표시하고 재수행한다.
 - Completion Check는 `pending / ready / blocked`를 사용한다. ready에는 현재 Revision·snapshot, 완료 조건별 근거, 적용 단계 판정, 남은 위험, Git 경계를 기록한다.
-- ready는 커밋을 만들 수 있다는 판정이며 done은 아니다. auto 작업은 커밋 성공 후 done이다. 명시적 none 또는 실제 변경 없음은 이유를 기록하고 완료 조건·품질 판정 후 done 가능하다. check_only 및 단계 단독 실행은 자동 finalize하지 않는다.
-- 조사나 로컬 보고만 만든 Task도 완료 조건 증거를 평가한다. Git 변경이 없으면 빈 커밋을 만들지 않고 실제 변경 없음을 기록한다.
+- ready는 현재 근거로 완료 정책 처리에 진입할 수 있다는 공통 준비 판정이며 done은 아니다. auto이고 Task 범위의 커밋 대상 변경이 있으면 커밋 가능 판정을 포함하며 성공 commit 후 done이다. auto여도 Task 범위 변경이 없으면 이유를 기록하고 commit을 skipped로 처리할 수 있다. 명시적 none도 사용자 지시·남은 미커밋 변경을 기록하고 완료 조건·품질 판정 후 done 가능하다. check_only 및 단계 단독 실행은 자동 finalize하지 않는다.
+- 전체 Task 실행은 사전 목표·완료 조건 → 적용 단계의 유효 근거·품질 확인 → Task 범위 Git 변경 및 커밋 정책 처리 → done/finalize 순서다. 별도 commit-check 단계가 해당 없음이어도 공통 품질·완료 정책 판정을 Task의 Completion Check에 남긴다. 새 단계나 enum은 만들지 않는다.
+- Git 변경 없음은 Task 범위 후보를 기준으로 판단하며 저장소 전체 clean을 요구하지 않는다. unrelated 사용자 working/index는 보존한다. 조사나 로컬 보고만 만든 Task는 기본 로컬 .memory를 후보로 삼거나 빈 커밋을 만들지 않는다. 테스트 코드·공유 가이드를 작성했다면 그 변경에는 일반 커밋 정책을 적용한다.
+
+### Investigation Outcomes
+
+조사 목적이 사전에 명확한 Task는 검사 대상의 결과와 조사 작업의 목표 달성을 분리한다. Type 이름만으로 이 경로를 선택하지 않는다. 기존 보고의 Details/Result 안에 필요할 때 다음 두 항목을 작성한다. 새 상태 enum이나 실행 schema가 아니다.
+
+| Item | 기록 기준 |
+| :--- | :--- |
+| Observed Result | 실제 command/cwd/exit, 대상 검사 통과·실패·미실행, 원인 분류·근거. 실패 exit와 로그를 성공으로 바꾸지 않음 |
+| Objective Assessment | 사전 AC별 충족/미충족, 조사 목적 달성 판정과 근거·한계·후속 권고. workflow Status 및 Task 완료 판정과의 대응 |
+
+예를 들어 사전 목표가 테스트 결과 조사·실패 분류이고 그 근거·한계·권고가 모두 갖춰졌다면, Observed Result에 테스트 실패를 보존하면서 조사 단계 목적은 passed로 판정할 수 있다. 보고 상단 Result에는 조사 목적 달성과 관측 실패를 함께 밝혀 검사 통과로 오해하지 않게 한다. 전체 Task done은 나머지 적용 단계·품질·커밋 정책까지 확인한 뒤다.
+
+통과가 목표인 Task의 실패, 조사 자체가 수행 불가하거나 필수 자료가 부족한 경우는 이 예외가 아니다. 원인 후보·한계 조사가 목표라면 미확정 원인을 사실대로 평가할 수 있지만, 원인 확정이 목표라면 후보만으로 완료하지 않는다. 조사 대상 제품의 Critical/High 발견은 원래 severity와 영향을 보존하여 보고하되, 조사 작업 자체의 결함이나 AC 미달성과 구분한다. 조사 요청만으로 발견 사항 수정·후속 Task 생성까지 실행하지 않는다.
+
+실패 후 목표를 조사로 바꾸거나 필수 failed/blocked/stale를 skipped/passed로 덮어 gate를 우회하지 않는다. 목표 변경은 승인·Revision·영향 증거 재검증을 따르고 이전 실패 근거를 보존한다. 과거 done 보고를 새 형식에 맞추려고 재작성하지 않는다.
 
 ### Environment Evidence
 

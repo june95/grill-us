@@ -37,12 +37,12 @@ description: Create or extend a .memory Plan with Phase and independently execut
 | Decision Summary / Guide Alignment | 확정 선택·코드 근거, Compliant/Approved Design Change/Blocked, 실제 승인·정본 |
 | Bug Investigation (버그 수정 Task만) | [공통 계약](../memory-execute/references/conventions.md#bug-investigation)의 최소 재현 근거·실제/기대 결과·독립 재현/원인 수준·한계·다음 검증 |
 | Dependencies | 선행 T ID/링크와 필요한 결과 |
-| Implementation | path::symbol 또는 문서 heading, 목적, new/modify/read-only, I01/I02 단위 |
+| Implementation | path::symbol 또는 문서 heading, 목적, new/modify/read-only, I01/I02 단위; 조사/검증 전용은 절차·산출 근거로 작성 |
 | Signatures / Data / Flow | 적용되는 정확한 타입·필드·기본값·nullable·관계·검증·처리·오류·상태·반환 |
 | Acceptance Criteria | 관찰 가능한 완료 체크리스트 |
 | Workflow | Stage, Applicability, Reason/Trigger, Status, Evidence |
 | Validation | 실제 command 또는 수동 방법, cwd, expected result와 대응 criterion; 관련 환경 근거를 실행 시 확인할 범위·이유 |
-| Commit Message | 요약과 Plan/Phase/Task trailer |
+| Commit Message | 커밋 대상이 있으면 요약과 Plan/Phase/Task trailer; 없으면 해당 없음과 이유 |
 | Completion Check / Progress | 초기 pending 판정·commit 상태, 첫 미수행 적용 stage·blocker·next step |
 | Change Log | 의미 있는 확정 계약 변경과 이유·날짜 |
 
@@ -54,6 +54,8 @@ description: Create or extend a .memory Plan with Phase and independently execut
 
 ## Workflow Selection
 
+분석·기존 테스트 실행도 독립 Task다. Goal/AC에 후보 조사·결과 분류의 완료 기준을 정하고 원인 확정·테스트 통과 목표와 구분한다. 조사 대상 실패와 조사 목적 달성은 [Investigation Outcomes](../memory-execute/references/conventions.md#investigation-outcomes)에 따라 각각 기록하도록 계획한다. Type 문자열만으로 성공·완료 정책을 선택하지 않는다.
+
 planner가 각 stage를 필수/필요 시/해당 없음으로 판단하고 이유·조건을 적는다. 사용자 지시를 우선하며 모든 표 항목을 미평가 placeholder로 남기지 않는다.
 
 - 충분한 기존 조사·결정이 있으면 reference는 해당 없음과 근거 링크로 둔다.
@@ -62,6 +64,8 @@ planner가 각 stage를 필수/필요 시/해당 없음으로 판단하고 이�
 - 단순 문구 수정은 필요한 diff·문구·링크 확인으로 입증할 수 있다. 별도 review/test 보고서가 불필요하면 생략하되 완료 조건 근거는 남긴다.
 - review-action은 actionable finding 조건, guides/refactor는 실제 영향·필요성으로 결정한다. 구현 사실만으로 정본 재작성·코드 정리를 강제하지 않는다.
 - 변경 Task의 공통 commit-check는 필수다. commit은 정책·실제 후보에 맞게 정한다. 아직 수행 전인 commit을 점검의 선행 passed 조건으로 만들지 않는다.
+- 조사 전용은 reference/test 등 목적에 필요한 단계만 선택하고 불필요한 구현·가이드·리팩터는 이유 있는 skipped로 둔다. 별도 commit-check가 해당 없음이어도 전체 Task 완료 전 Completion Check의 AC·근거·품질·커밋 정책 판정은 필수다.
+- auto의 커밋 필요 여부는 Task 범위 Git 변경으로 정한다. 로컬 조사 보고만 남으면 이유와 commit skipped를 기록하고 완료할 수 있다. 테스트 코드/공유 가이드를 작성하면 일반 커밋 정책을 적용한다. none은 사용자 지시와 미커밋 변경을 기록하며, check_only/단독 단계는 자동 done/전진하지 않는다.
 - 필수/필요 시는 pending, 해당 없음은 사유 있는 skipped다. 수행된 조사 evidence는 Revision·covered snapshot이 유효하면 재사용한다.
 - 완료 기준이 생략으로는 입증되지 않으면 필요한 검증을 유지한다. 미확정 가정으로 정본·blocker를 덮어쓰지 않는다.
 

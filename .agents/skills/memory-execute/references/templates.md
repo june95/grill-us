@@ -6,6 +6,8 @@
 
 Task 폴더의 task.md가 요청·완료 조건·상세 구현의 정본이다. Blueprint Revision은 의미 있는 계약 변경에만 증가시킨다. Workflow의 적용·조건·초기 상태는 Task별 판단 후 확정한다.
 
+Implementation에는 적용 작업을 적는다. 분석 전용이면 조사 절차·산출 근거, 테스트 실행 전용이면 대상·명령·결과 분류 절차로 구체화하며 제품 구현을 강제하지 않는다. Goal/AC에는 조사 결과 정리가 목표인지, 원인 확정이나 테스트 통과가 목표인지 사전에 명시한다. 커밋 대상이 없는 Task는 Commit Message에 `해당 없음`과 이유만 적어도 된다. 공유 변경이 있는 Task에는 아래 실제 메시지 형식을 사용한다.
+
 아래 Bug Investigation은 [공통 버그 조사 계약](conventions.md#bug-investigation)에 따라 버그 수정 Task에만 채운다. 일반 기능·문서 Task에서는 해당 섹션 전체를 제외하며, 과거 완료 기록에 빈 표를 소급 추가하지 않는다.
 
 ```markdown
@@ -139,7 +141,7 @@ Task 폴더의 task.md가 요청·완료 조건·상세 구현의 정본이다. 
 
 - [ ] 구현 또는 조사 목표 완료
 - [ ] 적용 검증 완료
-- [ ] 공통 품질·커밋 점검 완료
+- [ ] 공통 품질·완료 정책 판정 완료 (커밋 필요 여부 포함)
 - Commit Status: pending
 - Commit Hash: 없음
 - Resume Stage: {첫 적용 단계}
@@ -154,6 +156,8 @@ Task 폴더의 task.md가 요청·완료 조건·상세 구현의 정본이다. 
 필수/필요 시는 pending, 해당 없음은 사유 있는 skipped로 작성한다. 모든 항목이 `{판단}`인 미완성 표를 실행 청사진으로 남기지 않는다. 작은 작업은 적용되는 섹션만 구체적으로 작성하고, 상세 계약을 요약하다가 다음 실행자가 추측하게 만들지 않는다.
 
 Commit Message의 마지막 세 줄은 metadata와 같은 Plan/Phase/Task 식별자를 사용하는 Git trailer다. 그 뒤에 설명 목록을 붙이지 않는다. 실제 메시지 파일을 `git interpret-trailers --parse`로 확인하며 과거 완료 문서·커밋은 이 템플릿에 맞추려고 재작성하지 않는다.
+
+이 trailer 규칙은 실제 커밋 메시지가 있는 경우에 적용한다. 커밋을 수행하지 않는 Task에는 가상 메시지 파일·commit.md·빈 커밋을 만들지 않는다. commit-check가 해당 없음이어도 Completion Check는 사전 AC·증거·품질·Task 범위 Git 변경과 정책 결과를 평가한다. `ready`는 정책 처리 준비이며 `done`과 구분한다.
 
 ## Plan
 
@@ -315,6 +319,13 @@ Candidate Snapshot의 각 항목에는 path, added/modified/deleted 상태, 검�
 ## Details
 
 {실제 변경·판단·검증 근거, command/cwd/result 또는 필요한 대응표}
+
+{조사 목적 Task에서 검사 결과와 목표 달성이 다를 수 있으면 아래 항목을 작성한다. 해당하지 않으면 제거한다.}
+
+- Observed Result: {실제 command/cwd/exit와 관측 실패/통과/미실행, 분류·근거}
+- Objective Assessment: {사전 AC별 충족/미충족, 조사 목적 판정·한계·후속 권고, workflow Status와 대응}
+
+{상단 Result에도 조사 목적 판정과 관측 실패를 구분해 요약한다. 실제 실패를 passed로 표기하지 않으며, 통과 목표 실패나 필수 조사 근거 부족을 완료로 처리하지 않는다.}
 
 ## Environment Evidence
 

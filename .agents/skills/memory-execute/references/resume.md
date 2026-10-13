@@ -74,7 +74,8 @@ Plan별 `.memory/state/{plan-id}.md`에 아래를 기록한다.
 
 ## Completion
 
-- 전체 실행은 품질 판정과 auto commit 성공, 명시적 none, 또는 실제 변경 없음 정책까지 충족했을 때 Task done으로 기록한다.
+- 전체 실행은 사전 AC·유효 근거·공통 품질을 확인해 ready로 판정하고, auto+Task 범위 변경이면 commit 성공, 명시적 none 또는 Task 범위 변경 없음이면 사유 있는 생략까지 확인한 뒤 Task done으로 기록한다. unrelated 사용자 working/index가 있다는 이유로 커밋을 요구하지 않는다. 별도 commit-check가 해당 없음이어도 공통 완료 판정은 남긴다.
+- 조사 결과를 재사용할 때도 [관측 결과와 목표 평가](conventions.md#investigation-outcomes)를 구분한다. 관측 실패가 보존된 조사 단계 passed를 검사 통과로 해석하지 않는다. 사전 통과 목표 실패·필수 조사 근거 부족·stale 증거는 조사 완료로 덮지 않으며 기존 실패 및 과거 done 기록을 보존한다.
 - stage-only 또는 check_only 요청은 완료 조건을 채웠더라도 자동 포인터 전진을 하지 않는다.
 - done Task를 근거로 Phase Tasks 표·done count를 갱신하고 Plan 요약을 갱신한 뒤 current를 다음 Task로 전진한다.
 - 다음 Task는 같은 Plan의 순서와 실제 Dependencies를 확인한다. 완료되지 않은 선행 Task를 건너뛰어 검증 실패를 숨기지 않는다.

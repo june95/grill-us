@@ -22,6 +22,8 @@ T01부터 T03까지 순서대로 진행해줘
 
 이 표기는 에이전트 요청 형식이며 별도 CLI가 아니다. `--stage` 또는 "분석만 / 구현만 / 리뷰만 / 리뷰 지적 처리만 / 테스트만 / 가이드 갱신만 / 리팩토링만 / 커밋 점검만 / 커밋만"은 해당 단계만 수행한다. 가이드 모드는 승인된 설계 변경 전 반영인지 구현 후 동기화인지 Task와 요청에서 확인한다. 실제 선택이 모호할 때만 질문한다.
 
+다만 명시된 독립 분석/테스트 전용 Task를 전체 실행하라는 요청은 해당 Task의 완료 정책 처리까지 수행한다. 예: "분석 전용 T01 전체 진행"은 task-mode, "T01의 분석 단계만" 또는 `--stage reference`는 stage-mode다. 명시적 단계 선택이 우선이며 "테스트만 하는 T01 진행"처럼 실제 의도가 모호하면 Task 계약·문맥을 확인하고 필요한 경우 한 질문으로 구분한다.
+
 ## Resolve Task
 
 1. 명시된 Task 경로를 우선하고 없으면 .memory/current.md의 Active Task를 사용한다. 없는 경로·가짜 초기 링크·활성 Task 없음이면 작업을 임의 생성하지 않고 등록·계획 요청을 안내한다.
@@ -50,16 +52,17 @@ T01부터 T03까지 순서대로 진행해줘
 - 사용자 지시로 optional stage를 수행하면 실제 적용 이유를 남긴다. 실패·차단을 생략으로 바꿔 완료하지 않는다.
 - evidence는 Revision과 covered 파일 snapshot에 맞아야 한다. 코드·테스트·상세 계약 변경에 영향받은 결과만 stale로 표시하고 재확인한다. HEAD만 바뀐 동일 내용의 증거는 무효화하지 않는다.
 - 검증 전 실제 checkout/cwd와 관련 도구·설정을 확인하고 [Environment Evidence](references/conventions.md#environment-evidence)를 결과에 기록한다. 재사용 시 관련 환경도 비교하여 영향받은 결과만 재검증한다. 과거 기록 부재는 한계·완료 조건 영향으로 판단하며 자동 통과/일괄 차단하지 않는다.
+- 조사 목적이면 [Investigation Outcomes](references/conventions.md#investigation-outcomes)의 Observed Result와 Objective Assessment로 관측 결과·사전 단계 목표 달성을 구분한다. 보고와 채팅에서 조사 완료를 검사 통과로 표현하지 않는다. 통과 목표 실패나 필수 조사 근거 부족은 기존 실패/차단 규칙을 적용한다.
 
 ## Task Mode
 
 1. 새 단계·staging·commit 전에 Task와 기존 prepared/committed/failed intent의 실제 결과부터 확인한다. 성공한 동일 commit이 확인되면 누락된 finalize만 복구하고 새 단계·커밋을 반복하지 않는다. 그 외에는 아직 필요한 첫 적용 단계를 찾아 선행 의존성과 정본 승인을 확인한다. 환경·설계 blocker는 원인·재개 행동을 기록하고 멈춘다.
 2. running으로 기록한 뒤 해당 단계 지침만 읽어 수행하고 실제 결과·Revision·covered snapshot 및 관련 환경 근거를 기록한다. 유효한 이전 결과는 환경 변경 영향까지 확인해 재사용한다. 근거 수집을 위해 설치·업그레이드·설정을 자동 변경하지 않는다.
-3. 범위 안 구현 결함은 해당 수정 단계로 돌아가 해결한다. 새 근거 없이 같은 실패를 반복하는 루프를 만들지 않는다. 코드 조정·테스트 작성·가이드 변경 뒤 필요한 관련 review/test 증거를 갱신한다.
+3. 수정이 Task 범위인 구현 결함은 해당 수정 단계로 돌아가 해결한다. 조사 전용 Task에서 발견한 대상 결함은 근거·영향·권고를 보고하며 자동 수정/후속 등록하지 않는다. 새 근거 없이 같은 실패를 반복하는 루프를 만들지 않는다. 코드 조정·테스트 작성·가이드 변경 뒤 필요한 관련 review/test 증거를 갱신한다.
 4. 파일 위치·기존 함수명 등의 비기능 조정은 청사진·변경 기록에 반영한다. 사용자 동작·완료 조건·API·권한·데이터의 새로운 결정은 승인 근거를 확인하고 필요한 질문 하나를 한다.
-5. [공통 커밋 점검](references/commit-check.md)으로 선행 적용 단계, 완료 조건, 최종 품질·정본·검증 한계와 Git 경계를 평가한다. `ready`는 done이 아니며 별도 final-review.md가 필수인 것도 아니다.
-6. auto이면 명시적 후보만 staging하고 prepared 의도를 저장한 뒤 청사진 메시지로 commit한다. 실제 commit tree와 의도를 확인한 다음에만 성공으로 기록한다. 실패하면 현재 Task와 blocker를 유지한다.
-7. 명시적 no-commit 또는 실제 Git 변경 없음은 이유와 남은 상태를 기록하고 완료 조건·품질 판정 후 finalize한다. check_only는 점검 결과만 남긴다.
+5. [공통 완료·커밋 점검](references/commit-check.md)으로 선행 적용 단계, 사전 완료 조건, 최종 품질·정본·검증 한계와 Git 경계를 평가한다. 별도 commit-check 단계가 해당 없음이어도 전체 Task의 Completion Check는 수행한다. `ready`는 완료 정책 처리 준비이며 done이 아니고, 별도 final-review.md도 필수는 아니다.
+6. auto이고 Task 범위 커밋 대상 변경이 있으면 명시적 후보만 staging하고 prepared 의도를 저장한 뒤 청사진 메시지로 commit한다. 실제 commit tree와 의도를 확인한 다음에만 성공으로 기록한다. 실패하면 현재 Task와 blocker를 유지한다.
+7. 명시적 no-commit 또는 Task 범위 Git 변경 없음은 이유와 남은 상태·commit skipped를 기록하고 완료 조건·품질 판정 후 finalize한다. unrelated 사용자 변경·index나 로컬 .memory 보고를 커밋 후보로 삼지 않으며 빈 commit을 만들지 않는다. check_only는 점검 결과만 남긴다.
 8. 성공한 동일 commit이 이미 있으면 내용을 검증하고 누락된 finalize만 복구한다. Task done → Phase 집계 → Plan 요약 → current를 순서대로 갱신한다. 다음 Task는 실제 시작 전 pending이며 마지막 Task 후 Active Task·Stage는 없음이다.
 9. 기본 한 Task에서 끝낸다. 연속 요청이 있으면 요청한 범위 내에서 각 Task별 검증·점검·커밋 후 순차 진행하고 차단 시 멈춘다. 다른 pending Plan을 임의로 시작하지 않는다.
 

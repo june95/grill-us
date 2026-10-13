@@ -40,7 +40,9 @@ description: Explain recorded designs, plans, progress, and completed work from 
 
 ## Explain by State
 
-Task Status(`pending / in_progress / blocked / done`)와 Workflow Status(`pending / running / passed / skipped / failed / blocked / stale`)는 다르다. `ready`는 커밋 가능 판정이지 `done`이 아니다. 단계 passed가 전체 Task 완료나 현재 제품 정상 동작을 뜻하지 않는다.
+Task Status(`pending / in_progress / blocked / done`)와 Workflow Status(`pending / running / passed / skipped / failed / blocked / stale`)는 다르다. `ready`는 완료 정책 처리 준비 판정이며, auto+Task 범위 변경이 있으면 커밋 가능 의미도 포함하지만 `done`은 아니다. 단계 passed가 전체 Task 완료나 현재 제품 정상 동작을 뜻하지 않는다.
+
+조사 Task는 보고의 Observed Result와 Objective Assessment를 읽고 실제 검사 결과와 사전 조사 목표 달성을 구분한다. 조사 완료와 함께 테스트 실패가 보고될 수 있으며 이를 검사 통과로 설명하지 않는다. 통과가 목표인데 실패한 경우나 필수 근거가 부족한 경우를 정상 완료로 단정하지 않는다. auto라도 Task 범위 변경이 없어 커밋을 생략한 정상 완료가 가능하다. 다른 사용자 변경이 남아 있다는 사실과 해당 Task의 커밋 필요 여부도 구분하며 설명 중 상태·보고를 수정하지 않는다.
 
 | 상태 | 설명할 내용 | 단정하지 않을 내용 |
 | :--- | :--- | :--- |

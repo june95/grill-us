@@ -12,6 +12,7 @@ test 단계가 적용되거나 사용자가 요청한 경우에 읽는다. [프�
 
 ## Coverage
 
+- 사전 목표가 검사 통과인지 기존 검사 결과 조사·실패 분류인지 확인한다. 후자는 [Investigation Outcomes](conventions.md#investigation-outcomes)에 따라 실제 검사 실패와 조사 단계 목적 달성을 분리한다. 실패 후 조사 목표로 바꾸어 완료 판정을 우회하지 않는다.
 - 각 완료 조건·회귀 위험을 검증 방법과 연결한다. 유효한 기존 결과가 있으면 재사용한다.
 - 새로운 테스트가 의미 있게 오류·회귀를 잡을 때 기존 프로젝트 suite에 추가한다. 구현을 그대로 반복하는 검사나 불필요한 대형 suite를 만들지 않는다.
 - 제품 실행 테스트를 Task 문서 폴더의 새 harness로 옮기지 않는다. Task 폴더에는 보고·비실행 증거만 둔다.
@@ -33,13 +34,15 @@ test 단계가 적용되거나 사용자가 요청한 경우에 읽는다. [프�
 
 - 제품 실패, 테스트 설정 실패, 환경 blocker, 의도적 생략을 구분한다. 필수 실패를 생략으로 바꿔 완료하지 않는다.
 - 하위 실패가 막는 상위 검사는 Blocked로 기록하고 독립적으로 가능한 확인은 수행할 수 있다.
-- 단독 test 단계에서는 제품 결함을 보고하고 구현을 자동 수정하지 않는다. 전체 Task 모드에서는 범위 안 수정 단계로 돌아가 영향받은 검증을 갱신한다.
+- 단독 test 단계에서는 제품 결함을 보고하고 구현을 자동 수정하지 않는다. 전체 Task 모드에서도 수정이 사전 scope에 있을 때만 수정 단계로 돌아간다. 조사 전용이면 대상 결함·영향·권고를 기록하고 자동 수정·후속 등록하지 않는다.
 - 파괴적 setup·production 변경·불명확한 credential 사용을 평범한 로컬 검증으로 실행하지 않는다. 실제 필요한 승인·안전한 입력 경로를 확인한다. 비밀 값을 보고나 채팅에 남기지 않는다.
 - 필수 검증을 실행할 수 없으면 실제 한계·영향·가장 가까운 대체 확인을 기록한다. 대체가 완료 조건을 충족하지 못하면 blocked 상태를 유지한다.
 
 ## Evidence
 
 test.md에 `Pass / Pass with Issues / Fail / Blocked`, 완료 조건별 coverage, 새·수정 테스트 파일, command/cwd/실제 exit/result, 생략·환경 제약, 다음 행동을 적는다.
+
+조사 목적에서는 Details에 Observed Result(실제 exit·통과/실패/미실행·분류·근거)와 Objective Assessment(사전 조사 AC별 충족·한계·권고)를 기록한다. 상단 Result는 예를 들어 "조사 목적 Pass, 대상 검사 Fail(exit 1)"처럼 두 판단을 함께 밝힌다. 이 경우 workflow passed는 조사 목적 달성을 뜻하며 검사 실패 자체를 passed로 바꾸는 것이 아니다. 검사 통과 목표의 실패나 필수 조사/근거 부족은 Fail/Blocked와 미달성으로 남긴다. 무조건 성공을 초기값으로 두지 않는다.
 
 - 수행한 범위의 Revision·Covered Files·Source Snapshot·Checked At을 기록한다.
 - Environment Evidence에는 관련 Tool Versions, Relevant Files의 snapshot 참조, Non-secret Settings와 Scope / Reason·Checked At만 조건부로 기록한다. 재사용 시 현재 값과 비교해 해당 검사에 영향을 주는 변경만 stale/재검증하고 과거 기록 부재는 실제 완료 조건 영향·한계로 판단한다. 단독 test는 선행 stale 사유·대상·Next Action을 남기며 선행 단계 자동 실행이나 active Position 변경을 하지 않는다.

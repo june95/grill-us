@@ -27,6 +27,7 @@ implementation 단계에 필요한 지침이다. 상세 구현 계약은 현재 
 
 ## Verification
 
+- 사전 작업 목표를 기준으로 [관측 결과와 목표 평가](conventions.md#investigation-outcomes)를 구분한다. 구현/통과 목표의 검증 실패를 조사 완료로 재해석하지 않는다. 순수 조사 Task는 implementation 단계 없이 적용 reference/test 및 공통 완료 판정으로 구성할 수 있다.
 - 청사진에 지정된 command/cwd와 완료 조건을 확인한다. 명령이 없으면 [프로젝트 구조](project-profile.md)에서 가장 작은 관련 검증을 찾아 근거와 함께 기록한다.
 - 실행 전 실제 cwd와 관련 도구·설정을 확인하고 실제 command·exit/result·검증 대상·한계를 적는다. [Environment Evidence](conventions.md#environment-evidence)에 관련 버전·설정 근거를 기록하고 동일 Revision·snapshot 및 환경 변경 영향까지 확인한 유효 결과는 재사용한다.
 - 범위 안 구현 결함은 수정하고 영향받은 검증을 반복한다. 같은 실패에 새 근거 없는 수정만 반복하지 않는다. 환경·서비스·credential blocker는 원인과 다음 행동을 기록하고 멈춘다.

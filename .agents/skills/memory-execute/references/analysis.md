@@ -12,6 +12,8 @@ reference 단계가 실제 필요하거나 요청된 경우에 읽는다. 이미
 
 ## Evidence
 
+독립 분석 Task라면 사전 목표가 후보·근거·한계 조사인지 원인 확정인지 확인한다. [Investigation Outcomes](conventions.md#investigation-outcomes)에 따라 실제 관측·가설을 Observed Result에, AC 충족·한계·권고를 Objective Assessment에 구분한다. 후보 조사 목표는 충분한 근거와 한계 정리로 달성할 수 있지만 원인 확정 목표는 후보만으로 완료하지 않는다. 필수 조사 자체가 수행 불가하거나 자료가 부족하면 그 미달성을 남긴다.
+
 reference.md에 다음을 기록한다.
 
 | Item | Content |
@@ -34,6 +36,7 @@ reference의 정합성은 `Aligned / Approved Design Change / Design Change Requ
 - Aligned는 현재 정본 안의 접근이다. Task의 Compliant를 뒷받침한다.
 - Approved Design Change는 명시 승인과 영향 계약·정본 목록이 있는 경우다. 필요한 design-guide-update는 의존 구현 전에 완료해야 한다.
 - Design Change Required 또는 Blocked이면 그 문제를 해소하기 전에 제품 구현을 진행하지 않는다. 일반 구현 옵션의 확인을 새로운 기반 설계 변경 승인으로 과대 해석하지 않는다.
+- 설계 변경 필요라는 조사 결론과 조사 작업의 완료 여부는 별개다. 사전 조사 목표가 충족됐는지 평가하며, 그 결론만으로 조사 Task를 자동 차단하거나 제품 구현을 승인하지 않는다. 전체 Task 완료는 공통 판정·커밋 정책을 확인하며 단독 reference는 자동 finalize하지 않는다.
 - 현재 코드의 drift·외부 best practice·미확정 가정으로 정본과 blocker를 덮어쓰지 않는다. 특정 예시 문서가 없는 것과 실제 필요한 정본이 누락된 것을 구분한다.
 
 ## Reference Sync
