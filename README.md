@@ -14,9 +14,14 @@
 
 ## 다른 프로젝트에 적용하기
 
-1. 대상 프로젝트의 .agents/skills 아래에 grill-me, memory-intake, memory-plan, memory-execute, memory-explain 폴더를 복사합니다. memory-execute의 공통 references와 memory-explain의 references도 함께 복사합니다. 기존 같은 이름의 스킬이 있다면 내용을 확인해 통합합니다. 명시적 HTML 설명도 사용하려면 별도 visualize 폴더와 references를 함께 복사합니다.
-2. [AGENTS.md](AGENTS.md)의 프로젝트 메모리 규칙을 대상 지침에 반영합니다. 대상 프로젝트의 기존 지침과 정본 우선순위를 보존합니다.
-3. 대상 .gitignore에 다음 기본 로컬 정책을 추가합니다. 기존 ignore 규칙은 유지합니다.
+공식 배포 경로는 공통 `.agents/skills` 정본에서 생성하는 `grill-us` plugin입니다. 메모리 5개와 visualize를 함께 포함하며 CodeBurn과 개발용 검증기는 포함하지 않습니다. 도구별 프로젝트 폴더의 수동 사본을 새 공식 배포 방식으로 관리하지 않고, 기존 설치본을 자동 삭제·변환하지 않습니다.
+
+포함 스킬·도구별 호출 표기·작업공간 경계와 현재 검증 한계는 [패키지 사용자 안내](packaging/README.md)를 참고합니다. 이 안내도 빌드할 때 생성 패키지의 README로 복사됩니다.
+
+1. 저장소에서 `node scripts/build-plugin.mjs`로 `dist/grill-us` 패키지를 생성합니다. 생성물의 스킬 본문은 별도로 편집하거나 Git에 추적하지 않습니다.
+2. 사용하는 도구의 plugin 경로로 이 패키지를 제공합니다. 실제 host 발견·호출과 최소 지원 버전은 후속 검증에서 확정하며 현재는 미검증입니다. 개발 원본 직접 로딩과 설치 plugin을 같은 시험 세션에서 혼용하지 않습니다.
+3. 사용자 프로젝트의 실제 root를 확인합니다. 설치 cache는 읽기 전용 스킬 위치이고 작업 기록은 사용자 프로젝트의 `.memory`에 둡니다. 대상이 혼동되면 쓰기 전에 확인합니다([작업공간 경계](.agents/skills/memory-execute/references/project-profile.md#skill-installation-and-workspace)). 기존 프로젝트 지침과 정본을 존중합니다.
+4. 대상 `.gitignore`에는 다음 기본 로컬 정책을 반영하고 기존 규칙을 유지합니다. 사용 프로젝트에는 이 저장소의 개발용 검증기나 특정 README/AGENTS 구조를 요구하지 않습니다.
 
 ~~~gitignore
 /.memory/
@@ -194,9 +199,23 @@ node scripts/validate-skills.mjs
 - **ID 문자 참조:** 숫자 참조(잘못된 범위의 replacement와 C1 치환 포함)는 [HTML 규칙](https://html.spec.whatwg.org/multipage/parsing.html#numeric-character-reference-end-state)에 따라 한 번만 정규화합니다. named reference는 `amp`/`lt`/`gt`/`quot`와 해당 대문자형, `apos`/`nbsp`를 지원합니다. 다른 named reference가 있으면 해당 ID만 정보 진단과 함께 비교에서 제외합니다. 전체 entity 표, 실제 DOM 트리·namespace·스크립트의 동적 ID 변화는 검사 범위가 아닙니다.
 - **Git:** OS 임시 저장소에서 ignore 부정 패턴·부모 제외·NUL 출력·tracked 경로·오류와 표준/과거 메시지 식별을 확인합니다. 임시 저장소의 명시 파일만 staging하고 소유 경로를 확인한 뒤 정리합니다. 실제 프로젝트의 index·config·current를 변경하지 않습니다.
 
-회귀 검사만 실행하려면 `node --test tests/validate-skills.test.mjs`를 사용합니다. 추가 패키지 설치와 CI 설정은 필요하지 않습니다. 구현 시 확인한 환경은 Node v26.5.1과 Git 2.53.0.windows.2이며, 최소 지원 버전 전부를 시험한 것은 아닙니다.
+회귀 검사만 실행하려면 `node --test tests/validate-skills.test.mjs tests/build-plugin.test.mjs`를 사용합니다. 추가 패키지 설치와 CI 설정은 필요하지 않습니다. 구현 시 확인한 환경은 Node v26.5.1과 Git 2.53.0.windows.2이며, 최소 지원 버전 전부를 시험한 것은 아닙니다.
 
 결과 종류는 `frontmatter`, `links`, `messages`, `examples`, `html-ids`, `memory-examples`, `git`입니다. 이 명령은 지원 범위의 필수 scalar·ID·정적 구문·파일/제목 참조·예제 형식·격리 Git 동작을 검사합니다. 제외 진단은 부분 확인이며 미확인 대상을 성공으로 세지 않습니다. 전체 Markdown renderer, HTML 렌더링, 접근성 전반, 생성된 UI 동작, 실제 모델 workflow 실행, commit tree를 포함한 중단 복구 성공은 별도 검증이 필요합니다.
+
+## 플러그인 패키지 생성과 검사
+
+저장소 root에서 다음 명령으로 패키지를 생성합니다. 이름·버전·포함 원본의 정본은 [패키지 metadata](packaging/grill-us.json)이며, 생성기는 명시한 6개 스킬과 문서만 복사합니다.
+
+~~~powershell
+node scripts/build-plugin.mjs
+~~~
+
+출력은 `dist/grill-us`이고 이 경로만 Git에서 제외합니다. `build.json`에 원본 SHA256과 생성 파일 목록을 남깁니다. 생성물은 수동 편집하지 않습니다. 기존 출력에 알 수 없는 파일·빈 디렉터리·수동 변경이 있으면 빌드는 덮어쓰지 않고 중단합니다. 원본이나 임의 사용자 경로, symlink/junction을 통한 출력은 허용하지 않습니다.
+
+`node scripts/validate-skills.mjs`는 생성기 회귀도 함께 실행합니다. 생성기 회귀만 확인하려면 `node --test tests/build-plugin.test.mjs`를 사용합니다. 이 검사는 재현성·포함/제외 범위·내부 참조·경로와 사용자 출력 보호를 확인하며 실제 에이전트 호출을 실행하지 않습니다.
+
+Claude Code 2.1.296에서 `claude plugin validate --strict dist/grill-us --json`의 manifest 정적 검증을 통과했습니다. Codex CLI 0.160.1에는 plugin validate 명령이 없어 공식 문서의 최소 manifest 필드·경로와 정적으로 대조했습니다. 전체 외부 Codex JSON Schema나 양쪽 host의 실제 발견·호출을 검증한 것은 아닙니다. 설치·지원 범위와 최소 지원 버전은 후속 T02의 실제 시험 결과로 확정합니다.
 
 ## 추가 도구
 

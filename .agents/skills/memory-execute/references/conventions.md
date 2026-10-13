@@ -45,6 +45,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 - 보고서와 개인 진행 기록을 프로젝트 공유 설계 문서나 `.github` 작업 디렉터리에 추가하지 않는다. 제품 테스트와 공유 가이드는 해당 프로젝트의 기존 위치를 사용한다.
 - 경로와 링크는 작성한 문서 기준 상대 경로를 사용한다. 보고서의 Covered Files는 저장소 기준 상대 경로다. 경로를 쓰기 전에 의도한 프로젝트 안인지 확인한다.
 - 기본적으로 `.memory`는 로컬 관리한다. 명시적인 공유 예외는 실제 Git ignore 정책과 함께 확인하며 force-add로 우회하지 않는다.
+- `.memory` 경로는 확인한 사용자 작업공간 root 기준이며 plugin 설치/cache 경로와 구분한다. 설치된 스킬·참고 문서는 읽기 전용이고 실제 작업공간 발견/미확인 시 질문은 [Skill Installation and Workspace](project-profile.md#skill-installation-and-workspace)를 따른다. cache 안에 상태를 만들지 않는다.
 
 ## Task Fields
 

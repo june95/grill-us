@@ -904,7 +904,8 @@ export function main({ root = projectRoot, runRegressionTests = true } = {}) {
   root = path.resolve(root);
   let failed = false;
   if (runRegressionTests) {
-    const suite = spawnSync(process.execPath, ['--test', path.join(projectRoot, 'tests', 'validate-skills.test.mjs')], { cwd: projectRoot, encoding: 'utf8', timeout: 60000 });
+    const suite = spawnSync(process.execPath, ['--test', path.join(projectRoot, 'tests', 'validate-skills.test.mjs'),
+      path.join(projectRoot, 'tests', 'build-plugin.test.mjs')], { cwd: projectRoot, encoding: 'utf8', timeout: 60000 });
     process.stdout.write(suite.stdout || '');
     if (suite.error || suite.status !== 0) {
       console.error(suite.error?.message || suite.stderr || '회귀 검사 실패'); failed = true;

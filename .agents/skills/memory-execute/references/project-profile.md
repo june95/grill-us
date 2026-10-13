@@ -12,6 +12,17 @@
 
 Git이 없으면 프로젝트 root를 사용자 지시·실제 작업 폴더에서 확인하고 등록·조사·계획은 수행할 수 있다. Git 커밋이 필수인 Task의 실행에서는 Git 부재를 blocker로 기록한다. 로컬 조사·명시적 no-commit 작업에 가상의 commit을 만들지 않는다.
 
+## Skill Installation and Workspace
+
+스킬의 설치 root와 사용자가 작업하는 프로젝트 root는 별개다. plugin metadata·스킬/참고 문서·runtime 파일을 읽은 디렉터리를 현재 프로젝트로 추정하지 않는다. 설치 cache와 생성된 package는 읽기 전용으로 취급하며 `.memory`, 테스트, 제품 변경이나 실행 상태를 그곳에 작성하지 않는다.
+
+1. 사용자 명시 작업공간을 우선하고 실제 cwd·열린 대상 파일·Git root로 사용자 프로젝트를 확인한다. 도구가 제공한 project 경로도 실제 대상으로 대조하며 plugin 설치 경로 변수는 작업공간 근거로 사용하지 않는다.
+2. 등록·계획·실행 기록의 `.memory`는 확인한 사용자 프로젝트 root 기준이다. plugin root에 `.memory`가 없다는 이유로 그곳에 새 기록을 만들거나 기존 사용자 current를 새 pointer로 덮지 않는다.
+3. 실제 cwd가 설치 cache/package 내부이거나 대상 프로젝트가 혼동되면 쓰기 전에 한 질문으로 작업공간을 확정한다. 대상이 분명하면 같은 위치를 반복해서 묻지 않는다.
+4. 스킬 지침과 내부 참조는 설치된 package에서 읽고, 제품·공유 정본·검증 명령·Git 정책은 사용자 프로젝트에서 발견한다. 사용 프로젝트에 이 저장소의 개발용 scripts/tests나 README/AGENTS 구조를 요구하지 않는다.
+
+공식 배포는 공통 원본에서 생성한 plugin 경로로 제공한다. 저장소 `.agents/skills`는 개발 정본이며 수동으로 복제한 도구별 프로젝트 스킬 폴더를 별도 공식 배포 방식으로 관리하지 않는다. 개발 원본 직접 로딩과 설치 plugin을 같은 시험 세션에서 혼용하지 않는다. 기존 설치본은 자동 삭제·변환·덮어쓰지 않는다.
+
 ## Optional Profile
 
 `.memory/project.md`는 선택적인 Markdown 설정이다. 파일 없이도 Discovery로 동작한다. 설정을 만들거나 바꿀 필요가 없다면 빈 설정을 생성하지 않는다.

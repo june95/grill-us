@@ -1,2 +1,5 @@
 # Project Memory: local decisions, blueprints, evidence and runtime state
 /.memory/
+
+# Generated grill-us package only; preserve unrelated dist entries
+/dist/grill-us/

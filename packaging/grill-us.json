@@ -1,0 +1,49 @@
+{
+  "name": "grill-us",
+  "version": "0.1.0",
+  "description": "Project memory workflows and HTML visualization skills from one maintained source.",
+  "author": {
+    "name": "grill-us"
+  },
+  "sourceRoot": ".agents/skills",
+  "skillNames": [
+    "grill-me",
+    "memory-intake",
+    "memory-plan",
+    "memory-execute",
+    "memory-explain",
+    "visualize"
+  ],
+  "sourceFiles": [
+    "grill-me/SKILL.md",
+    "memory-execute/SKILL.md",
+    "memory-execute/references/analysis.md",
+    "memory-execute/references/commit-check.md",
+    "memory-execute/references/conventions.md",
+    "memory-execute/references/guides.md",
+    "memory-execute/references/implementation.md",
+    "memory-execute/references/project-profile.md",
+    "memory-execute/references/resume.md",
+    "memory-execute/references/review.md",
+    "memory-execute/references/scenarios.md",
+    "memory-execute/references/templates.md",
+    "memory-execute/references/testing.md",
+    "memory-execute/references/validation-scope.md",
+    "memory-explain/SKILL.md",
+    "memory-explain/references/scenarios.md",
+    "memory-intake/SKILL.md",
+    "memory-plan/SKILL.md",
+    "visualize/SKILL.md",
+    "visualize/references/animations.md",
+    "visualize/references/anthropic-skill-guide-notes.md",
+    "visualize/references/css-techniques.md",
+    "visualize/references/design-system.md",
+    "visualize/references/eval.md",
+    "visualize/references/libraries.md",
+    "visualize/references/menu.md",
+    "visualize/references/provenance.md",
+    "visualize/references/recipes.md",
+    "visualize/references/skeleton.md",
+    "visualize/references/types.md"
+  ]
+}

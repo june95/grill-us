@@ -113,6 +113,21 @@ E01~E08은 환경 변화에 대한 문서 판단 경계다. 실제 runtime 변�
 
 완료 조건을 입증하는 최소 관련 검증을 사용한다. 변경이 없는 case를 단계가 바뀌었다는 이유로 반복하지 않는다. 새 변경·실패·미해결 위험이 있는 부분만 재검토한다.
 
+## Plugin Package Cases
+
+이 저장소의 개발용 `node scripts/build-plugin.mjs`와 `tests/build-plugin.test.mjs`로 확인한다. 생성 package는 개발 검증기·CodeBurn·사용자 `.memory`를 포함하지 않으며 설치/실제 호출은 별도 host 검증이다. 런타임 문서의 root 발견은 [Skill Installation and Workspace](project-profile.md#skill-installation-and-workspace)를 따른다.
+
+| Case | 입력 | 확인할 결과 / 경계 | 수준 |
+| :--- | :--- | :--- | :--- |
+| K01 | 단일 metadata와 6개 스킬/명시 sourceFiles | 세 manifest identity/version 일치, 본문 bytes/hash 보존, 같은 입력의 재생성 동일 | 생성기 회귀 |
+| K02 | CodeBurn/기록/개인 파일 또는 scope·sourceFiles 변조 | 목록 밖 파일 제외, 누락·중복·탈출 입력 실패 | 생성기 회귀 |
+| K03 | 깨진 링크/anchor 또는 package 밖·파일URI 참조 | 실패하고 이전 생성물 보존, runtime 예시와 실제 문서 참조 구분 | 생성기 회귀 |
+| K04 | source/root/임의 출력 경로·junction/symlink | 쓰기·따라가기 거부, 대상 sentinel 보존 | 생성기 회귀; 실제 OS의 생성 권한/대체 확인 수준 기록 |
+| K05 | 기존 출력에 알 수 없는 파일/빈폴더/수동 수정 | 덮어쓰기·삭제하지 않고 실패. 소유 표식/실제내용 일치만 교체·cleanup | 생성기 회귀 |
+| K06 | module import 또는 잘못된 CLI 입력 | import 부수효과 없음, CLI 성공0/실패1 | 생성기 회귀 |
+| K07 | plugin cache에서 스킬을 읽고 사용자 프로젝트 작업 | cache 읽기만, 실제 userroot의 .memory/정본/Git 사용. 미확인은 질문 | 지침 대조; 실제 host 검증과 구분 |
+| K08 | 생성·static manifest 통과, host 발견/호출 미시도 | static 성공만 기록, 지원표면/최소버전·설치성공 추정 없음 | 공식 manifest/CLI 정적 확인 + 지침 대조 |
+
 ## Limitations
 
 frontmatter 검사는 한 줄 plain/quoted 필수 문자열과 description block만 지원한다. 전체 YAML/metadata 해석은 하지 않는다. HTML ID는 fence마다 태그 속성을 비교하며 numeric/common named reference만 정규화한다. 지원하지 않는 named reference는 해당 ID 비교를 제외하고 이유를 표시한다. 실제 DOM 트리/namespace/동적 ID, 전체 entity 표·HTML 문법·접근성·렌더링은 별도 확인 대상이다. 정확한 scalar/anchor/예제 구조 지원 범위는 패키지 내부 문서인 [validation-scope.md](validation-scope.md)에 기록한다.
