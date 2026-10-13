@@ -7,7 +7,8 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import {
   collectDocuments, readFences, checkLinks, checkTaskMessages, checkExamples, checkSkillFrontmatter, checkHtmlIds,
-  identifyMessage, decodeIgnoreOutput, cleanupGitDirectory
+  identifyMessage, decodeIgnoreOutput, cleanupGitDirectory,
+  extractMarkdownAnchors, extractTaskTemplateContract, checkMemoryExamples
 } from '../scripts/validate-skills.mjs';
 
 const moduleURL = new URL('../scripts/validate-skills.mjs', import.meta.url).href;
@@ -236,7 +237,7 @@ test('broken local links report source line and normal links succeed', t => {
 test('reference links, angle paths, encoded spaces and hash characters', t => {
   const root = fixture(t, {
     'README.md': '[first](<a space.md>)\n[second](a%23b.md#heading)\n[manual][Guide]\n[guide]: <a space.md> "Manual"\n[missing][unknown]\n',
-    'a space.md': '# Title', 'a#b.md': '# Title'
+    'a space.md': '# Title', 'a#b.md': '# Heading'
   });
   const out = checkLinks(root, [path.join(root, 'README.md')]);
   assert.equal(out.checked, 3);
@@ -259,11 +260,12 @@ test('long/nested/indented fences and inline code do not become real links', t =
   assert.equal(out.skipped, 2);
 });
 
-test('external URLs, placeholder paths and outside-repo links have skip reasons', t => {
-  const root = fixture(t, { 'README.md': '[web](https://example.invalid)\n[mail](mailto:x@example.invalid)\n[plan](plans/{id}.md)\n[outside](../foreign.md)\n[heading](#title)' });
+test('external URLs, placeholder paths and outside-repo links skip while supported anchors are checked', t => {
+  const root = fixture(t, { 'README.md': '# Title\n[web](https://example.invalid)\n[mail](mailto:x@example.invalid)\n[plan](plans/{id}.md)\n[outside](../foreign.md)\n[heading](#title)' });
   const out = checkLinks(root, [path.join(root, 'README.md')]);
   assert.equal(errors(out).length, 0);
-  assert.equal(out.skipped, 5);
+  assert.equal(out.skipped, 4);
+  assert.equal(out.checked, 1);
   assert(out.diagnostics.every(d => d.message && d.line));
 });
 
@@ -485,4 +487,325 @@ test('isolated Git checks discard inherited repository/config/index environment'
   assert.equal(JSON.parse(run.stdout).checked, 16);
   assert.equal(fs.existsSync(index), false);
   assert.equal(fs.existsSync(path.join(root, '.git')), false);
+});
+
+
+test('Markdown anchors preserve Unicode, inline display and collision suffixes', () => {
+  const source = [
+    '---', 'name: hidden', 'description: hidden', '---',
+    '# 한글 ' + String.fromCharCode(96) + 'my_key' + String.fromCharCode(96) + ' **Bold** &amp; [Link](dest.md)',
+    '# Repeat', '# Repeat', '# Repeat-1', '# Repeat',
+    'A setext', 'second line', '===', '### Plain_under_score ###',
+    ticks + 'markdown', '# Hidden', ticks, '<!-- # Also hidden -->'
+  ].join('\n');
+  assert.deepEqual([...extractMarkdownAnchors(source)], [
+    '한글-my_key-bold--link', 'repeat', 'repeat-1', 'repeat-1-1', 'repeat-2',
+    'a-setext-second-line', 'plain_under_score'
+  ]);
+});
+
+test('same-file and cross-file percent-encoded anchors report broken fragments at source lines', t => {
+  const root = fixture(t, {
+    'README.md': '# 한글 제목\n[local](#%ED%95%9C%EA%B8%80-%EC%A0%9C%EB%AA%A9)\n[other](guide.md#repeat-1)\n[bad](guide.md#absent)\n[encoding](#%ZZ)\n[start](#)\n',
+    'guide.md': '# Repeat\n# Repeat'
+  });
+  const out = checkLinks(root, [path.join(root, 'README.md')]);
+  assert.equal(out.checked, 4);
+  assert.deepEqual(errors(out).map(d => d.line), [4, 5]);
+  assert.match(errors(out)[0].message, /anchor 없음/);
+  assert.match(errors(out)[1].message, /percent encoding/);
+});
+
+test('reference links can point at supported headings and fenced headings do not count', t => {
+  const root = fixture(t, {
+    'README.md': '[ok][target]\n[target]: guide.md#visible\n[bad](guide.md#hidden)\n',
+    'guide.md': '# Visible\n' + ticks + 'markdown\n# Hidden\n' + ticks
+  });
+  const out = checkLinks(root, [path.join(root, 'README.md')]);
+  assert.equal(out.checked, 2);
+  assert.equal(errors(out).length, 1);
+  assert.match(errors(out)[0].message, /hidden/);
+});
+
+test('raw HTML and unsupported heading entities remain explicit partial checks', t => {
+  const root = fixture(t, {
+    'README.md': '[known](html.md#known)\n[id](html.md#manual)\n[unknown](complex.md#copy)\n[data](file.txt#fragment)\n',
+    'html.md': '# Known\n<a id="manual"></a>',
+    'complex.md': '# &copy; Unknown\n', 'file.txt': 'data'
+  });
+  const out = checkLinks(root, [path.join(root, 'README.md')]);
+  assert.equal(out.checked, 1);
+  assert.equal(out.skipped, 3);
+  assert.deepEqual(errors(out), []);
+  assert(out.diagnostics.every(d => /제외/.test(d.message)));
+});
+
+test('private memory targets are excluded without parsing their headings', t => {
+  const root = fixture(t, {
+    'README.md': '[private](.memory/private.md#absent)\n', '.memory/private.md': '# Secret\n'
+  });
+  const out = checkLinks(root, [path.join(root, 'README.md')]);
+  assert.equal(out.checked, 0);
+  assert.equal(out.skipped, 1);
+  assert.match(out.diagnostics[0].message, /사용자 .memory/);
+});
+
+// 실제 교육용 문서의 독립 fixture를 변형하여 검사 기준과 사례의 drift를 검증한다.
+const sourceRoot = fileURLToPath(new URL('../', import.meta.url));
+const templateRelative = '.agents/skills/memory-execute/references/templates.md';
+const exampleTaskRelative = 'examples/phases/2026-08-22-product-api/P01-core-crud/T01-product-schema/task.md';
+const examplePhaseRelative = 'examples/phases/2026-08-22-product-api/P01-core-crud/phase.md';
+const examplePlanRelative = 'examples/plans/2026-08-22-product-api.md';
+const memoryFixtureFiles = [
+  templateRelative, 'examples/current.md', examplePlanRelative, examplePhaseRelative,
+  exampleTaskRelative, 'examples/phases/2026-08-22-product-api/P01-core-crud/T02-crud-handler/task.md'
+];
+function memoryFixture(t) {
+  return fixture(t, Object.fromEntries(memoryFixtureFiles.map(file => [file, fs.readFileSync(path.join(sourceRoot, file), 'utf8')])));
+}
+function changeDocument(root, file, transform) {
+  const absolute = path.join(root, file);
+  const before = fs.readFileSync(absolute, 'utf8');
+  const after = transform(before);
+  assert.notEqual(after, before, 'fixture mutation must change ' + file);
+  fs.writeFileSync(absolute, after);
+}
+const checkMemory = root => checkMemoryExamples(root, collectDocuments(root));
+
+test('aligned examples accept educational sections and nonbug optional omission', t => {
+  const root = memoryFixture(t);
+  const out = checkMemory(root);
+  assert.equal(out.checked, 5);
+  assert.deepEqual(errors(out), []);
+  assert(!fs.readFileSync(path.join(root, exampleTaskRelative), 'utf8').includes('## Bug Investigation'));
+});
+
+test('template contract is extracted from canonical headings, fields and columns', t => {
+  const root = memoryFixture(t);
+  const contract = extractTaskTemplateContract(fs.readFileSync(path.join(root, templateRelative), 'utf8'));
+  assert(contract.metadata.includes('Blueprint Revision'));
+  assert.deepEqual(contract.validationColumns, ['Criteria', 'Command / Method', 'Cwd', 'Expected Result']);
+  assert(contract.currentFields.includes('Checkpoint'));
+  assert(contract.lastFields.includes('Commit'));
+});
+
+test('missing or duplicate required example headings and fields are detected', t => {
+  for (const [mutate, expected] of [
+    [s => s.replace('## Goal', '## Renamed Goal'), /필수 heading 없음: Goal/],
+    [s => s.replace('## Goal', '## Scope\n\nDuplicated\n\n## Goal'), /중복 heading: Scope/],
+    [s => s.replace('- Source: 스타터의 상품 API 문서 예시', ''), /필수 필드 없음.*Source/],
+    [s => s.replace('- Type: 기능', '- Type: 기능\n- Type: 기능'), /중복 필드: Type/]
+  ]) {
+    const root = memoryFixture(t);
+    changeDocument(root, exampleTaskRelative, mutate);
+    assert(errors(checkMemory(root)).some(d => expected.test(d.message)), String(expected));
+  }
+});
+
+test('invalid policy, revision, status and path identity cannot pass example checks', t => {
+  for (const [mutate, expected] of [
+    [s => s.replace('- Commit Policy: auto', '- Commit Policy: always'), /Commit Policy enum/],
+    [s => s.replace('- Blueprint Revision: 1', '- Blueprint Revision: 0'), /Blueprint Revision/],
+    [s => s.replace('## Status: pending', '## Status: complete'), /Task Status enum/],
+    [s => s.replace('- Task ID: P01-T01', '- Task ID: P01-T010'), /경로와 Plan\/Phase\/Task/]
+  ]) {
+    const root = memoryFixture(t);
+    changeDocument(root, exampleTaskRelative, mutate);
+    assert(errors(checkMemory(root)).some(d => expected.test(d.message)), String(expected));
+  }
+});
+
+test('workflow and validation column drift and progress duplication fail', t => {
+  for (const [mutate, expected] of [
+    [s => s.replace('| Stage | Applicability |', '| Step | Applicability |'), /표 열 불일치: Workflow/],
+    [s => s.replace('| Criteria | Command / Method |', '| Actual Result | Command / Method |'), /표 열 불일치: Validation/],
+    [s => s.replace('- Commit Hash: 없음', '- commit: pending\n- Commit Hash: 없음'), /legacy commit/],
+    [s => s.replace('- Commit Status: pending', '- Commit Status: pending\n- Commit Status: pending'), /중복 필드: Commit Status/],
+    [s => s.replace('- Commit Hash: 없음', ''), /필수 필드 없음.*Commit Hash/]
+  ]) {
+    const root = memoryFixture(t);
+    changeDocument(root, exampleTaskRelative, mutate);
+    assert(errors(checkMemory(root)).some(d => expected.test(d.message)), String(expected));
+  }
+});
+
+test('bug investigation is conditional and obsolete Execution metadata is rejected', t => {
+  const root = memoryFixture(t);
+  changeDocument(root, exampleTaskRelative, s => s.replace('- Type: 기능', '- Type: 버그'));
+  assert(errors(checkMemory(root)).some(d => /Bug Investigation 없음/.test(d.message)));
+  changeDocument(root, exampleTaskRelative, s => s.replace('## Scope', '## Bug Investigation\n\n관찰 근거 예시\n\n## Scope'));
+  assert.deepEqual(errors(checkMemory(root)), []);
+  changeDocument(root, exampleTaskRelative, s => s.replace('- Type: 버그', '- Type: 버그\n- Execution: 교육용'));
+  assert(errors(checkMemory(root)).some(d => /Execution metadata/.test(d.message)));
+});
+
+test('damaged template cannot silently weaken example validation', t => {
+  for (const mutate of [
+    s => s.replace('## Task', '## Not Task'),
+    s => s.replace('- Blueprint Revision: 1', ''),
+    s => s.replace('- Type: {추론한 작업 유형}', '- Type: {추론한 작업 유형}\n- Type: duplicate'),
+    s => s.replace('| Criteria | Command / Method |', '| Other | Command / Method |'),
+    s => s.replace('## Last Completed Task', '## Removed Last Task'),
+    s => s.replace('## Phases\n', '## Phases\n\n## Phases\n')
+  ]) {
+    const root = memoryFixture(t);
+    changeDocument(root, templateRelative, mutate);
+    const out = checkMemory(root);
+    assert.equal(errors(out).length, 1);
+    assert.equal(errors(out)[0].file, path.join(root, templateRelative));
+    assert.match(errors(out)[0].message, /템플릿/);
+  }
+});
+
+test('current missing fields, bogus completion and task status drift fail', t => {
+  for (const [mutate, expected] of [
+    [s => s.replace('## Last Completed Task', '## Missing Last'), /필수 heading 없음: Last Completed Task/],
+    [s => s.replace(/^- Checkpoint: .+\n/m, ''), /필수 필드 없음.*Checkpoint/],
+    [s => s.replace('- Checkpoint: 없음', '- Checkpoint: missing-state'), /Checkpoint는/],
+    [s => s.replace('- Task Status: pending', '- Task Status: done'), /Current Task Status/],
+    [s => s.replace(/없음 — 구현·검증·커밋 또는 no-commit 완료 이력이 없는 예시다\./, '- Plan: test\n- Task: P01-T01\n- Commit: pending\n- Evidence: none'), /마지막 완료 Commit/]
+  ]) {
+    const root = memoryFixture(t);
+    changeDocument(root, 'examples/current.md', mutate);
+    assert(errors(checkMemory(root)).some(d => expected.test(d.message)), String(expected));
+  }
+});
+
+test('no-active current can retain a real checkpoint and explicit no-commit completion', t => {
+  const root = memoryFixture(t);
+  changeDocument(root, 'examples/current.md', s => s
+    .replace(/\[T01 Product\/Variant 스키마\]\([^)]+\)/, '없음')
+    .replace('- Task Status: pending', '- Task Status: 없음')
+    .replace('- implementation (구조 설명을 위한 값)', '- 없음')
+    .replace(/^- Checkpoint: .+$/m, '- Checkpoint: [보존 state](../state.md)')
+    .replace('없음 — 구현·검증·커밋 또는 no-commit 완료 이력이 없는 예시다.',
+      '- Plan: 2026-08-22-product-api\n- Task: P01-T01\n- Commit: no-commit — 로컬 조사 보고만 작성\n- Evidence: [Task](./phases/2026-08-22-product-api/P01-core-crud/T01-product-schema/task.md)'));
+  assert.deepEqual(errors(checkMemory(root)), []);
+});
+
+test('plan and phase summaries reject stale states, missing rows and duplicate fields', t => {
+  for (const [file, mutate, expected] of [
+    [examplePhaseRelative, s => s.replace('| T01 | pending |', '| T01 | done |'), /Phase의 Task ID\/상태/],
+    [examplePhaseRelative, s => s.replace('- done: 0/2', '- done: 1/2'), /Phase done 집계/],
+    [examplePhaseRelative, s => s.replace(/^\| T01 \|.*\n/m, ''), /Phase 표의 Task 누락/],
+    [examplePlanRelative, s => s.replace('| P01 | pending |', '| P01 | done |'), /Plan의 Phase ID\/상태/],
+    [examplePlanRelative, s => s.replace('- Status: pending', '- Status: pending\n- Status: done'), /중복 필드: Status/],
+    ['examples/current.md', s => s.replace('./plans/2026-08-22-product-api.md', './plans/other.md'), /Current Active Plan/]
+  ]) {
+    const root = memoryFixture(t);
+    changeDocument(root, file, mutate);
+    assert(errors(checkMemory(root)).some(d => expected.test(d.message)), String(expected));
+  }
+});
+
+test('no memory examples means no user-memory or optional template scan', t => {
+  const root = fixture(t, { '.memory/phases/private/task.md': 'broken', 'examples/unrelated.md': '# General' });
+  const out = checkMemory(root);
+  assert.equal(out.checked, 0);
+  assert.equal(out.skipped, 1);
+  assert.deepEqual(errors(out), []);
+});
+
+test('main exits 1 for a broken supported anchor and preserves memory', t => {
+  const root = fixture(t, { 'README.md': '# Present\n[broken](#absent)\n', '.memory/current.md': 'preserve' });
+  const source = 'import { main } from ' + JSON.stringify(moduleURL) +
+    '; process.exitCode=main({root:' + JSON.stringify(root) + ',runRegressionTests:false});';
+  const run = spawnSync(process.execPath, ['--input-type=module', '-e', source], { cwd: root, encoding: 'utf8', timeout: 30000 });
+  assert.equal(run.status, 1);
+  assert.match(run.stdout, /\[FAIL links\].*README.md:2.*anchor 없음/);
+  assert.equal(fs.readFileSync(path.join(root, '.memory/current.md'), 'utf8'), 'preserve');
+});
+
+test('main reports example drift separately from links and leaves source files intact', t => {
+  const root = memoryFixture(t);
+  changeDocument(root, exampleTaskRelative, s => s.replace('- Commit Hash: 없음', ''));
+  const before = fs.readFileSync(path.join(root, exampleTaskRelative), 'utf8');
+  const source = 'import { main } from ' + JSON.stringify(moduleURL) +
+    '; process.exitCode=main({root:' + JSON.stringify(root) + ',runRegressionTests:false});';
+  const run = spawnSync(process.execPath, ['--input-type=module', '-e', source], { cwd: root, encoding: 'utf8', timeout: 30000 });
+  assert.equal(run.status, 1);
+  assert.match(run.stdout, /\[FAIL memory-examples\].*Commit Hash/);
+  assert.equal(fs.readFileSync(path.join(root, exampleTaskRelative), 'utf8'), before);
+});
+
+
+test('escaped literal underscores and code are preserved in heading slugs', () => {
+  const source = '# \\_literal\\_ and ' + String.fromCharCode(96) + '<body>' + String.fromCharCode(96);
+  assert.deepEqual([...extractMarkdownAnchors(source)], ['_literal_-and-body']);
+});
+
+test('unsupported nested headings do not falsely pass or fail unknown anchors', t => {
+  const root = fixture(t, { 'README.md': '[nested](other.md#nested)', 'other.md': '> # Nested\n' });
+  const out = checkLinks(root, [path.join(root, 'README.md')]);
+  assert.equal(out.checked, 0);
+  assert.equal(out.skipped, 1);
+  assert.deepEqual(errors(out), []);
+});
+
+test('example source junctions cannot make the exported checker read private memory', t => {
+  const root = memoryFixture(t);
+  const source = path.join(root, '.memory');
+  fs.mkdirSync(source);
+  fs.writeFileSync(path.join(source, 'task.md'), 'must not parse this');
+  const alias = path.join(root, 'examples/phases/alias');
+  fs.symlinkSync(source, alias, 'junction');
+  t.after(() => { if (fs.existsSync(alias)) fs.unlinkSync(alias); });
+  const out = checkMemoryExamples(root, [path.join(alias, 'task.md')]);
+  assert(errors(out).some(d => /검사 범위 밖/.test(d.message)));
+});
+
+
+test('nested blockquote and mixed list prefixes keep unsupported heading checks partial', t => {
+  for (const heading of ['> > # Nested', '> - > # Nested', '- > # Nested', '- - # Nested', '> > Nested\n> > ---']) {
+    const root = fixture(t, { 'README.md': '[nested](other.md#nested)', 'other.md': heading });
+    const out = checkLinks(root, [path.join(root, 'README.md')]);
+    assert.deepEqual(errors(out), [], heading);
+    assert.equal(out.checked, 0, heading);
+    assert.equal(out.skipped, 1, heading);
+  }
+});
+
+test('phase rejects a known foreign task extra row and a wrong parent Plan backlink', t => {
+  const root = memoryFixture(t);
+  const foreignTask = 'examples/phases/2026-08-22-product-api/P02-other/T01-foreign/task.md';
+  fs.mkdirSync(path.dirname(path.join(root, foreignTask)), { recursive: true });
+  fs.writeFileSync(path.join(root, foreignTask), fs.readFileSync(path.join(root, exampleTaskRelative), 'utf8')
+    .replace('- Phase ID: P01-core-crud', '- Phase ID: P02-other')
+    .replace('- Task ID: P01-T01', '- Task ID: P02-T01'));
+  changeDocument(root, examplePhaseRelative, s => s.replace(/^(\| T01 \|.*)$/m,
+    '$1\n| T01 | pending | 없음 | foreign | [Foreign](../P02-other/T01-foreign/task.md) |'));
+  assert(errors(checkMemory(root)).some(d => /Phase의 Task 소속/.test(d.message)));
+  const backlinkRoot = memoryFixture(t);
+  changeDocument(backlinkRoot, examplePhaseRelative, s => s.replace(
+    '../../../plans/2026-08-22-product-api.md', '../../../plans/other-plan.md'));
+  assert(errors(checkMemory(backlinkRoot)).some(d => /Phase 상단 Plan 링크 소속/.test(d.message)));
+});
+
+test('plan rejects a known foreign pending Phase even if its own Phase is listed', t => {
+  const root = memoryFixture(t);
+  const otherId = '2026-08-23-other-api';
+  const otherPhase = 'examples/phases/' + otherId + '/P01-core-crud/phase.md';
+  const otherPlan = 'examples/plans/' + otherId + '.md';
+  fs.mkdirSync(path.dirname(path.join(root, otherPhase)), { recursive: true });
+  fs.writeFileSync(path.join(root, otherPhase), fs.readFileSync(path.join(root, examplePhaseRelative), 'utf8')
+    .replace('../../../plans/2026-08-22-product-api.md', '../../../plans/' + otherId + '.md')
+    .replace(/^\| T0[12] \|.*\n/gm, '').replace('- done: 0/2', '- done: 0/0'));
+  fs.writeFileSync(path.join(root, otherPlan), fs.readFileSync(path.join(root, examplePlanRelative), 'utf8')
+    .replaceAll('2026-08-22-product-api', otherId).replace('- done: 0/2', '- done: 0/0'));
+  changeDocument(root, examplePlanRelative, s => s.replace(/^(\| P01 \|.*)$/m,
+    '$1\n| P01 | pending | foreign | [Foreign](../phases/' + otherId + '/P01-core-crud/phase.md) |'));
+  const out = checkMemory(root);
+  assert(errors(out).some(d => /Plan의 Phase 소속/.test(d.message)));
+});
+
+test('invalid or stale Active Stage is rejected when no task is active', t => {
+  for (const [mutate, expected] of [
+    [s => s.replace('- implementation (구조 설명을 위한 값)', '- unknown-stage'), /Active Stage 값/],
+    [s => s.replace(/\[T01 Product\/Variant 스키마\]\([^)]+\)/, '없음')
+      .replace('- Task Status: pending', '- Task Status: 없음'), /활성 Task 없음의 Active Stage/]
+  ]) {
+    const root = memoryFixture(t);
+    changeDocument(root, 'examples/current.md', mutate);
+    assert(errors(checkMemory(root)).some(d => expected.test(d.message)), String(expected));
+  }
 });

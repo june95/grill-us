@@ -201,6 +201,71 @@ function inlineDestination(text, start) {
   return null;
 }
 
+/** fence/frontmatter/comment를 지우되 진단에 필요한 원래 행 번호를 유지한다. */
+function markdownOutside(text) {
+  let outside = readFences(text).outside;
+  const frontmatter = outside.match(/^\uFEFF?---\n[\s\S]*?\n---(?:\n|$)/);
+  if (frontmatter) outside = outside.replace(frontmatter[0], frontmatter[0].replace(/[^\n]/g, ' '));
+  return outside.replace(/<!--[\s\S]*?(?:-->|$)/g, value => value.replace(/[^\n]/g, ' '));
+}
+
+/** 지원하는 제목 표시 텍스트를 추출하고 복잡한 HTML/속성은 불확실성으로 남긴다. */
+function headingLabel(text) {
+  const code = [];
+  let value = text.replace(/(\x60+)([^\n]*?)\1/g, (_, marks, body) => {
+    code.push(body);
+    return '\u0000' + (code.length - 1) + '\u0000';
+  });
+  value = value.replace(/\\([\\\x60*_[\]{}()#+.!<>~-])/g, (_, literal) => {
+    code.push(literal);
+    return '\u0000' + (code.length - 1) + '\u0000';
+  });
+  value = value.replace(/!?\[([^\]\n]*)\]\((?:[^()\\]|\\.|(?:\([^()]*\)))*\)/g, '$1')
+    .replace(/!?\[([^\]\n]*)\](?:\[[^\]\n]*\])?/g, '$1');
+  if (/<\/?[A-Za-z][^>]*>|\{#[^}]+\}/.test(value)) return null;
+  const decoded = decodeHtmlId(value);
+  if (decoded.unsupported) return null;
+  return decoded.value.replace(/\\([\\\x60*_[\]{}()#+.!<>~-])/g, '$1')
+    .replace(/(\*\*|\*|~~)(?=\S)(.+?)\1/g, '$2')
+    .replace(/(^|[^\p{L}\p{N}])(_{1,2})(?=\S)(.+?)\2(?=$|[^\p{L}\p{N}])/gu, '$1$3')
+    .replace(/\u0000(\d+)\u0000/g, (_, index) => code[Number(index)]);
+}
+
+/** Markdown 전체 renderer가 아닌 지원 제목 범위의 anchor 색인. */
+function markdownAnchorIndex(text) {
+  const outside = markdownOutside(text);
+  const lines = outside.split('\n');
+  const anchors = new Set();
+  let uncertain = false;
+  function add(label) {
+    const display = headingLabel(label);
+    if (display === null) { uncertain = true; return; }
+    const base = display.toLowerCase().replace(/[^\p{L}\p{N}\p{M}_\-\s]/gu, '').replace(/\s/g, '-');
+    let anchor = base, suffix = 0;
+    while (anchors.has(anchor)) anchor = base + '-' + (++suffix);
+    anchors.add(anchor);
+  }
+  for (let i = 0; i < lines.length; i++) {
+    const atx = lines[i].match(/^ {0,3}#{1,6}(?:[ \t]+(.*?)|[ \t]*)$/);
+    if (atx) { add((atx[1] || '').replace(/[ \t]+#+[ \t]*$/, '').trim()); continue; }
+    if (!/^ {0,3}(?:=+|-+)[ \t]*$/.test(lines[i]) || i === 0 || !lines[i - 1].trim()) continue;
+    let start = i - 1;
+    while (start > 0 && lines[start - 1].trim() && !/^(?: {0,3}#{1,6}\s| {0,3}(?:[-*+] |\d+[.)] )|[>|]| {4}|\t)/.test(lines[start - 1])) start--;
+    const paragraph = lines.slice(start, i);
+    if (paragraph.some(line => /^(?: {0,3}#{1,6}\s| {0,3}(?:[-*+] |\d+[.)] )|[>|]| {4}|\t)/.test(line))) continue;
+    add(paragraph.map(line => line.trim()).join(' '));
+  }
+  // raw HTML이 정의하는 id/heading은 지원 밖이다. 미확인 fragment를 성공으로 세지 않는다.
+  if (/<[A-Za-z][^>]*\bid\s*=|<h[1-6](?:\s|>)/i.test(withoutInlineCode(outside))) uncertain = true;
+  if (/^ {0,3}(?:(?:>[ \t]*)|(?:(?:[-+*]|\d+[.)])[ \t]+))+(?:#{1,6}(?:[ \t]|$)|=+[ \t]*$|-+[ \t]*$)/m.test(outside)) uncertain = true;
+  return { anchors, uncertain };
+}
+
+/** 지원 ATX/setext 제목의 Unicode slug·중복 suffix 집합을 반환한다. */
+export function extractMarkdownAnchors(text) {
+  return markdownAnchorIndex(text).anchors;
+}
+
 export function checkLinks(root, files) {
   const out = result();
   for (const file of files) {
@@ -221,26 +286,42 @@ export function checkLinks(root, files) {
     text = text.replace(/^[ \t]*\[[^\]]+\]:[^\n]*$/gm, match => ' '.repeat(match.length));
     function verify(target, offset) {
       const line = lineAt(text, offset);
-      if (!target || target.startsWith('#')) {
-        diagnostic(out, 'links', file, line, '문서 내부 anchor 제외', 'info'); return;
-      }
+      if (!target) { diagnostic(out, 'links', file, line, '빈 링크 대상 제외', 'info'); return; }
       if (/^[a-z][a-z0-9+.-]*:/i.test(target) || target.startsWith('//')) {
         diagnostic(out, 'links', file, line, '외부 URL/프로토콜 제외', 'info'); return;
       }
       if (/[{}]/.test(target) || /<[^>]+>/.test(target)) {
         diagnostic(out, 'links', file, line, '동적 placeholder 경로 제외', 'info'); return;
       }
-      let local;
-      try { local = decodeURIComponent(target.split('#')[0]).replace(/\\([ ()[\]<>\\])/g, '$1'); }
-      catch { diagnostic(out, 'links', file, line, `잘못된 경로 percent encoding: ${target}`); return; }
-      const absolute = path.resolve(path.dirname(file), local);
+      let local, fragment;
+      try {
+        const hash = target.indexOf('#');
+        local = decodeURIComponent(hash < 0 ? target : target.slice(0, hash)).replace(/\\([ ()[\]<>\\])/g, '$1');
+        fragment = hash < 0 ? null : decodeURIComponent(target.slice(hash + 1));
+      }
+      catch { diagnostic(out, 'links', file, line, '잘못된 링크 percent encoding: ' + target); return; }
+      const absolute = local ? path.resolve(path.dirname(file), local) : file;
       if (!within(root, absolute)) {
         diagnostic(out, 'links', file, line, '저장소 밖 경로 제외', 'info'); return;
       }
-      out.checked++;
-      if (!fs.existsSync(absolute)) diagnostic(out, 'links', file, line, `링크 대상 없음: ${target}`);
+      if (within(path.join(root, '.memory'), absolute)) {
+        diagnostic(out, 'links', file, line, '사용자 .memory 대상 제외', 'info'); return;
+      }
+      if (!fs.existsSync(absolute)) {
+        out.checked++; diagnostic(out, 'links', file, line, '링크 대상 없음: ' + target);
+      }
       else if (!within(fs.realpathSync(root), fs.realpathSync(absolute))) {
         diagnostic(out, 'links', file, line, '저장소 밖 심볼릭 링크 대상 제외', 'info');
+      } else if (within(path.join(fs.realpathSync(root), '.memory'), fs.realpathSync(absolute))) {
+        diagnostic(out, 'links', file, line, '사용자 .memory 심볼릭 링크 대상 제외', 'info');
+      } else if (fragment === null || fragment === '') { out.checked++; }
+      else if (!/\.md$/i.test(absolute)) {
+        diagnostic(out, 'links', file, line, 'Markdown 외 fragment 제외: ' + target, 'info');
+      } else {
+        const index = markdownAnchorIndex(fs.readFileSync(absolute, 'utf8'));
+        if (index.anchors.has(fragment)) out.checked++;
+        else if (index.uncertain) diagnostic(out, 'links', file, line, '지원 밖 HTML/제목 구문으로 fragment 판단 제외: ' + target, 'info');
+        else { out.checked++; diagnostic(out, 'links', file, line, 'Markdown anchor 없음: ' + target); }
       }
     }
     const used = [];
@@ -256,6 +337,289 @@ export function checkLinks(root, files) {
       if (m[2] !== undefined && !references.has(key)) diagnostic(out, 'links', file, lineAt(text, m.index), `reference 정의 없음: ${key}`);
       else if (references.has(key)) verify(references.get(key), m.index);
     }
+  }
+  return out;
+}
+
+const taskStatuses = new Set(['pending', 'in_progress', 'blocked', 'done']);
+const commitPolicies = new Set(['auto', 'none', 'check_only']);
+const workflowStages = new Set(['reference', 'design-guide-update', 'implementation', 'review', 'review-action',
+  'test', 'guide-update', 'refactor', 'commit-check', 'commit']);
+const minimumTaskSections = ['Metadata', 'Status', 'Goal', 'Decision Summary', 'Scope', 'Dependencies',
+  'Guide Alignment', 'Implementation', 'Acceptance Criteria', 'Workflow', 'Validation',
+  'Commit Message', 'Completion Check', 'Progress', 'Change Log'];
+const minimumMetadata = ['Plan ID', 'Phase ID', 'Task ID', 'Type', 'Source', 'Blueprint Revision', 'Commit Policy'];
+
+/** 문서의 fence 밖 top-level 섹션을 읽고 중복 heading의 위치를 보존한다. */
+function documentSections(text) {
+  const outside = markdownOutside(text);
+  const matches = [...outside.matchAll(/^##[ \t]+(.+?)[ \t]*$/gm)];
+  return matches.map((m, i) => ({
+    name: m[1].startsWith('Status:') ? 'Status' : m[1],
+    title: m[1], line: lineAt(outside, m.index),
+    body: text.replace(/\r\n/g, '\n').split('\n').slice(lineAt(outside, m.index), matches[i + 1] ? lineAt(outside, matches[i + 1].index) - 1 : undefined).join('\n')
+  }));
+}
+
+function fieldsOf(section) {
+  const body = markdownOutside(section?.body || '');
+  return [...body.matchAll(/^- ([^:\n]+):[ \t]*(.*)$/gm)]
+    .map(m => ({ name: m[1], value: m[2], line: section.line + lineAt(body, m.index) }));
+}
+
+function tableOf(section) {
+  const lines = markdownOutside(section?.body || '').split('\n');
+  const index = lines.findIndex(line => /^\s*\|/.test(line));
+  if (index < 0) return null;
+  const cells = line => line.trim().replace(/^\||\|$/g, '').split('|').map(cell => cell.trim());
+  if (!/^\s*\|(?:[ :\-]+\|)+\s*$/.test(lines[index + 1] || '')) return null;
+  const rows = [];
+  for (let i = index + 2; i < lines.length && /^\s*\|/.test(lines[i]); i++) {
+    rows.push({ cells: cells(lines[i]), line: section.line + i + 1 });
+  }
+  return { columns: cells(lines[index]), rows, line: section.line + index + 1 };
+}
+
+/** 지정 템플릿 절의 markdown fence 하나만 선택; 누락/중복은 조용히 약화하지 않는다. */
+function templateBlock(text, title) {
+  const sections = documentSections(text).filter(section => section.name === title);
+  if (sections.length !== 1) throw new Error('템플릿 ' + title + ' 섹션 누락/중복');
+  const outside = readFences(text).outside;
+  const headings = [...outside.matchAll(/^##[ \t]+(.+)$/gm)];
+  const index = headings.findIndex(m => m[1] === title);
+  const start = lineAt(outside, headings[index].index);
+  const end = index + 1 < headings.length ? lineAt(outside, headings[index + 1].index) : Infinity;
+  const fences = readFences(text).fences.filter(f => f.line > start && f.line < end && f.language === 'markdown');
+  if (fences.length !== 1 || !fences[0].closed) throw new Error('템플릿 ' + title + ' markdown fence 누락/중복/미종료');
+  return fences[0].content;
+}
+
+function requireUnique(values, label) {
+  if (new Set(values).size !== values.length) throw new Error('템플릿 ' + label + ' 중복');
+}
+
+/** Task/Current/Plan/Phase의 현재 형식을 읽고 최소 필수 계약 손상은 실패시킨다. */
+export function extractTaskTemplateContract(templateText) {
+  const sections = documentSections(templateBlock(templateText, 'Task'));
+  const names = sections.map(s => s.name);
+  requireUnique(names, 'Task heading');
+  for (const name of minimumTaskSections) if (!names.includes(name)) throw new Error('템플릿 Task heading 누락: ' + name);
+  const get = name => sections.find(s => s.name === name);
+  const metadata = fieldsOf(get('Metadata')).map(f => f.name);
+  requireUnique(metadata, 'Metadata');
+  for (const name of minimumMetadata) if (!metadata.includes(name)) throw new Error('템플릿 Metadata 누락: ' + name);
+  const progress = fieldsOf(get('Progress')).map(f => f.name);
+  requireUnique(progress, 'Progress');
+  for (const name of ['Commit Status', 'Commit Hash', 'Resume Stage', 'Blocker', 'Next Step']) {
+    if (!progress.includes(name)) throw new Error('템플릿 Progress 누락: ' + name);
+  }
+  function columns(section, required) {
+    const table = tableOf(section);
+    const separators = markdownOutside(section?.body || '').match(/^\s*\|(?:[ :\-]+\|)+\s*$/gm) || [];
+    if (!table || separators.length !== 1 || table.columns.join('|') !== required.join('|')) throw new Error('템플릿 표 손상/중복: ' + section?.name);
+    return table.columns;
+  }
+  function uniqueTemplateSections(title) {
+    const found = documentSections(templateBlock(templateText, title));
+    requireUnique(found.map(s => s.name), title + ' heading');
+    return found;
+  }
+  const current = documentSections(templateBlock(templateText, 'Current'));
+  requireUnique(current.map(s => s.name), 'Current heading');
+  for (const name of ['Active Plan', 'Active Phase', 'Active Task', 'Active Stage', 'Status', 'Last Completed Task', 'Next Step']) {
+    if (!current.some(s => s.name === name)) throw new Error('템플릿 Current heading 누락: ' + name);
+  }
+  const currentFields = fieldsOf(current.find(s => s.name === 'Status')).map(f => f.name);
+  requireUnique(currentFields, 'Current Status');
+  for (const name of ['Task Status', 'Commit Policy', 'Blocker', 'Checkpoint']) {
+    if (!currentFields.includes(name)) throw new Error('템플릿 Current 필드 누락: ' + name);
+  }
+  const lastFields = fieldsOf(current.find(s => s.name === 'Last Completed Task')).map(f => f.name);
+  requireUnique(lastFields, 'Last Completed Task');
+  for (const name of ['Plan', 'Task', 'Commit', 'Evidence']) {
+    if (!lastFields.includes(name)) throw new Error('템플릿 Last Completed Task 필드 누락: ' + name);
+  }
+  return {
+    sections: names.filter(name => name !== 'Bug Investigation'), metadata, progress,
+    workflowColumns: columns(get('Workflow'), ['Stage', 'Applicability', 'Reason / Trigger', 'Status', 'Evidence']),
+    validationColumns: columns(get('Validation'), ['Criteria', 'Command / Method', 'Cwd', 'Expected Result']),
+    currentSections: current.map(s => s.name), currentFields, lastFields,
+    planColumns: columns(uniqueTemplateSections('Plan').find(s => s.name === 'Phases'),
+      ['Phase', 'Status', 'Summary', 'Blueprint']),
+    phaseColumns: columns(uniqueTemplateSections('Phase').find(s => s.name === 'Tasks'),
+      ['Task', 'Status', 'Depends On', 'Summary', 'Blueprint'])
+  };
+}
+
+/** examples의 문서 형식·요약 관계만 검사하고 사용자 .memory/제품 실행은 읽지 않는다. */
+export function checkMemoryExamples(root, files) {
+  const out = result();
+  const normalized = file => path.relative(root, file).split(path.sep).join('/');
+  const examples = files.filter(file => /^(?:examples\/current\.md|examples\/plans\/[^/]+\.md|examples\/phases\/.*\/(?:task|phase)\.md)$/.test(normalized(file)));
+  if (!examples.length) { diagnostic(out, 'memory-examples', null, null, '검사할 메모리 예제 없음', 'info'); return out; }
+  const templateFile = path.join(root, '.agents/skills/memory-execute/references/templates.md');
+  let contract;
+  function safeSource(file, directory) {
+    const actual = fs.realpathSync(file);
+    if (!within(fs.realpathSync(root), actual) || !within(path.join(fs.realpathSync(root), directory), actual)) throw new Error('검사 범위 밖/심볼릭 링크 대상: ' + file);
+  }
+  try {
+    safeSource(templateFile, '.agents/skills/memory-execute/references');
+    contract = extractTaskTemplateContract(fs.readFileSync(templateFile, 'utf8'));
+  }
+  catch (error) { diagnostic(out, 'memory-examples', templateFile, 1, error.message); return out; }
+  const documents = new Map();
+  function issue(file, line, message) { diagnostic(out, 'memory-examples', file, line, message); }
+  for (const file of examples) {
+    try { safeSource(file, 'examples'); }
+    catch (error) { issue(file, 1, error.message); continue; }
+    const text = fs.readFileSync(file, 'utf8');
+    const sections = documentSections(text);
+    const map = new Map();
+    for (const s of sections) {
+      if (map.has(s.name)) issue(file, s.line, '중복 heading: ' + s.name);
+      else map.set(s.name, s);
+    }
+    documents.set(file, { text, sections: map });
+    out.checked++;
+  }
+  function requireSections(file, doc, names) {
+    for (const name of names) if (!doc.sections.has(name)) issue(file, 1, '필수 heading 없음: ' + name);
+  }
+  function checkFields(file, section, required, rejectLegacy = false) {
+    const values = new Map();
+    for (const f of fieldsOf(section)) {
+      if (values.has(f.name)) issue(file, f.line, '중복 필드: ' + f.name);
+      else values.set(f.name, f.value);
+      if (rejectLegacy && f.name === 'commit') issue(file, f.line, 'legacy commit 중복 키 대신 Commit Status/Commit Hash 사용');
+    }
+    for (const name of required) if (!values.has(name) || !values.get(name).trim()) issue(file, section?.line || 1, '필수 필드 없음/빈값: ' + name);
+    return values;
+  }
+  function checkTable(file, section, expected) {
+    const table = tableOf(section);
+    if (!table || table.columns.join('|') !== expected.join('|')) { issue(file, section?.line || 1, '표 열 불일치: ' + (section?.name || expected[0])); return null; }
+    for (const row of table.rows) if (row.cells.length !== expected.length) issue(file, row.line, '표 행 열 개수 불일치');
+    return table;
+  }
+  const tasks = new Map();
+  for (const [file, doc] of documents) {
+    if (!normalized(file).endsWith('/task.md')) continue;
+    requireSections(file, doc, contract.sections);
+    const metadata = checkFields(file, doc.sections.get('Metadata'), contract.metadata);
+    if (metadata.has('Execution')) issue(file, doc.sections.get('Metadata').line, 'Execution metadata는 Example Preconditions 설명으로 이동');
+    if (!commitPolicies.has(metadata.get('Commit Policy'))) issue(file, doc.sections.get('Metadata')?.line || 1, 'Commit Policy enum 오류');
+    if (!/^[1-9]\d*$/.test(metadata.get('Blueprint Revision') || '')) issue(file, doc.sections.get('Metadata')?.line || 1, 'Blueprint Revision 정수 오류');
+    const status = doc.sections.get('Status')?.title.replace(/^Status:\s*/, '');
+    if (!taskStatuses.has(status)) issue(file, doc.sections.get('Status')?.line || 1, 'Task Status enum 오류');
+    if (/버그|bug/i.test(metadata.get('Type') || '') && !doc.sections.has('Bug Investigation')) issue(file, 1, '버그 Task의 Bug Investigation 없음');
+    checkFields(file, doc.sections.get('Progress'), contract.progress, true);
+    checkTable(file, doc.sections.get('Workflow'), contract.workflowColumns);
+    checkTable(file, doc.sections.get('Validation'), contract.validationColumns);
+    const rel = normalized(file).split('/');
+    if (metadata.get('Plan ID') !== rel[2] || metadata.get('Phase ID') !== rel[3] ||
+      metadata.get('Task ID') !== rel[3]?.split('-')[0] + '-' + rel[4]?.split('-')[0]) issue(file, 1, '경로와 Plan/Phase/Task metadata 불일치');
+    tasks.set(file, { metadata, status });
+  }
+  const phases = new Map();
+  function summaryFields(file, doc, required) {
+    const firstHeading = markdownOutside(doc.text).match(/^## /m)?.index ?? doc.text.length;
+    return checkFields(file, { line: 0, body: markdownOutside(doc.text).slice(0, firstHeading) }, required);
+  }
+  for (const [file, doc] of documents) {
+    if (!normalized(file).endsWith('/phase.md')) continue;
+    requireSections(file, doc, ['Tasks', 'Progress']);
+    const table = checkTable(file, doc.sections.get('Tasks'), contract.phaseColumns);
+    let completed = 0;
+    const seen = new Set();
+    for (const row of table?.rows || []) {
+      const link = row.cells[4]?.match(/\]\(([^)#]+)(?:#[^)]*)?\)/);
+      const target = link && path.resolve(path.dirname(file), link[1]);
+      const task = target && tasks.get(target);
+      if (!task) { issue(file, row.line, 'Phase가 알려진 예제 Task를 가리키지 않음'); continue; }
+      const own = normalized(file).split('/');
+      if (path.dirname(path.dirname(target)) !== path.dirname(file) ||
+        task.metadata.get('Plan ID') !== own[2] || task.metadata.get('Phase ID') !== own[3]) {
+        issue(file, row.line, 'Phase의 Task 소속 불일치'); continue;
+      }
+      if (seen.has(target)) issue(file, row.line, 'Phase의 중복 Task');
+      seen.add(target);
+      const taskNumber = task.metadata.get('Task ID')?.split('-')[1];
+      if (row.cells[0] !== taskNumber || row.cells[1] !== task.status) issue(file, row.line, 'Phase의 Task ID/상태 불일치');
+      if (task.status === 'done') completed++;
+    }
+    const ownTasks = [...tasks.keys()].filter(task => path.dirname(path.dirname(task)) === path.dirname(file));
+    if (ownTasks.some(task => !seen.has(task))) issue(file, doc.sections.get('Tasks')?.line || 1, 'Phase 표의 Task 누락');
+    const progress = fieldsOf(doc.sections.get('Progress'));
+    if (progress.filter(f => f.name === 'done').length !== 1 || progress.find(f => f.name === 'done')?.value !== completed + '/' + ownTasks.length) issue(file, doc.sections.get('Progress')?.line || 1, 'Phase done 집계 불일치');
+    const fields = summaryFields(file, doc, ['Plan', 'Status']);
+    const backlink = fields.get('Plan')?.match(/\]\(([^)#]+)(?:#[^)]*)?\)/);
+    const expectedPlan = path.join(root, 'examples/plans', normalized(file).split('/')[2] + '.md');
+    if (!backlink || path.resolve(path.dirname(file), backlink[1]) !== expectedPlan || !documents.has(expectedPlan)) issue(file, 1, 'Phase 상단 Plan 링크 소속 불일치');
+    const status = fields.get('Status');
+    if (!taskStatuses.has(status)) issue(file, 1, 'Phase Status enum 오류');
+    phases.set(file, { status });
+  }
+  for (const [file, doc] of documents) {
+    if (!normalized(file).startsWith('examples/plans/')) continue;
+    requireSections(file, doc, ['Goal', 'Scope', 'Phases', 'Dependencies and Sequencing', 'Completion Criteria', 'Next Step']);
+    const table = checkTable(file, doc.sections.get('Phases'), contract.planColumns);
+    const seen = new Set();
+    for (const row of table?.rows || []) {
+      const link = row.cells[3]?.match(/\]\(([^)#]+)(?:#[^)]*)?\)/);
+      const target = link && path.resolve(path.dirname(file), link[1]);
+      const phase = target && phases.get(target);
+      if (!phase) { issue(file, row.line, 'Plan이 알려진 예제 Phase를 가리키지 않음'); continue; }
+      if (normalized(target).split('/')[2] !== path.basename(file, '.md')) { issue(file, row.line, 'Plan의 Phase 소속 불일치'); continue; }
+      if (seen.has(target)) issue(file, row.line, 'Plan의 중복 Phase');
+      seen.add(target);
+      if (row.cells[0] !== path.basename(path.dirname(target)).split('-')[0] || row.cells[1] !== phase.status) issue(file, row.line, 'Plan의 Phase ID/상태 불일치');
+    }
+    const planId = path.basename(file, '.md');
+    if ([...phases.keys()].some(phase => normalized(phase).split('/')[2] === planId && !seen.has(phase))) issue(file, 1, 'Plan 표의 Phase 누락');
+    const fields = summaryFields(file, doc, ['Plan ID', 'Date', 'Status']);
+    if (!taskStatuses.has(fields.get('Status'))) issue(file, 1, 'Plan Status enum 오류');
+    const id = fields.get('Plan ID');
+    if (id !== planId) issue(file, 1, 'Plan ID와 예제 파일명 불일치');
+  }
+  const currentFile = path.join(root, 'examples/current.md');
+  const current = documents.get(currentFile);
+  if (current) {
+    requireSections(currentFile, current, contract.currentSections);
+    const status = checkFields(currentFile, current.sections.get('Status'), contract.currentFields);
+    const activeStage = current.sections.get('Active Stage')?.body.match(/^\s*-\s+(\S+)/m)?.[1];
+    if (activeStage !== '없음' && !workflowStages.has(activeStage)) issue(currentFile, current.sections.get('Active Stage')?.line || 1, 'Active Stage 값은 기존 stage 또는 없음이어야 함');
+    if (!commitPolicies.has(status.get('Commit Policy')?.split(/\s/)[0])) issue(currentFile, current.sections.get('Status')?.line || 1, 'Current Commit Policy enum 오류');
+    const checkpoint = status.get('Checkpoint') || '';
+    if (!/^(?:없음\b|없음[ \u2014]|.*\]\([^)]+\))/.test(checkpoint)) issue(currentFile, current.sections.get('Status')?.line || 1, 'Checkpoint는 실제 링크 또는 없음이어야 함');
+    const last = current.sections.get('Last Completed Task');
+    if (/^\s*없음(?:\s|$)/.test(last?.body || '')) {
+      if (fieldsOf(last).length) issue(currentFile, last.line, 'Last Completed Task 없음과 필드 충돌');
+    } else {
+      const fields = checkFields(currentFile, last, contract.lastFields);
+      const commit = fields.get('Commit') || '';
+      if (!/^[a-f0-9]{7,40}$/i.test(commit) && !/^(?:no-commit|변경 없음).+\S/.test(commit)) issue(currentFile, last?.line || 1, '마지막 완료 Commit은 확인한 SHA 또는 사유 있는 no-commit');
+      if (!/\]\([^)]+\)/.test(fields.get('Evidence') || '')) issue(currentFile, last?.line || 1, '마지막 완료 Evidence 링크 없음');
+    }
+    const active = current.sections.get('Active Task');
+    const link = active?.body.match(/\]\(([^)#]+)(?:#[^)]*)?\)/);
+    if (link) {
+      const target = path.resolve(path.dirname(currentFile), link[1]), task = tasks.get(target);
+      if (!task) issue(currentFile, active.line, 'Current가 알려진 예제 Task를 가리키지 않음');
+      else {
+        if (status.get('Task Status') !== task.status) issue(currentFile, current.sections.get('Status').line, 'Current Task Status 불일치');
+        for (const [sectionName, expected] of [
+          ['Active Plan', path.join(root, 'examples/plans', task.metadata.get('Plan ID') + '.md')],
+          ['Active Phase', path.dirname(path.dirname(target)) + path.sep + 'phase.md']
+        ]) {
+          const section = current.sections.get(sectionName);
+          const ref = section?.body.match(/\]\(([^)#]+)(?:#[^)]*)?\)/);
+          if (!ref || path.resolve(path.dirname(currentFile), ref[1]) !== expected) issue(currentFile, section?.line || 1, 'Current ' + sectionName + ' 대상 불일치');
+        }
+      }
+    } else if (!/^\s*없음(?:\s|$)/.test(active?.body || '')) issue(currentFile, active?.line || 1, 'Active Task는 예제 링크 또는 없음이어야 함');
+    else if (status.get('Task Status') !== '없음') issue(currentFile, current.sections.get('Status')?.line || 1, '활성 Task 없음의 Task Status는 없음이어야 함');
+    if (!link && /^\s*없음(?:\s|$)/.test(active?.body || '') && activeStage !== '없음') issue(currentFile, current.sections.get('Active Stage')?.line || 1, '활성 Task 없음의 Active Stage는 없음이어야 함');
   }
   return out;
 }
@@ -550,14 +914,15 @@ export function main({ root = projectRoot, runRegressionTests = true } = {}) {
     const files = collectDocuments(root);
     const checks = {
       frontmatter: checkSkillFrontmatter(root, files), links: checkLinks(root, files), messages: checkTaskMessages(root, files),
-      examples: checkExamples(files), 'html-ids': checkHtmlIds(files), git: checkGitCases()
+      examples: checkExamples(files), 'html-ids': checkHtmlIds(files),
+      'memory-examples': checkMemoryExamples(root, files), git: checkGitCases()
     };
     console.log(`Documents: ${files.length}`);
     for (const [name, out] of Object.entries(checks)) {
       const errors = out.diagnostics.filter(d => d.severity === 'error').length;
       console.log(`${name}: checked=${out.checked}, skipped=${out.skipped}, errors=${errors}`);
       for (const d of out.diagnostics) {
-        const location = d.file ? `${path.relative(root, d.file)}${d.line ? `:${d.line}` : ''}` : 'isolated Git';
+        const location = d.file ? `${path.relative(root, d.file)}${d.line ? `:${d.line}` : ''}` : name === 'git' ? 'isolated Git' : '검사 범위';
         console.log(`[${d.severity === 'error' ? 'FAIL' : 'SKIP'} ${name}] ${location} ${d.message}`);
       }
       if (errors) failed = true;

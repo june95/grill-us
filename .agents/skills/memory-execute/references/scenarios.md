@@ -91,13 +91,13 @@
 ## Verification Level
 
 E01~E08은 환경 변화에 대한 문서 판단 경계다. 실제 runtime 변경 실험이나 모델 실행 성공을 뜻하지 않는다. 수행 보고에는 case별 관찰과 관련 Environment Evidence를 기록한다.
-이 저장소 root의 `node scripts/validate-skills.mjs`는 회귀 fixture와 공유 Markdown의 필수 스킬 frontmatter·파일 링크·Task 메시지·HTML fence ID·완성형 예제 구문, 임시 저장소의 Git 사례를 실행한다. S20~S22는 실제 Git 명령으로, S23의 표준/과거 식별·다른 Phase/slug·중복 키 및 S25/S26의 검출/오탐 경계는 fixture로 확인한다. S23의 실제 commit tree 복구와 S11/S24의 에이전트 상태 전이는 수동 walkthrough 또는 실제 실행 증거가 필요하다.
+이 저장소 root의 `node scripts/validate-skills.mjs`는 회귀 fixture와 공유 Markdown의 필수 스킬 frontmatter·파일/제목 anchor·Task 메시지·HTML fence ID·완성형 예제 구문·메모리 예제 구조, 임시 저장소의 Git 사례를 실행한다. S20~S22는 실제 Git 명령으로, S23의 표준/과거 식별·다른 Phase/slug·중복 키 및 S25/S26의 검출/오탐 경계는 fixture로 확인한다. S23의 실제 commit tree 복구와 S11/S24의 에이전트 상태 전이는 수동 walkthrough 또는 실제 실행 증거가 필요하다.
 
-외부 URL·placeholder·anchor·명시 fragment·외부/데이터 script는 출력에 제외 사유를 남긴다. module inline script는 Node의 구문 검사로 지원한다. 검사 성공을 실제 모델/브라우저/제품 테스트 성공으로 표현하지 않는다. 검증기의 회귀 검사만은 `node --test tests/validate-skills.test.mjs`로 실행한다.
+외부 URL·placeholder·지원 밖 anchor·명시 코드 fragment·외부/데이터 script는 출력에 제외 사유를 남긴다. 지원 Markdown anchor는 실제 제목과 비교하고, 메모리 형식 검사는 examples에만 적용한다. module inline script는 Node의 구문 검사로 지원한다. 검사 성공을 실제 모델/브라우저/제품 테스트 성공으로 표현하지 않는다. 검증기의 회귀 검사만은 `node --test tests/validate-skills.test.mjs`로 실행한다.
 
 | Level | What It Establishes |
 | :--- | :--- |
-| Static scalar/link/message/HTML ID/example check | 지원하는 필수 문자열·스킬 이름·파일 링크·메시지·fence 내 ID·JS 구문의 정합성 |
+| Static scalar/link/message/HTML ID/example check | 지원하는 필수 문자열·스킬 이름·파일/제목 링크·메시지·fence 내 ID·JS 구문·교육용 메모리 형식의 정합성 |
 | Git status/ignore/index/tree check | 실제 local 정책·후보·commit 내용과 기록 일치 |
 | Manual walkthrough | 입력·상태·요청 범위에 대한 지침의 일관성과 판단 경계 |
 | Actual model/product execution | 실제로 수행한 경우에만 해당 입력·환경·관찰·한계를 별도로 기록 |
@@ -106,7 +106,7 @@ E01~E08은 환경 변화에 대한 문서 판단 경계다. 실제 runtime 변�
 
 ## Limitations
 
-frontmatter 검사는 한 줄 plain/quoted 필수 문자열과 description block만 지원한다. 전체 YAML/metadata 해석은 하지 않는다. HTML ID는 fence마다 태그 속성을 비교하며 numeric/common named reference만 정규화한다. 지원하지 않는 named reference는 해당 ID 비교를 제외하고 이유를 표시한다. 실제 DOM 트리/namespace/동적 ID, 전체 entity 표·HTML 문법·접근성·렌더링은 별도 확인 대상이다. 정확한 scalar/참조 지원 범위는 [README](../../../../README.md#로컬-스킬-검증)에 기록한다.
+frontmatter 검사는 한 줄 plain/quoted 필수 문자열과 description block만 지원한다. 전체 YAML/metadata 해석은 하지 않는다. HTML ID는 fence마다 태그 속성을 비교하며 numeric/common named reference만 정규화한다. 지원하지 않는 named reference는 해당 ID 비교를 제외하고 이유를 표시한다. 실제 DOM 트리/namespace/동적 ID, 전체 entity 표·HTML 문법·접근성·렌더링은 별도 확인 대상이다. 정확한 scalar/anchor/예제 구조 지원 범위는 패키지 내부 문서인 [validation-scope.md](validation-scope.md)에 기록한다.
 
 이 저장소에는 상품 API 앱·테스트 harness와 자동 workflow 실행 엔진이 없다. 문서 예시·case 표·수동 검토를 앱 테스트나 모델 forward-run 성공으로 표현하지 않는다.
 

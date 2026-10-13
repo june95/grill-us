@@ -163,7 +163,7 @@ T01부터 T03까지 순서대로 진행해줘
 
 ## 로컬 스킬 검증
 
-Node.js 22.13.0 이상과 Git이 필요합니다. 저장소 root에서 다음 명령 하나로 검증기의 회귀 검사와 실제 문서·격리 Git 검사를 실행합니다.
+Node.js 22.13.0 이상과 Git이 필요합니다. 저장소 root에서 다음 명령 하나로 검증기의 회귀 검사와 실제 문서·격리 Git 검사를 실행합니다. 검증기는 이 저장소의 개발·배포용이며 설치 대상 프로젝트의 `.memory`를 검사하거나 플러그인에 검사 도구를 추가하지 않습니다. 지원·제외 범위의 정본은 [validation-scope.md](.agents/skills/memory-execute/references/validation-scope.md)입니다.
 
 ~~~powershell
 node scripts/validate-skills.mjs
@@ -174,7 +174,8 @@ node scripts/validate-skills.mjs
 - **문서:** AGENTS.md, README.md, examples와 .agents/skills 아래 Markdown을 검사합니다. .memory, .git, .codeburn, node_modules와 심볼릭 링크 디렉터리는 탐색하지 않습니다.
 - **스킬 frontmatter:** .agents/skills 안의 SKILL.md에서 시작/종료 `---`, top-level `name`/`description`의 누락·중복·빈값을 검사합니다. `name`은 lower kebab-case이며 부모 스킬 디렉터리명과 일치하고 다른 스킬과 중복되지 않아야 합니다. UTF-8 BOM과 CRLF를 지원하며 들여쓴 metadata 필드는 필수 필드로 세지 않습니다.
 - **지원 scalar:** 한 줄 plain/quoted 문자열과 description의 `>`/`|` block(`+`/`-` 포함)을 지원합니다. 작은따옴표의 `''`와 큰따옴표의 JSON escape를 처리합니다. 숫자·boolean·null형 값은 인용해야 합니다. 필수 필드의 array/object/tag/anchor/alias, 일반 문자열의 들여쓴 continuation, block의 tab/불일치 들여쓰기 등 지원하지 않는 표현은 오류로 표시합니다. 전체 YAML 문법이나 나머지 metadata의 유효성을 검사하는 파서는 아닙니다.
-- **링크:** 실제 inline/reference 상대 파일 링크와 이미지 대상의 존재를 확인합니다. fence/inline code 안의 예시, 외부 URL, 동적 placeholder, 저장소 밖 경로, 내부 anchor는 제외 이유를 표시합니다. heading/anchor의 정확한 대응은 수동 확인 대상입니다.
+- **링크·anchor:** 실제 inline/reference 상대 파일과 지원 Markdown 제목을 확인합니다. 같은 파일 `#fragment`, 다른 파일 `file.md#fragment`, Unicode 제목·중복 suffix·percent encoding을 지원합니다. 깨진 지원 anchor는 실패로 표시합니다. fence/inline code 예시·외부 URL·동적 placeholder·저장소 밖·사용자 `.memory` 대상은 제외하며, raw HTML/복잡한 제목 등 미확인 fragment도 제외 사유를 남깁니다.
+- **메모리 예제 구조:** 공통 템플릿의 heading·Metadata·Progress·표 열과 교육용 Task/Current/Plan/Phase를 대조합니다. 기준 템플릿 손상, 필수 항목 누락·중복, 상태·소속·요약 집계 drift, 비활성 Task의 잔존 Stage를 검출합니다. Bug Investigation은 버그 Task에만 필요합니다. 실제 제품 파일·검증 결과·사용자 기록의 진위는 검사하지 않습니다.
 - **작업 식별자:** 상품 Task 예제와 공통 Task 템플릿의 metadata·폴더·메시지 마지막 Plan/Phase/Task 블록을 대조합니다. 로컬 완료 기록을 마이그레이션하지 않습니다.
 - **예제 구문:** 완성형 js/javascript와 HTML의 classic inline script는 vm.Script로 검사합니다. module inline script는 Node의 --check --input-type=module로 지원하며 import를 해결하거나 코드를 실행하지 않습니다. src와 데이터 MIME script는 제외합니다.
 - **classic MIME:** [WHATWG JavaScript MIME 목록](https://mimesniff.spec.whatwg.org/#javascript-mime-type)에 있는 과거 alias도 구문 검사 대상으로 포함합니다.
@@ -185,7 +186,7 @@ node scripts/validate-skills.mjs
 
 회귀 검사만 실행하려면 `node --test tests/validate-skills.test.mjs`를 사용합니다. 추가 패키지 설치와 CI 설정은 필요하지 않습니다. 구현 시 확인한 환경은 Node v26.5.1과 Git 2.53.0.windows.2이며, 최소 지원 버전 전부를 시험한 것은 아닙니다.
 
-결과 종류는 `frontmatter`, `links`, `messages`, `examples`, `html-ids`, `git`입니다. 이 명령은 지원 범위의 필수 scalar·ID·정적 구문·파일 참조·격리 Git 동작을 검사합니다. 제외 진단이 있는 검사는 해당 범위에서 부분 확인한 결과입니다. HTML 렌더링, 접근성 전반, 생성된 UI 동작, 실제 모델 workflow 실행, commit tree를 포함한 중단 복구 성공은 별도 검증이 필요합니다.
+결과 종류는 `frontmatter`, `links`, `messages`, `examples`, `html-ids`, `memory-examples`, `git`입니다. 이 명령은 지원 범위의 필수 scalar·ID·정적 구문·파일/제목 참조·예제 형식·격리 Git 동작을 검사합니다. 제외 진단은 부분 확인이며 미확인 대상을 성공으로 세지 않습니다. 전체 Markdown renderer, HTML 렌더링, 접근성 전반, 생성된 UI 동작, 실제 모델 workflow 실행, commit tree를 포함한 중단 복구 성공은 별도 검증이 필요합니다.
 
 ## 추가 도구
 
