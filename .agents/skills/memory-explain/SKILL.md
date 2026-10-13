@@ -19,6 +19,7 @@ description: Explain recorded designs, plans, progress, and completed work from 
 
 1. 사용자가 명시한 대상이 최우선이다. 비활성·완료 Task도 그 자료를 읽으며 current로 전환하지 않는다. Task 번호가 중복되면 Plan/Phase/경로로 구분한다.
 2. 대상이 없으면 대화 주제와 `.memory/current.md`의 실제 Active Task/Plan을 확인한다. 활성 작업이 없고 완료 결과를 묻는다면 Last Completed Task와 대응하는 실제 Task·보고를 읽는다. 완료 Plan 링크가 남아 있다는 사실을 활성 실행으로 해석하지 않는다.
+   Last Completed Task의 Plan/Task·확인한 commit 또는 no-commit 사유·evidence와 Checkpoint 링크는 활성 위치와 구분한다. 과거 포인터에 이 항목이 없거나 없음이면 관련 Task/보고로 확인 가능한 사실만 설명하고 가짜 완료 정보나 state 경로를 채우지 않는다. 결정은 Plan ID와 같은 파일명을 가정하지 않고 실제 링크의 독립 Decision ID로 읽는다.
 3. 여러 후보가 실제로 모호하면 짧은 후보와 필요한 질문 하나를 제시한다. 경로가 없거나 대상이 없으면 확인한 사실과 필요한 대상 정보를 알린다. 가짜 작업·경로·기록을 만들거나 다른 Plan을 활성화하지 않는다.
 4. 대상과 연결된 자료만 필요한 깊이로 읽는다. 작은 질문에 전체 `.memory`·Git 이력을 조사하거나 모든 설명 항목을 출력하지 않는다. 관련 파일 검색은 이름·ID·주제 범위로 좁힌다.
 

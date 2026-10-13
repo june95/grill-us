@@ -72,6 +72,7 @@ planner가 각 stage를 필수/필요 시/해당 없음으로 판단하고 이�
 ## Artifacts
 
 1. Plan: .memory/plans/YYYY-MM-DD-feature.md에 Goal·Source/결정·scope·Phase·순서를 기록한다. 기존 Plan 추가 시 ID·날짜를 유지한다.
+   결정 파일은 독립 Decision ID의 실제 경로를 링크한다. 결정 날짜·주제와 Plan ID가 다르거나 여러 Plan에서 참조해도 기존 문서를 옮기거나 합치지 않는다.
 2. Phase: .memory/phases/{plan-id}/P01-phase/phase.md에 Tasks(Task,Status,DependsOn,Summary,Blueprint)와 진행률을 둔다.
 3. Task: 각 T 폴더의 task.md를 완결된 청사진으로 작성한다. 초기 Status pending, Revision 1, 첫 미수행 적용 단계부터 재개하게 한다.
 4. Pointer: 아래 Pointer 규칙에 따라 current/checkpoint를 필요할 때만 갱신한다. 후속 작업을 등록했다고 다른 active 정보를 덮지 않는다.
@@ -84,7 +85,8 @@ planner가 각 stage를 필수/필요 시/해당 없음으로 판단하고 이�
 - active가 없으면 첫 실행 가능한 T를 활성화한다. 우선 처리 지시가 있으면 [재개 절차](../memory-execute/references/resume.md)로 이전 위치를 보존한 뒤 전환한다.
 - 초기 가짜 링크는 active 없음으로 처리하되, 실제 진행 정보 손상·미해결 commit intent가 확인되면 먼저 복구하며 무작정 덮지 않는다.
 - 새 Plan은 대기면 pending, 활성화되면 in_progress다. 완료 Plan에 T를 추가할 때 기존 done T는 보존하고 새 T만 pending; Phase/Plan 요약을 실제 상태로 갱신한다.
-- current는 Active Plan/Phase/Task·Stage, Status, Blocker, Next Step, Commit Policy를 담는다. 실재하는 Task 링크를 사용하고 새 active T는 실제 시작 전 pending으로 둔다.
+- current는 Active Plan/Phase/Task·Stage, Status, Blocker, Next Step, Commit Policy, 실제 Checkpoint/없음과 Last Completed Task를 담는다. 마지막 완료의 Plan·Task·확인된 commit 또는 no-commit 사유·evidence는 새 활성 위치와 별도로 보존한다. 실재하는 Task 링크를 사용하고 새 active T는 실제 시작 전 pending으로 둔다.
+- 이전 재개 상태는 기존 Task·보고·Plan별 state로 보존하며 매 전환의 archive 사본을 만들지 않는다. 성공 intent 초기화 전 실제 완료 근거를 보존하고 미해결 prepared/failed는 덮어쓰지 않는다. 기존 사본은 그대로 유지한다.
 - 쓰기 직전 최신 current를 다시 확인한다. 등록 중 위치가 달라졌으면 새 활성 정보를 보존한다. 상태 파일은 인접 임시 파일에 완성 후 교체한다.
 
 ## Report

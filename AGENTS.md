@@ -25,6 +25,8 @@ memory-explain은 기존 네 작업 진입점을 보조하는 설명 전용 진�
 5. 청사진에 파일·심볼/문서 섹션, 타입·필드·실행 흐름 등 적용되는 상세 정보, 완료 조건, 실제 command/cwd, workflow 표, Plan/Phase/Task 커밋 메시지를 적는다.
 6. AI가 단계별 필수/필요 시/해당 없음과 근거를 지정한다. 생략은 Task 표에 기록하고 실행한 단계만 보고서를 만든다. 등록·계획은 구현·staging·commit하지 않는다.
 
+결정은 생성일·주제의 독립 Decision ID로 저장하고 Plan/Task에서 실제 문서를 링크한다. 여러 Plan이 같은 결정을 참조할 수 있으며 기존 파일명·링크를 이동·통합하지 않는다.
+
 분석·기존 테스트 실행도 독립 Task로 계획할 수 있다. 사전 완료 조건에 결과 조사·분류가 목적인지, 원인 확정·테스트 통과가 목적인지 구분한다. 제품 구현과 커밋 메시지는 실제 적용될 때만 구체화한다.
 
 ## Active Work and Resume
@@ -32,6 +34,8 @@ memory-explain은 기존 네 작업 진입점을 보조하는 설명 전용 진�
 - 등록만으로 기존 current나 활성 checkpoint Position을 바꾸지 않는다. 활성 작업이 없으면 실행 가능한 첫 Task를 활성화한다.
 - 우선 처리 지시가 있으면 이전 Task의 재개 위치를 보존한 뒤 전환한다. completed Task의 과거 계약·증거를 조용히 수정하지 않고 후속 수정은 새 T로 기록한다.
 - current는 활성 위치와 다음 행동, Task는 상세 상태의 정본이다. Phase/Plan 진행률은 실제 Task 상태에서 계산한다.
+- current의 Checkpoint와 Last Completed Task는 활성 위치와 구분한다. 실제 보존 state·확인한 완료 근거 또는 없음/no-commit 사유를 기록하며 가짜 링크·SHA를 만들지 않는다.
+- 이전 위치는 기존 Task·보고·Plan별 state로 보존하고 매 전환 archive 사본을 만들지 않는다. 성공 의도 초기화 전 완료 근거를 보존하며 미해결 prepared/failed는 덮어쓰지 않고 기존 사본은 유지한다.
 - 기본 실행은 Task 하나다. 연속 실행은 요청한 범위를 따르며 다른 pending Plan을 임의로 시작하지 않는다.
 
 ## Execution and Commit

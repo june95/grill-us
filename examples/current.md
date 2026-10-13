@@ -22,8 +22,14 @@
 
 - Example: 실제 활성 작업 아님
 - Task Status: pending
+- Blocker: 문서 예시이며 실제 실행 환경·완전한 구현 계약은 제공하지 않음
 - Commit Policy: auto (예시)
+- Checkpoint: 없음 — 실제 Plan별 state를 생성하지 않은 문서 예시
 - 실제 실행 환경·완전한 구현 계약을 확정해야 함
+
+## Last Completed Task
+
+없음 — 구현·검증·커밋 또는 no-commit 완료 이력이 없는 예시다.
 
 ## Next Step
 

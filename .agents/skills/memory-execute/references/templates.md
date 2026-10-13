@@ -245,6 +245,16 @@ active Plan/Phase는 in_progress로 표시할 수 있어도 Task가 실제 시�
 - Task Status: pending
 - Blocker: 없음
 - Commit Policy: auto
+- Checkpoint: {실제 Plan별 state 링크 또는 없음}
+
+## Last Completed Task
+
+{완료 이력이 없으면 없음. 있으면 아래 항목을 실제 근거로 작성한다.}
+
+- Plan: {마지막 완료 Plan ID}
+- Task: {마지막 완료 metadata Task ID}
+- Commit: {확인한 성공 SHA 또는 no-commit/변경 없음과 사유}
+- Evidence: {실제 완료 보고 또는 Task Completion Check 링크}
 
 ## Next Step
 
@@ -252,6 +262,8 @@ active Plan/Phase는 in_progress로 표시할 수 있어도 Task가 실제 시�
 ```
 
 활성 Task가 없으면 Active Task·Active Stage에 `없음`을 적고 가짜 링크를 만들지 않는다. Plan 완료 시 완료한 Plan 링크와 완료 상태는 보존할 수 있다. 다른 Plan 자동 전환은 하지 않는다.
+
+Checkpoint와 Last Completed Task는 활성 위치와 별개다. 참조할 실제 활성 또는 보존한 Plan state가 없으면 Checkpoint는 없음이며, 활성 Task가 없어도 보존한 state가 있으면 실제 링크를 유지할 수 있다. 완료 이력이 없으면 Last Completed Task 전체를 없음으로 작성한다. no-commit 완료는 SHA 대신 명시 사유와 Task 내 완료 근거를 연결한다. 과거 포인터에 이 항목이 빠져 있으면 확인 가능한 자료만 설명하며 성공을 추정하지 않는다.
 
 ## Checkpoint
 
@@ -292,6 +304,8 @@ active Plan/Phase는 in_progress로 표시할 수 있어도 Task가 실제 시�
 ```
 
 Last Completed Commit과 현재 Commit Intent는 구분한다. 완료 Task의 의도를 다음 Task 의도로 오인하지 않게 Task ID를 기록하고 finalize 후 마지막 성공 결과를 보존한다.
+
+성공 의도를 none으로 초기화하기 전에 해당 Task의 commit 보고·Last Completed Commit에 확인된 성공 근거를 보존한다. no-commit은 Task Completion Check·current Last Completed Task로 보존한다. 미해결 prepared/failed는 초기화하지 않으며 매 전환 archive 사본은 만들지 않는다. 기존 사본은 이동·삭제하지 않는다.
 
 Candidate Snapshot의 각 항목에는 path, added/modified/deleted 상태, 검증한 working-tree SHA256, staged Git mode/blob ID를 기록한다. Git entry는 `git ls-files --stage -- <명시적 후보>`의 stage 0 값이다. 삭제 경로는 mode/blob 없음으로 기록한다. 승인된 memory index 삭제는 로컬 보존 여부를 별도로 기록하고 진행 문서 bytes를 코드 freshness 판단에 넣지 않는다.
 

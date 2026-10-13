@@ -6,7 +6,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 
 | 역할 | 저장 위치 |
 | :--- | :--- |
-| 확정 결정 | `.memory/decisions/{plan-id}.md` |
+| 확정 결정 | `.memory/decisions/{decision-id}.md` |
 | 전체 로드맵 | `.memory/plans/{plan-id}.md` |
 | Phase 현황 | `.memory/phases/{plan-id}/{phase-id}/phase.md` |
 | Task 청사진 정본 | `.memory/phases/{plan-id}/{phase-id}/{task-folder}/task.md` |
@@ -17,6 +17,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | 선택적 프로젝트 설정 | `.memory/project.md` |
 
 - Plan ID는 `YYYY-MM-DD-{slug}`, Phase ID는 `P01-{slug}`, Task 폴더는 `T01-{slug}` 형식이다. 날짜는 새 Plan 생성일이며 기존 Plan 추가 시 바꾸지 않는다.
+- Decision ID는 결정 문서 생성일 기준 `YYYY-MM-DD-{topic}`이며 Plan ID와 독립적이다. Plan 생성 전 인터뷰나 기존 Plan의 후속 결정도 자체 ID를 유지한다. Plan/Task에서 실제 결정 문서를 링크하며 여러 Plan이 같은 결정을 참조할 수 있다. 같은 ID가 있으면 내용과 연결 범위를 먼저 확인하고, 기존 파일명·링크는 이동·통합·재번호하지 않는다.
 - Task ID는 Plan 안에서 유일한 `P01-T01` 형식이다. 다른 Plan의 같은 Task ID는 Plan ID와 함께 식별한다.
 - 새 커밋 메시지의 마지막 블록은 `Plan: {Plan ID}`, `Phase: {전체 Phase ID}`, `Task: {metadata Task ID}`다. 설명 본문은 이 블록보다 앞에 둔다. Task 폴더명과 Task ID를 구분하며, 과거 메시지의 호환 판정은 [재개 규약](resume.md#commit-message-identity)을 따른다.
 - 일반 작업은 단일 Phase를 기본으로 하고 실행 단위는 Task로 나눈다. 큰 작업을 나눌 때 기존 plan-N의 역할은 Phase 내 T가 맡는다.
@@ -174,12 +175,14 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 
 - Task의 Status·Workflow·Completion Check·Progress가 작업 상태의 정본이다.
 - current는 활성 Plan·Phase·Task와 Active Stage·Blocker·Next Step·정책의 책갈피다. 상세 청사진을 중복 보관하지 않는다.
+- current의 Checkpoint는 실제 활성 또는 보존한 Plan별 state 링크다. Last Completed Task는 활성 위치와 별개로 마지막 완료의 Plan ID·Task ID, 확인한 commit hash 또는 명시 no-commit/변경 없음 사유, 실제 완료 evidence를 가리킨다. 완료 이력이 없으면 없음으로 기록하고 가짜 경로·hash를 만들지 않는다. 과거 current에 이 정보가 없으면 Task/보고로 확인 가능한 범위만 읽는다.
 - Phase의 done count와 Plan의 요약은 Task 실제 상태로 갱신한다. 커밋 실패 전에 done을 쓰지 않는다.
 - 새 등록은 기존 활성 작업을 유지한다. 우선 처리 지시가 있을 때만 Task 재개 상태와 Plan checkpoint를 먼저 보존하고 current를 전환한다.
 - placeholder·누락 링크·실제 완료된 Task를 유효한 진행 중 작업으로 취급하지 않는다.
 - 기본 실행은 활성 Task 하나다. 연속 실행은 요청한 범위를 따른다. 단계만 요청한 실행은 그 단계만 수행하고 포인터를 자동 전진하지 않는다.
 - 마지막 Task 완료 시 Phase/Plan done과 Active Task·Stage 없음을 기록한다. 다른 pending Plan을 임의로 시작하지 않는다.
 - checkpoint와 원자적 기록·커밋 복구 절차는 [resume.md](resume.md)를 따른다.
+- 이전 위치 보존은 기존 Task·보고·Plan별 checkpoint에 필요한 재개/완료 근거를 남기는 뜻이다. 매 전환마다 전체 checkpoint 사본이나 별도 archive를 만들지 않는다. 기존 사본과 과거 완료 증거는 보존하고 미해결 커밋 의도는 덮어쓰지 않는다.
 
 ## Change Boundaries
 
@@ -205,3 +208,5 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 ```
 
 기록 N은 기존 최대 번호 +1이며 기존 항목을 재작성하지 않는다. 한국어 보고를 기본으로 하되 프로젝트 관례와 사용자 지시를 따른다. 핵심 변경의 무엇·왜, 필요한 짧은 인용, 검증 한계, 범위 밖 발견 사항을 변경 규모에 맞게 설명한다. 발견이 없으면 특이사항 없음이라고 명시한다.
+
+제목의 `stage-plan-id-task-id`는 신규 실행 이력의 명명 예시이며 제목 문자열만으로 대상을 식별하지 않는다. 본문의 실제 Task 링크·ID·Checked At·Evidence가 식별 근거다. 인터뷰·등록·계획처럼 stage가 아닌 활동은 `activity-{decision-id 또는 plan-id/task-id}`로 명명하고 해당 결정/계획 링크를 남긴다. Task가 없는 인터뷰에 가짜 Task ID를 부여하거나 과거 제목을 새 형식으로 고치지 않는다.

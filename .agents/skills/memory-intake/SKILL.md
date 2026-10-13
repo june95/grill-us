@@ -43,6 +43,7 @@ description: Register a clear change, bug, or issue as a .memory task without im
 2. 신규 Plan은 생성일 YYYY-MM-DD-feature ID를 사용한다. 기존 Plan에 추가하면 ID·날짜를 유지한다. 같은 날짜 slug 충돌은 기존 의미를 확인하고 다른 요청에는 구별되는 이름을 쓴다.
 3. [공통 규약](../memory-execute/references/conventions.md)의 상세 작업(구현 또는 조사/검증 절차)·Dependencies·workflow·완료 조건·검증 경로를 작성한다. 커밋 대상이 없으면 Commit Message는 해당 없음과 이유로 기록하며, 공유 변경을 계획하면 실제 메시지를 적는다. stub만 남기고 실행하게 만들지 않는다.
 4. 상세 조사 기록이 필요한 경우에만 reference.md를 만들고, 이미 충분한 근거는 Task와 결정 링크로 재사용한다. 해당 없음 단계의 빈 보고서는 생성하지 않는다.
+   결정은 Plan과 독립적인 Decision ID를 유지하고 실제 문서로 연결한다. 여러 Plan/Task가 같은 결정을 참조할 수 있으며 기존 결정 파일명·링크는 바꾸지 않는다.
 5. 새 버그 Task는 [조건부 템플릿](../memory-execute/references/templates.md#task)의 Bug Investigation에 조사 결과를 보존한다. nonbug에는 빈 버그 표를 만들지 않고, 이미 완료된 Task에는 소급 추가하지 않는다. 수정 전 실패/수정 후 기대 동작을 입증할 회귀 검증 경로를 적되 제품 수정·새 테스트 작성은 실행 단계에 둔다.
 
 ## Activation
@@ -52,6 +53,7 @@ description: Register a clear change, bug, or issue as a .memory task without im
 - active 작업이 없으면 첫 실행 가능한 새 T를 활성화한다. 의존성이 미완료인 T를 억지로 active로 만들지 않는다.
 - 우선 처리 지시가 있으면 [재개 규약](../memory-execute/references/resume.md)에 따라 old Task 위치·stage·blocker·next step을 먼저 보존한 뒤 new pointer를 쓴다.
 - 등록·포인터 쓰기 전에 최신 current를 다시 확인한다. 등록 중 활성 위치가 달라졌으면 새 위치를 보존하며 배치를 재평가한다. 진행 정보를 먼저 삭제하지 않는다.
+- current의 Last Completed Task와 실제 Checkpoint/없음 표현을 보존한다. 이전 재개 위치는 기존 Task·보고·Plan별 state에 저장하며 별도 archive 사본을 만들지 않는다. 성공 의도 보존·미해결 prepared/failed 처리에는 [재개 규약](../memory-execute/references/resume.md#checkpoint-fields)을 따른다.
 
 ## Report
 

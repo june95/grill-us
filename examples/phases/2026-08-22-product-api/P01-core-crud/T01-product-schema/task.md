@@ -9,7 +9,6 @@
 - Source: 스타터의 상품 API 문서 예시
 - Blueprint Revision: 1
 - Commit Policy: auto
-- Execution: 문서 구조 설명용, 이 스타터에서 실행하지 않음
 
 ## Status: pending
 
@@ -113,11 +112,11 @@
 
 ## Validation
 
-| Command / Method | Cwd | Expected Result | Actual Result |
+| Criteria | Command / Method | Cwd | Expected Result |
 | :--- | :--- | :--- | :--- |
-| pnpm test tests/models/product.spec.ts | 제품 애플리케이션 root; 이 스타터에는 없음 | 명시된 모델/API 조건을 실제 suite로 확인 | 실행하지 않음 |
+| 모델 제약과 유효성 검증 | pnpm test tests/models/product.spec.ts | 제품 애플리케이션 root; 이 스타터에는 없음 | 명시된 모델/API 조건을 실제 suite로 확인 |
 
-명령은 원 예시의 제품 환경을 가정한다. 실제 사용 시 manifest·suite·cwd를 확인해 정확한 명령으로 확정한다. 테스트 개수·성공 로그·commit hash는 실행 후에만 기록한다.
+실제 실행 결과는 없음 — 수행하지 않은 검증을 통과로 기록하지 않는다. 명령은 원 예시의 제품 환경을 가정한다. 실제 사용 시 manifest·suite·cwd를 확인해 정확한 명령으로 확정한다. 테스트 개수·성공 로그·commit hash는 실행 후에만 기록한다.
 
 ## Commit Message
 
@@ -139,14 +138,18 @@ Task: P01-T01
 - Evidence Revision: 없음
 - Covered Files / Source Snapshot: 없음
 - Acceptance Evidence: 실제 검증 전
+- Applied Stages: reference는 예시 근거로 skipped; 필수/조건부 단계는 미수행.
+- Blocking Findings: 없음 — 제품 검토를 수행한 결과가 아님.
+- Remaining Risks: 실제 앱/검증 환경이 없어 이 예시로 구현·성공을 단정할 수 없음.
 - Staging: 수행하지 않음
 
 ## Progress
 
-- [ ] 구현 완료
-- [ ] 검증 통과
+- [ ] 구현 또는 조사 목표 완료
+- [ ] 적용 검증 완료
+- [ ] 공통 품질·완료 정책 판정 완료 (커밋 필요 여부 포함)
 - Commit Status: pending
-- commit: pending
+- Commit Hash: 없음
 - Resume Stage: implementation
 - Blocker: 문서 예시이며 실제 실행 환경·완전한 구현 계약은 제공하지 않음
 - Next Step: 예시 구조를 참고하고 실제 요청은 intake 또는 plan으로 등록
@@ -155,3 +158,5 @@ Task: P01-T01
 
 - 2026-08-22: 원본 상품 API 예시 ID.
 - 2026-09-30: Task 폴더 형식으로 전환, 가상 완료·검증 기록 제거. 도메인 의미 보존.
+
+- 2026-10-13: 공통 템플릿의 Metadata/Validation/Progress 형식에 정렬. 가상·비실행 경고와 도메인 계약 보존.

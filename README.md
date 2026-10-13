@@ -125,7 +125,7 @@ T01부터 T03까지 순서대로 진행해줘
 
 ~~~text
 .memory/
-├── decisions/YYYY-MM-DD-feature.md
+├── decisions/YYYY-MM-DD-topic.md       # Plan과 독립적인 Decision ID
 ├── plans/YYYY-MM-DD-feature.md
 ├── phases/YYYY-MM-DD-feature/
 │   └── P01-core/
@@ -143,6 +143,9 @@ T01부터 T03까지 순서대로 진행해줘
 
 - task.md는 상세 계약·workflow·완료 조건의 정본입니다.
 - current는 활성 위치, state는 재개·커밋 의도, Phase/Plan은 실제 Task 상태의 요약입니다.
+- 결정 문서는 생성일·주제로 독립 ID를 갖습니다. Plan 생성 전 인터뷰나 기존 Plan의 후속 결정도 파일명을 유지하고 Plan/Task에서 실제 경로를 링크합니다. 여러 Plan이 같은 결정을 참조할 수 있으며, 기존 파일·링크를 옮기거나 합치지 않습니다.
+- current의 Checkpoint는 실제 활성 또는 보존한 Plan state 링크이고, Last Completed Task는 마지막 완료의 Plan/Task·확인한 커밋 또는 no-commit 사유·완료 근거입니다. 활성 Task가 없어도 보존한 state 링크는 남길 수 있습니다. 완료 이력이나 참조할 state가 없으면 없음으로 적습니다.
+- 이전 위치는 기존 Task·보고·Plan별 state로 보존합니다. 성공 커밋 의도를 초기화하기 전에 Task의 커밋 보고와 마지막 성공 정보를 남기며, 미해결 prepared/failed 의도는 덮어쓰지 않습니다. 매 전환 archive 사본을 만들지 않고 기존 사본은 유지합니다.
 - memory-explain은 이 기록을 읽어 설명하며 설명 결과를 보고·history로 자동 저장하지 않습니다.
 - 코드·계약·관련 검증 환경 변경 뒤에는 영향을 받은 증거의 최신성을 확인합니다.
 - 제품 테스트와 공유 가이드는 해당 프로젝트의 기존 디렉터리에 둡니다.

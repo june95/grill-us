@@ -31,12 +31,13 @@ description: Resolve material requirements and design choices one question at a 
 
 중요한 분기가 모두 해소되면 종료한다. 추가 질문이 없으면 명확한 요청·확인 근거를 요약하며 형식적인 질문을 만들지 않는다.
 
-의미 있는 확정 결정이 있으면 .memory/decisions/YYYY-MM-DD-feature.md로 저장한다. 기존 연결 결정 문서는 관련 선택·이유·날짜를 추가하며 과거 근거를 보존한다.
+의미 있는 확정 결정이 있으면 `.memory/decisions/{decision-id}.md`로 저장한다. Decision ID는 생성일 기준 `YYYY-MM-DD-topic`이며 Plan ID와 독립적이다. Plan이 아직 없거나 기존 Plan의 후속 결정이어도 문서 ID를 유지하고 Plan/Task에서 링크한다. 같은 ID가 있으면 실제 내용·범위를 확인해 재사용 여부를 판단하고, 기존 파일·링크를 이동·병합·재번호하지 않는다. 기존 연결 결정 문서는 관련 선택·이유·날짜를 추가하며 과거 근거를 보존한다.
 
 ~~~markdown
 # Decisions: {기능명}
 
 - Date: YYYY-MM-DD
+- Decision ID: YYYY-MM-DD-topic
 - Status: Confirmed
 - Source: {사용자 지시·연결한 Plan·조사 근거}
 

@@ -26,6 +26,8 @@ Plan별 `.memory/state/{plan-id}.md`에 아래를 기록한다.
 
 새 Task로 전진할 때 직전 성공 의도를 다음 Task의 의도로 오인하지 않는다. 마지막 성공 결과는 보존하고 새 의도는 none으로 초기화한다. 불완전한 prepared/failed intent는 해결 전 덮어쓰지 않는다.
 
+성공 의도를 초기화하기 전에 확인한 SHA·대상·실제 tree 대조 근거를 해당 Task의 commit 보고와 Last Completed Commit에 남긴다. no-commit 완료는 해당 Task의 정책 사유·Completion Check와 current의 Last Completed Task로 보존하며, Last Completed Commit은 마지막 실제 성공 커밋을 유지한다. Task/보고가 상세 근거이고 이 checkpoint는 Plan별 현재 재개 위치·커밋 의도다.
+
 ## Stale Evidence
 
 1. 명시 Task 경로 또는 current Active Task를 확인하고 Task의 Revision·Status·workflow·Resume Stage를 읽는다.
@@ -42,6 +44,7 @@ Plan별 `.memory/state/{plan-id}.md`에 아래를 기록한다.
 - 새 요청 등록은 현재 진행 중 Task를 유지한다. 활성 작업이 없으면 첫 실행 가능한 새 Task를 활성화할 수 있다.
 - 사용자 우선 처리 지시가 있으면 old Task Resume Stage·Blocker·Next Step과 Plan checkpoint를 먼저 저장하고 new current를 기록한다.
 - 상세 상태는 old Task에 유지한다. current를 전환했다고 해당 작업을 done 또는 blocker 해결로 바꾸지 않는다.
+- 이 저장은 기존 Task·보고·Plan별 checkpoint의 갱신이며 매 전환의 전체 사본 생성 의무가 아니다. 별도 archive 경로는 추가하지 않고 기존 사본은 그대로 둔다. 같은 Plan의 새 Task로 전진할 때도 이전 성공 근거 보존과 미해결 intent 차단을 먼저 확인한다.
 - 등록·전환 실패 중간에 current를 먼저 새 링크로 변경하지 않는다. 같은 Plan에서 여러 Task가 있어도 Task ID와 현재 단계가 모호하지 않아야 한다.
 
 ## Recovery
