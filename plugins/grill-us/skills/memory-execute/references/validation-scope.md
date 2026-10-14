@@ -36,6 +36,7 @@
 
 - templates.md의 Task/Current/Plan/Phase markdown fence에서 heading·Metadata·Progress 필드와 Workflow/Validation/요약 표의 열을 읽는다. 최소 필수 계약의 누락·중복·표 손상이나 기준 파일 부재는 실패로 처리한다. 템플릿이 손상되어 검사가 약해지는 것을 허용하지 않는다.
 - Task의 필수 top-level heading/Metadata·Progress, Commit Policy와 Task Status·Revision, 폴더 ID, 표 헤더/행 열 개수를 확인한다. legacy `commit`이나 Execution metadata의 재등장을 검출한다.
+- Constraints와 정확한 H3 `Must` / `Must Not` 각각 하나 및 각 하위의 비어 있지 않은 목록 항목을 템플릿·예시 모두에서 확인한다. fence/HTML comment의 가짜 항목은 제외하며 적용 제약이 없으면 목록에 `없음 — 이유`를 쓴다. 내용의 작업 적합성·이유의 타당성·과설계는 정적 검사 대상이 아니라 의미 리뷰 대상이다. 과거 사용자 `.memory`에 소급 검사하지 않는다.
 - Bug Investigation은 버그 Type일 때 필요하다. 일반 Task에 억지로 강제하지 않으며 Example Preconditions·추가 설명 섹션·적용되지 않는 API/DTO 세부는 허용한다.
 - Current의 Checkpoint/Last Completed Task, 없음 또는 근거 필드의 형식, 활성 Task와 Plan/Phase/상태 연결을 확인한다. Active Stage는 기존 단계 이름 또는 없음이며, 활성 Task가 없으면 Stage도 없음이어야 한다. 실제 커밋 성공이나 no-commit 완료의 진위는 정적 형식만으로 입증하지 않는다.
 - Plan/Phase 표의 대상 예제 링크·ID·명시 상태와 Phase done 집계를 대조한다. Phase의 Task 소속, Plan의 Phase 소속과 Phase 상단의 Plan backlink도 확인한다. 교육 예제가 가정한 제품 명령·파일의 존재, 테스트 결과, 도메인 구현은 검증하지 않는다.

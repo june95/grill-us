@@ -13,6 +13,8 @@ Task scope·AC·Dependencies와 현재 근거를 확인한다. Compliant 또는 
 3. 범위 안 파일/심볼 조정과 중요한 계약 선택은 [Change Boundaries](conventions.md#change-boundaries), Revision/증거 영향은 [Task Fields](conventions.md#task-fields)를 적용한다.
 4. 단독 implementation은 변경·최소 검증·보고까지만 수행한다. 별도 review/test·커밋·완료·전진은 [Stage Isolation](conventions.md#stage-isolation)의 경계를 유지한다.
 
+[Planning Boundaries](conventions.md#planning-boundaries)에 따라 공유 API·DTO·저장/모듈 경계·중요 처리 순서/오류/상태·AC·검증과 Task Constraints를 지킨다. 계약에 필수로 고정하지 않은 private helper 이름·분할·동등한 알고리즘은 실행자가 선택한다. 새 파일/추상화는 기존 소유 위치에 둘 수 없는 이유를 남기며, 계획 자체의 과설계는 계획 문제로 보고하고 승인 구조를 자동 재설계하지 않는다.
+
 ## Comments
 
 - 목적이 불명확한 신규/의미 변경 함수에는 짧은 주석/docstring을 둔다. 중요한 인자·반환·부수 효과를 설명하고 명백한 대입/이름은 반복하지 않는다.

@@ -21,6 +21,18 @@
 - In: 상품 CRUD 핸들러·서비스의 문서 예시.
 - Out: 스타터에서 상품 API 구현·실제 검증·커밋 수행.
 
+## Constraints
+
+### Must
+
+- T01 모델·검증을 재사용하며 공유 서비스/DTO 경계, 상품·Variant 생성 트랜잭션과 SKU 중복 409·미존재 404를 보존한다.
+- 명시 API 라우트·상태 코드와 목록 limit 20/offset 0을 유지한다. 아래 new 경로는 기존 상품 서비스/DTO/컨트롤러 소유 파일이 없다는 예시 가정이며 실제 제품에 있으면 그 위치를 수정한다.
+
+### Must Not
+
+- 인증 D01 구현이나 범용 CRUD 엔진·위임만 하는 별도 wrapper를 추가하지 않는다.
+- 공유 처리 계약을 지키는 private helper 이름·분할·동등한 알고리즘은 고정하지 않는다.
+
 ## Dependencies
 
 - [P01-T01](../T01-product-schema/task.md)

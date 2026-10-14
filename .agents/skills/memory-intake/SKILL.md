@@ -33,6 +33,7 @@ description: Register a clear change, bug, or issue as a .memory task without im
 1. [memory-plan](../memory-plan/SKILL.md#task-contract)의 계약으로 Plan/Phase/folder/task.md를 작성한다. 기존 Phase 최대 T 다음 번호와 [Paths](../memory-execute/references/conventions.md#paths)의 실제 ID/링크를 사용한다.
 2. 조사 근거가 충분하면 Task와 결정 링크로 재사용하며 reference.md는 상세 기록이 필요한 경우만 만든다. 독립 분석/테스트도 사전 조사 목표·산출물을 명시한 Task로 등록 가능하다.
 3. 버그 Task는 조사 근거와 수정 전/후 검증 조건을 계획하고, nonbug/과거 done에는 빈 버그 표를 소급 추가하지 않는다. 명령·조건부 단계·커밋 정책을 stub 없이 작성하되 실제 코드는 실행 단계에 둔다.
+4. [Planning Boundaries](../memory-execute/references/conventions.md#planning-boundaries)의 공유 계약/내부 재량 경계와 작업별 Constraints를 적용한다. 새 파일/추상화는 기존 소유 위치에서 처리할 수 없는 이유를 적고 과거 완료 기록에 새 형식을 소급 강제하지 않는다.
 
 ## Activation
 

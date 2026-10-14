@@ -345,7 +345,7 @@ const taskStatuses = new Set(['pending', 'in_progress', 'blocked', 'done']);
 const commitPolicies = new Set(['auto', 'none', 'check_only']);
 const workflowStages = new Set(['reference', 'design-guide-update', 'implementation', 'review', 'review-action',
   'test', 'guide-update', 'refactor', 'commit-check', 'commit']);
-const minimumTaskSections = ['Metadata', 'Status', 'Goal', 'Decision Summary', 'Scope', 'Dependencies',
+const minimumTaskSections = ['Metadata', 'Status', 'Goal', 'Decision Summary', 'Scope', 'Constraints', 'Dependencies',
   'Guide Alignment', 'Implementation', 'Acceptance Criteria', 'Workflow', 'Validation',
   'Commit Message', 'Completion Check', 'Progress', 'Change Log'];
 const minimumMetadata = ['Plan ID', 'Phase ID', 'Task ID', 'Type', 'Source', 'Blueprint Revision', 'Commit Policy'];
@@ -365,6 +365,27 @@ function fieldsOf(section) {
   const body = markdownOutside(section?.body || '');
   return [...body.matchAll(/^- ([^:\n]+):[ \t]*(.*)$/gm)]
     .map(m => ({ name: m[1], value: m[2], line: section.line + lineAt(body, m.index) }));
+}
+
+/** 현재 템플릿/교육용 예시의 제약 형식만 확인하며 내용의 타당성은 의미 리뷰에 남긴다. */
+function constraintIssues(section) {
+  const body = markdownOutside(section?.body || '');
+  const headings = [...body.matchAll(/^###([ \t]+)(.+?)[ \t]*$/gm)];
+  const issues = [];
+  for (const name of ['Must', 'Must Not']) {
+    const found = headings.filter(m => m[2] === name);
+    if (found.length !== 1) {
+      issues.push({ line: section?.line || 1, message: 'Constraints 하위 heading 누락/중복: ' + name });
+      continue;
+    }
+    const heading = found[0];
+    const next = headings[headings.indexOf(heading) + 1];
+    const content = body.slice(heading.index + heading[0].length, next?.index);
+    if (!/^[-*+][ \t]+\S.*$/m.test(content)) {
+      issues.push({ line: section.line + lineAt(body, heading.index), message: 'Constraints 비어 있는 목록: ' + name });
+    }
+  }
+  return issues;
 }
 
 function tableOf(section) {
@@ -405,6 +426,8 @@ export function extractTaskTemplateContract(templateText) {
   requireUnique(names, 'Task heading');
   for (const name of minimumTaskSections) if (!names.includes(name)) throw new Error('템플릿 Task heading 누락: ' + name);
   const get = name => sections.find(s => s.name === name);
+  const constraints = constraintIssues(get('Constraints'));
+  if (constraints.length) throw new Error('템플릿 ' + constraints.map(issue => issue.message).join('; '));
   const metadata = fieldsOf(get('Metadata')).map(f => f.name);
   requireUnique(metadata, 'Metadata');
   for (const name of minimumMetadata) if (!metadata.includes(name)) throw new Error('템플릿 Metadata 누락: ' + name);
@@ -506,6 +529,7 @@ export function checkMemoryExamples(root, files) {
   for (const [file, doc] of documents) {
     if (!normalized(file).endsWith('/task.md')) continue;
     requireSections(file, doc, contract.sections);
+    for (const finding of constraintIssues(doc.sections.get('Constraints'))) issue(file, finding.line, finding.message);
     const metadata = checkFields(file, doc.sections.get('Metadata'), contract.metadata);
     if (metadata.has('Execution')) issue(file, doc.sections.get('Metadata').line, 'Execution metadata는 Example Preconditions 설명으로 이동');
     if (!commitPolicies.has(metadata.get('Commit Policy'))) issue(file, doc.sections.get('Metadata')?.line || 1, 'Commit Policy enum 오류');

@@ -128,6 +128,18 @@ E01~E08은 환경 변화에 대한 문서 판단 경계다. 실제 runtime 변�
 | K07 | plugin cache에서 스킬을 읽고 사용자 프로젝트 작업 | cache 읽기만, 실제 userroot의 .memory/정본/Git 사용. 미확인은 질문 | 지침 대조; 실제 host 검증과 구분 |
 | K08 | 생성·static manifest 통과, host 발견/호출 미시도 | static 성공만 기록, 지원표면/최소버전·설치성공 추정 없음 | 공식 manifest/CLI 정적 확인 + 지침 대조 |
 
+## Planning and Review Boundaries
+
+[Planning Boundaries](conventions.md#planning-boundaries)의 의미를 사람이 대조하는 사례다. 형식 회귀나 실제 모델 실행과 구분한다.
+
+| Case | 입력 | 확인할 결과 / 경계 | 수준 |
+| :--- | :--- | :--- | :--- |
+| P01 | Product DTO의 필수 name을 optional로 바꾸거나 SKU 중복 409를 400으로 변경 | 공유 타입/오류 계약 변경이므로 중요한 선택 확인과 승인된 정본 선반영 필요. 내부 재량으로 처리하지 않음 | 수동 의미 대조 |
+| P02 | 같은 DTO·오류·트랜잭션·반환을 유지하며 private 검증 helper 이름/분할이나 동등한 탐색 알고리즘 변경 | 계약에 필수로 고정한 선택이 아니면 실행 재량. helper 존재나 계획과 이름이 다르다는 사실만으로 finding을 만들지 않음 | 수동 의미 대조 |
+| P03 | 기존 ProductService로 처리 가능한데 한 번 위임하는 파일과 미래용 registry를 승인 근거 없이 추가 | 소유 위치를 나눌 필요와 이점 없이 호출 경로·수정 지점만 늘리는 구체 비용을 지적. Task 재사용 제약을 어겼다면 구현 문제 | 수동 의미 대조 |
+| P04 | 승인 계획 자체가 같은 미래용 registry를 요구하며 구현이 그대로 따름 | 계획의 과설계 문제와 구현 준수 사실을 구분해 보고. 계획 문제만으로 승인 구조를 자동 재설계하지 않고 필요한 결정으로 연결 | 수동 의미 대조 |
+| P05 | 현재 템플릿/교육 Task에서 Constraints 또는 Must / Must Not을 삭제하거나 목록을 비움 | 기존 validator의 해당 형식 진단 실패. 유효한 작업별 목록 또는 없음과 이유는 허용 | 격리 fixture 회귀 |
+
 ## Limitations
 
 frontmatter 검사는 한 줄 plain/quoted 필수 문자열과 description block만 지원한다. 전체 YAML/metadata 해석은 하지 않는다. HTML ID는 fence마다 태그 속성을 비교하며 numeric/common named reference만 정규화한다. 지원하지 않는 named reference는 해당 ID 비교를 제외하고 이유를 표시한다. 실제 DOM 트리/namespace/동적 ID, 전체 entity 표·HTML 문법·접근성·렌더링은 별도 확인 대상이다. 정확한 scalar/anchor/예제 구조 지원 범위는 패키지 내부 문서인 [validation-scope.md](validation-scope.md)에 기록한다.

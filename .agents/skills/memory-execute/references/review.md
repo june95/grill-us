@@ -8,6 +8,8 @@
 - review는 현재 구현/조사 산출물을 task.md의 Goal·I01/I02·AC·검증 의무와 대조한다. 수행하지 않은 구현 보고를 형식상 강제하지 않고 제품 코드를 수정하지 않는다.
 - 계획대로 수행/누락/부분 충족/불명확/범위 밖을 구분한다. 파일/동작 차이는 기록된 조정·승인과 결과 보고를 확인한다.
 - 관련 버그·회귀·권한·예외·주석·검증 공백을 찾고 일반 취향이나 무관한 기존 정리를 finding으로 확대하지 않는다.
+- [계획 경계](conventions.md#planning-boundaries)에 따라 불필요한 파일·추상화·wrapper·간접 참조와 놓친 재사용을 검토한다. 실제 유지보수·동작 비용의 근거를 제시하며 helper 존재 자체나 동등한 내부 구현을 결함으로 판정하지 않는다.
+- 계획이 불필요한 구조를 요구한 경우에는 **계획 문제**, 승인된 책임·공유 계약·Constraints를 어긴 경우에는 **구현 위반**으로 구분한다. 계획 문제도 실제 영향에 따라 기존 severity/AC 기준으로 판정하고, 동의 없는 재설계나 구현자에게 모순된 수정 지시를 하지 않는다.
 - 조사 대상 제품 실패와 조사 산출물 자체의 오류는 [Investigation Outcomes](conventions.md#investigation-outcomes)로 구분한다. 통과 목표 실패·필수 근거 부족은 완료 차단이며 후속 등록만으로 해소되지 않는다.
 - 필요한 승인·선행 evidence를 확인하고 aggregate gate를 만들지 않는다. review.md에 Pass / Pass with Issues / Needs Changes / Blocked, AC 대응·finding·한계·다음 행동을 [Stage Report](templates.md#stage-report)로 기록한다.
 
@@ -70,5 +72,7 @@ finding은 유일한 ID·severity·계약 항목·실제 근거·영향·권고�
 ## Refactor
 
 요청/Task 조건이 충족될 때 현재 변경 표면의 동작 보존 정리만 수행한다. 중복·국소 복잡성·이름·타입·의도 설명을 개선하되 이점 없는 cosmetic churn, API/데이터/권한/UI·의존성 의미 변경, untouched 광범위 정리는 하지 않는다.
+
+계획 자체의 구조 문제는 국소 리팩토링을 근거로 우회 변경하지 않는다. 반대로 공유 계약을 만족하는 내부 함수 분할·이름·동등한 알고리즘은 개인 취향에 맞추기 위해 다시 바꾸지 않는다.
 
 최소 검증과 영향 재리뷰를 수행한다. 필요하면 final-review.md에 후보/동작 보존 근거·실제 확인·한계를 기록하되 파일 자체를 모든 커밋에 강제하지 않는다. 최종 판정은 [Quality Gate](commit-check.md#quality-gate)를 따른다.

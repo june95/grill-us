@@ -29,11 +29,12 @@ description: Create or extend a .memory Plan with Phase and independently execut
 | :--- | :--- |
 | Metadata / Status | Plan/Phase/Task ID, Source·Type, Revision·정책, 초기 pending |
 | Goal / Scope | 단일 관찰 결과·이유·포함/제외 |
+| Constraints | 작업별 Must / Must Not: 책임·재사용·필요한 금지 사항; 적용 없음이면 짧은 이유 |
 | Decision Summary / Alignment | 확정 선택·코드 사실, 실제 정본·승인/보존 경계 |
 | Bug Investigation | 버그 Task만 기존 [조사 근거](../memory-execute/references/conventions.md#bug-investigation) 재사용 |
 | Dependencies | 선행 ID·실제 링크·필요 결과 |
 | Implementation | path::symbol/문서 heading, 목적·new/modify/read-only, 독립 I01/I02 |
-| Signatures / Data / Flow | 적용되는 정확 타입·필드·기본값·nullable·관계·흐름·오류·반환 |
+| Signatures / Data / Flow | 공유 경계의 정확 타입·필드·기본값·nullable·관계·중요 흐름·오류·반환; 계약에 필수인 내부 선택만 고정 |
 | Acceptance Criteria | 사전에 정한 관찰 가능한 완료 기준 |
 | Workflow | 단계 적용 이유/조건과 초기 상태 |
 | Validation | 실제 command/수동 방법, cwd·기대 결과·criterion, 관련 환경 확인 범위 |
@@ -42,6 +43,8 @@ description: Create or extend a .memory Plan with Phase and independently execut
 | Change Log | 의미 있는 계약 변경·이유·날짜 |
 
 조사/테스트 실행 자체도 Implementation 절차로 쓸 수 있다. 관측 실패와 조사 목적은 [Investigation Outcomes](../memory-execute/references/conventions.md#investigation-outcomes)로 구분하며, 원인 미확정 버그는 첫 실행 단위의 원인 확인·검증 조건·수정 범위와 중요 계약 변경 경계를 적는다.
+
+[Planning Boundaries](../memory-execute/references/conventions.md#planning-boundaries)에 따라 공유 계약·AC·검증은 고정하고 private helper 이름·분할·동등한 알고리즘은 실행 재량으로 둔다. 새 파일/추상화에는 기존 소유 위치에 둘 수 없는 구체적인 이유를 적는다.
 
 ## Workflow Selection
 

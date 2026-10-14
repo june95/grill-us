@@ -2,6 +2,8 @@
 
 2026-10-13에 생성 package 0.1.0을 개발 저장소 밖의 별도 Windows 가상 프로젝트에서 실제 CLI와 모델 요청으로 시험했습니다. 포함 스킬은 `grill-me`, `memory-intake`, `memory-plan`, `memory-execute`, `memory-explain`, `visualize` 6개이며 CodeBurn은 포함하지 않습니다. 현재 확인한 버전은 최소 지원 버전이 아닙니다.
 
+현재 개발 snapshot에서는 6개 스킬/0.1.0 metadata를 유지한 채 공유 계약·내부 구현 재량·Constraints·리뷰 지침을 갱신했습니다. 아래 시험은 당시 공개 커밋/본문에 대한 역사적 근거이며 현재 변경 지침의 native 재설치·모델 행동 검증으로 확대하지 않습니다. 현재 변경은 문서 대조·정적 회귀·생성물 freshness로 검증하며 새 native 검증은 별도 작업입니다.
+
 ## GitHub 주소 설치 — 2026-10-14
 
 공개된 `june95/grill-us`의 default branch main, 커밋 **`905e8fd66163c2da77335e6556a9a82666ae9a69`**, package **0.1.0**을 별도 Windows 사용자 프로젝트 두 곳에서 실제 native CLI로 등록·설치했습니다. 수동 ZIP·clone·package 복사·Node 빌드·개발 스킬 직접 로딩 없이 도구가 GitHub source를 받았고, 양쪽 marketplace의 실제 Git origin/HEAD와 설치 cache의 36개 파일 bytes가 공개 package와 일치했습니다.

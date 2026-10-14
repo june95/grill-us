@@ -16,6 +16,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | 문서 형식 | [templates.md](templates.md#stage-report) | 적용 필드만 실제 자료로 채움 |
 | 리뷰 위임·자체 리뷰·finding 처리 | [Review Delegation](review.md#review-delegation) | 적용 review만 기본 위임, 불가 알림·자체 리뷰, finding 보존 |
 | 프로젝트·정본·명령 발견 | [project-profile.md](project-profile.md#discovery) | 실제 cwd/정본/명령 확인 |
+| 계획의 공유 계약·구현 재량 | [Planning Boundaries](#planning-boundaries) | 공유 경계는 정확히, 내부 구현은 계약 안에서 선택 |
 | Git 품질·후보·ignore·staging·intent | [commit-check.md](commit-check.md#quality-gate), [Staging](commit-check.md#staging), [Commit Intent](commit-check.md#commit-intent) | Task 후보와 사용자 index 분리 |
 | 재개·전환·복구 알고리즘 | [resume.md](resume.md#stale-evidence), [Switch](resume.md#switch), [Recovery](resume.md#recovery) | 미해결 intent 보존, 실제 결과 확인 후 재개 |
 
@@ -86,6 +87,16 @@ Revision은 계약의 버전이다. 단순 문구 정리, stage 상태·보고 �
 - 상세 정본은 task.md 하나다. 실제 path::symbol/문서 절·적용 타입/필드/흐름·AC·Dependencies·command/cwd·workflow·커밋 정책을 실행 가능한 수준으로 적는다. 조사/검증 절차도 Implementation에 쓸 수 있으며 적용되지 않는 API/DTO·버그 표를 강제하지 않는다.
 - 분석·테스트 실행의 사전 Goal/AC는 조사·분류인지 원인 확정/검사 통과인지 구분한다. Type만으로 완료나 커밋 생략을 정하지 않는다. 계획/등록에서는 제품·테스트 코드·공유 정본·staging·commit을 변경하지 않는다.
 - 등록만으로 기존 활성 위치를 바꾸지 않는다. 활성 없음이면 첫 실행 가능한 Task를 연결하고, 우선 처리 전환은 [Switch](resume.md#switch)의 기존 위치/의도 보존 절차를 따른다. 실제 시작 전 새 Task는 pending이다.
+
+### Planning Boundaries
+
+청사진은 실행자가 구조·공유 계약을 다시 결정하지 않고 구현할 수 있어야 한다. 공개 API, DTO·저장 형식, 공유 모듈의 책임과 인터페이스, 중요한 처리 순서·분기·오류·상태 정책, 완료 조건과 검증 경로를 정확히 정한다. 적용되는 필드·타입·기본값·nullable·관계를 추상적인 목표로 대체하지 않는다.
+
+private helper의 이름·시그니처·함수 분할·변수 타입·동등한 내부 알고리즘은 공유 계약에 필수인 경우를 제외하고 실행자가 선택한다. Related Files에는 실제 파일·심볼/문서 섹션, 역할과 new/modify/read-only를 적되 함수 내부 코드를 계획서에 미리 재현하지 않는다. 계약을 만족하는 내부 선택을 새로운 설계 결정이나 계획 위반으로 취급하지 않는다.
+
+새 Task는 `Constraints` 아래 `Must`와 `Must Not`에 그 작업의 책임·재사용·구체적인 금지 사항을 짧은 목록으로 작성한다. 적용할 제약이 없으면 `없음 — 이유`처럼 근거를 적고 빈 항목이나 전역 규칙의 반복으로 채우지 않는다. 새 파일·추상화는 기존 파일/심볼이 그 책임을 맡기 어려운 구체적인 이유를 남긴다. 가상의 미래 요구나 한 번 쓰는 wrapper 분리만으로 새 구조를 정당화하지 않는다. 실제 중복·복잡성을 줄이는 local helper는 허용한다.
+
+검토는 승인된 계약 준수와 계획 자체의 불필요한 복잡성을 구분한다. 계획이 과설계를 요구한다면 계획 문제로 보고하며, 이를 이유로 실행자가 구조를 임의 변경하지 않는다. 중요한 계약 변경은 [Change Boundaries](#change-boundaries)를 따른다. 새 작성과 명시 수정 범위에 적용하며 과거 완료 Task·사용자 기록을 일괄 변환하지 않는다.
 
 ## Bug Investigation
 

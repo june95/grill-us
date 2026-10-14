@@ -615,6 +615,44 @@ test('invalid policy, revision, status and path identity cannot pass example che
   }
 });
 
+test('constraints omissions, duplicate subheadings and empty lists fail in examples and template', t => {
+  const mutations = [
+    [s => s.replace('## Constraints', '## Other Constraints'), /Constraints/],
+    [s => s.replace('### Must Not', '### Other'), /heading 누락\/중복: Must Not/],
+    [s => s.replace('### Must\n', '### Other\n'), /heading 누락\/중복: Must$/],
+    [s => s.replace('### Must Not', '### Must\n- duplicate\n\n### Must Not'), /heading 누락\/중복: Must/],
+    [s => s.replace(/(### Must\n)[\s\S]*?(?=### Must Not)/, '$1\n'), /비어 있는 목록: Must/],
+    [s => s.replace(/(### Must Not\n)[\s\S]*?(?=\n## )/, '$1\n-   \n'), /비어 있는 목록: Must Not/],
+    [s => s.replace(/(### Must\n)[\s\S]*?(?=### Must Not)/, '$1\n<!-- - hidden -->\n\n'), /비어 있는 목록: Must/]
+  ];
+  for (const file of [exampleTaskRelative, templateRelative]) {
+    for (const [mutate, expected] of mutations) {
+      const root = memoryFixture(t);
+      changeDocument(root, file, s => mutate(s.replace(/\r\n/g, '\n')));
+      const findings = errors(checkMemory(root));
+      assert(findings.some(d => d.file === path.join(root, file) && expected.test(d.message)), `${file}: ${expected}`);
+    }
+  }
+});
+
+test('fenced fake constraint headings or items cannot satisfy example requirements', t => {
+  for (const [replacement, expected] of [
+    ['```markdown\n### Must\n- fake\n```\n\n', /heading 누락\/중복: Must$/],
+    ['### Must\n\n```markdown\n- fake\n```\n\n', /비어 있는 목록: Must/]
+  ]) {
+    const root = memoryFixture(t);
+    changeDocument(root, exampleTaskRelative, s => s.replace(/### Must\r?\n[\s\S]*?(?=### Must Not)/, replacement));
+    assert(errors(checkMemory(root)).some(d => expected.test(d.message)));
+  }
+});
+
+test('explicit no-applicable constraints and ordinary inline code remain valid', t => {
+  const root = memoryFixture(t);
+  changeDocument(root, exampleTaskRelative, s => s.replace(/## Constraints[\s\S]*?(?=\n## )/,
+    '## Constraints\n\n### Must\n\n- `Product` 공유 타입을 유지한다.\n\n### Must Not\n\n- 없음 — 이 문서 비교 작업에 추가 금지 사항이 없다.\n'));
+  assert.deepEqual(errors(checkMemory(root)), []);
+});
+
 test('workflow and validation column drift and progress duplication fail', t => {
   for (const [mutate, expected] of [
     [s => s.replace('| Stage | Applicability |', '| Step | Applicability |'), /표 열 불일치: Workflow/],
