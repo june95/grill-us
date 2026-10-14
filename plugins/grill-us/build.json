@@ -3,12 +3,12 @@
   "generator": "scripts/build-plugin.mjs",
   "sourceSnapshot": {
     "packaging/grill-us.json": "dd958cc172465d48e463a52ab130649a6402cd5fb09a9418cc6f14b5c7fab51a",
-    "packaging/README.md": "b04f8bb9d4adb177a3567a793f61506d96610a4ed3d42f592c5c024b61618b77",
-    ".agents/skills/grill-me/SKILL.md": "80839047256472eefd9a7b7ae6f10b2a122ca163b28edb9f0f78addcbb89c20b",
+    "packaging/README.md": "7d63ce8f7ae962c075558b473120627d5ddca0329bb366ac52d165241ebe0a02",
+    ".agents/skills/grill-me/SKILL.md": "bd5a11cc9ef255fbd57338f5e8154f059939938c8dd1b6150600381968fb7260",
     ".agents/skills/memory-execute/SKILL.md": "6bbcd91f224cb6618f53d27743323a639264d8412b60a2b7600e0aba8566bf15",
     ".agents/skills/memory-execute/references/analysis.md": "b6567506372c942e5187698da5ccb2bf856f578509b9c113a3d31af5f2d4ec30",
     ".agents/skills/memory-execute/references/commit-check.md": "f09cb00046a286050be3b318faa70cd15941b3a388ab6315f10220e146cd2b26",
-    ".agents/skills/memory-execute/references/conventions.md": "ba66d152764e09b87c0c67ec41606d2a26ea88331adfd6c3ab4eb183f8fbcf47",
+    ".agents/skills/memory-execute/references/conventions.md": "57d165015c5b2b923c9b819dc86e64a29fe266e1c53e734d0175e12a7b5bdfa4",
     ".agents/skills/memory-execute/references/guides.md": "c3416edcede23a5f3abc4904092d5b608632cb412985c8ee74e5cf052732c392",
     ".agents/skills/memory-execute/references/implementation.md": "1724467cbb95c228b04f365001dc7f10243cbbcc4e46d71257b638af2c6e93bf",
     ".agents/skills/memory-execute/references/project-profile.md": "e7e42f59b5daf226a94b407567e447afe6835c4f1b0258a4d7a9ec018522d8c5",
@@ -18,8 +18,8 @@
     ".agents/skills/memory-execute/references/templates.md": "41d95de6e03b0388456b782e9f56a7be7c5c3e99fcb896145316ba0570211cf0",
     ".agents/skills/memory-execute/references/testing.md": "1e6e0d949743edd3b632f9a5e355da6d32dd9245e8ac115461eeb8d29728c4a6",
     ".agents/skills/memory-execute/references/validation-scope.md": "3d0314630a1432ca2c43c54a002595eca7d4eaaf0daac37d4b77b2e0c3524e36",
-    ".agents/skills/memory-explain/SKILL.md": "bad12223ad271ad3a44d45d9ee911828186762ac97698609dcd5e3196bea0706",
-    ".agents/skills/memory-explain/references/scenarios.md": "6d945e1774ec9a465288ec378aac16c0474cc9e2f1ff13dbbafcc6d6251d8fa8",
+    ".agents/skills/memory-explain/SKILL.md": "8bb46bcd7eccd1911d2ffa00cb187f36374350764b5c6762dec5ba1e232de3f7",
+    ".agents/skills/memory-explain/references/scenarios.md": "cfa65fbab88bd6b73e8e70e85060984f563417f859cca7762bdb4c88ae757e50",
     ".agents/skills/memory-intake/SKILL.md": "064dc8ff7e999bb7dfbcf84dbb67ad2dcec9cbf30baf5d85f9e9ea73838965dc",
     ".agents/skills/memory-plan/SKILL.md": "1c19ef175ceb4979eb714ba9e095aa31d0daccdd7983695a07ea0c81fa41d31b",
     ".agents/skills/visualize/SKILL.md": "e2006615c7e1d96ceb25c0bdea12bbfb8000066f98d0181a55eca6f6806d50d4",
@@ -46,7 +46,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "b04f8bb9d4adb177a3567a793f61506d96610a4ed3d42f592c5c024b61618b77"
+      "sha256": "7d63ce8f7ae962c075558b473120627d5ddca0329bb366ac52d165241ebe0a02"
     },
     {
       "path": "plugin.json",
@@ -54,7 +54,7 @@
     },
     {
       "path": "skills/grill-me/SKILL.md",
-      "sha256": "80839047256472eefd9a7b7ae6f10b2a122ca163b28edb9f0f78addcbb89c20b"
+      "sha256": "bd5a11cc9ef255fbd57338f5e8154f059939938c8dd1b6150600381968fb7260"
     },
     {
       "path": "skills/memory-execute/SKILL.md",
@@ -70,7 +70,7 @@
     },
     {
       "path": "skills/memory-execute/references/conventions.md",
-      "sha256": "ba66d152764e09b87c0c67ec41606d2a26ea88331adfd6c3ab4eb183f8fbcf47"
+      "sha256": "57d165015c5b2b923c9b819dc86e64a29fe266e1c53e734d0175e12a7b5bdfa4"
     },
     {
       "path": "skills/memory-execute/references/guides.md",
@@ -110,11 +110,11 @@
     },
     {
       "path": "skills/memory-explain/SKILL.md",
-      "sha256": "bad12223ad271ad3a44d45d9ee911828186762ac97698609dcd5e3196bea0706"
+      "sha256": "8bb46bcd7eccd1911d2ffa00cb187f36374350764b5c6762dec5ba1e232de3f7"
     },
     {
       "path": "skills/memory-explain/references/scenarios.md",
-      "sha256": "6d945e1774ec9a465288ec378aac16c0474cc9e2f1ff13dbbafcc6d6251d8fa8"
+      "sha256": "cfa65fbab88bd6b73e8e70e85060984f563417f859cca7762bdb4c88ae757e50"
     },
     {
       "path": "skills/memory-intake/SKILL.md",

@@ -8,13 +8,15 @@
 | [grill-me](.agents/skills/grill-me/SKILL.md) | 설계 검토나 중요한 미결정이 있을 때 | 한 질문씩 선택·이유 확정 |
 | [memory-plan](.agents/skills/memory-plan/SKILL.md) | 확정 요청을 실행 단위로 나눌 때 | Plan·Phase·Task 청사진 작성 |
 | [memory-execute](.agents/skills/memory-execute/SKILL.md) | 현재 Task 또는 지정 단계만 수행할 때 | 구현·검증·완료 판정·재개 |
-| [memory-explain](.agents/skills/memory-explain/SKILL.md) | 설계 이유·계획·진행·완료 결과를 이해할 때 | 관련 기록·코드·Git 근거에 따른 채팅 설명 |
+| [memory-explain](.agents/skills/memory-explain/SKILL.md) | 결정 검색·설계 이유·계획·진행·완료 결과를 이해할 때 | 결정 후보·적용 범위·출처와 기록·코드·Git 근거에 따른 채팅 설명 |
 
 스킬은 에이전트가 따르는 업무 지침입니다. 별도 workflow 실행 프로그램이나 제품 앱을 포함하지 않습니다.
 
 계획은 공개 API·DTO·저장/모듈 경계·중요 흐름·오류·상태·완료 조건과 검증을 고정합니다. 새 Task의 Constraints에는 작업별 Must / Must Not을 적고, 새 파일/추상화가 필요하면 기존 소유 위치에 둘 수 없는 이유를 남깁니다. 계약에 필수로 고정하지 않은 private helper 이름·분할·동등한 알고리즘은 실행자가 선택합니다. 리뷰는 계획 자체의 과설계와 구현의 계약 위반을 구분하며 helper 존재만으로 결함을 만들거나 승인 구조를 자동 재설계하지 않습니다.
 
-현재 개발 snapshot은 기존 6개 스킬/0.1.0 구성에서 계획·리뷰 지침을 갱신한 상태입니다. 아래 native 설치 기록은 당시 공개 커밋의 검증이며 현재 변경 지침의 모델 실행 성공을 뜻하지 않습니다.
+현재 개발 snapshot은 기존 6개 스킬/0.1.0 구성에서 계획·리뷰 및 결정 작성·검색 지침을 갱신한 상태입니다. 아래 native 설치 기록은 당시 공개 커밋의 검증이며 현재 변경 지침의 모델 실행 성공을 뜻하지 않습니다.
+
+새 결정은 `Applies to`에 적용 기능·모듈·상황을 반드시 남기고, `Revisit When`은 실제 조건이 있을 때만 작성합니다. `memory-explain 상품 모듈의 SKU 재고 결정을 찾아줘`처럼 ID·주제·적용 범위로 검색할 수 있습니다. 명시 결정이나 Plan/Task 연결을 먼저 읽고 필요한 경우 확인한 프로젝트의 `.memory/decisions`에서 후보를 찾습니다. 구형 기록의 적용 범위는 미기록으로 설명하고, 출처·이유·상충 근거를 보여 줍니다. 검색 결과 저장이나 과거 결정 변환은 하지 않습니다.
 
 ## 다른 프로젝트에 적용하기
 

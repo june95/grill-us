@@ -25,6 +25,8 @@ description: Resolve material requirements and design choices one question at a 
 
 중요한 분기가 해소되면 종료하며 불필요한 질문을 만들지 않는다. 확정 결정은 [Paths](../memory-execute/references/conventions.md#paths)의 독립 Decision ID 문서에 저장하고 기존 연결 문서에는 선택·이유·날짜를 추가한다. 과거 파일/링크는 유지한다.
 
+[Decision Fields](../memory-execute/references/conventions.md#decision-fields)에 따라 새 결정에는 적용 기능·모듈·상황을 `Applies to`로 반드시 적는다. 아래 예시는 재검토 조건이 없는 경우다. 실제 조건이 있을 때만 `Revisit When`을 추가하고 빈 항목이나 가상의 조건을 만들지 않는다. 기존 결정의 명시 수정은 그 범위에 한정하며 과거 기록을 일괄 변환하지 않는다.
+
 ~~~markdown
 # Decisions: {기능명}
 
@@ -37,6 +39,7 @@ description: Resolve material requirements and design choices one question at a 
 - Chosen: {확정 선택}
 - Rationale: {이유와 관련 제약}
 - Confirmation: 사용자 선택 / 사용자 명시 요청 / 코드 확인 사실
+- Applies to: {이 결정이 적용되는 기능·모듈·상황과 필요한 조건}
 ~~~
 
 미해결 중요한 결정은 Confirmed로 저장하지 않는다. 제품/공유 정본·staging·commit·active 전환은 하지 않으며 다음은 [memory-plan](../memory-plan/SKILL.md) 또는 기존 등록 맥락의 [memory-intake](../memory-intake/SKILL.md)로 안내한다.

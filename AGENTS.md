@@ -10,7 +10,7 @@
 | 설계 검토·중요한 미결정 | [grill-me](.agents/skills/grill-me/SKILL.md) | 한 질문씩 선택·이유 확정 |
 | 확정 요청의 작업 분할 | [memory-plan](.agents/skills/memory-plan/SKILL.md) | Plan → Phase → Task 청사진 |
 | 현재 작업·지정 단계 실행 | [memory-execute](.agents/skills/memory-execute/SKILL.md) | 구현·검증·완료 판정·재개 |
-| 설계·계획·진행·완료 설명 | [memory-explain](.agents/skills/memory-explain/SKILL.md) | 기록·코드·Git 근거의 읽기 전용 설명 |
+| 결정 검색·설계·계획·진행·완료 설명 | [memory-explain](.agents/skills/memory-explain/SKILL.md) | 결정 후보·적용 범위·출처와 기록·코드·Git 근거의 읽기 전용 설명 |
 
 ## Essential Boundaries
 
@@ -24,6 +24,7 @@
 - Git은 Task 후보와 사용자 working/index를 분리하고 `.memory`를 기본 제외한다. force-add·무관 변경 폐기·자동 push/외부 메시지를 수행하지 않는다.
 - plugin 설치 경로는 읽기 전용 스킬 위치이며 `.memory`는 확인한 사용자 프로젝트 root에 둔다. cache/metadata 위치를 작업공간으로 추정하지 않는다. 공식 배포는 생성 plugin이고 `.agents/skills`는 개발 정본이다([작업공간 경계](.agents/skills/memory-execute/references/project-profile.md#skill-installation-and-workspace)).
 - 설명만 하는 호출은 memory/history/current/checkpoint·제품·Git을 쓰거나 테스트를 실행하지 않는다. 당시 완료 근거와 현재 코드를 구분하고 불일치·복구 권고만 설명한다.
+- 새 결정은 [Decision Fields](.agents/skills/memory-execute/references/conventions.md#decision-fields)에 따라 Applies to를 필수로, Revisit When은 실제 조건이 있을 때만 작성한다. 결정 검색도 무쓰기이며 과거 필드 누락을 전역 적용으로 추정하거나 원문을 변환하지 않는다.
 
 ## Canonical References
 

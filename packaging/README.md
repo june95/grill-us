@@ -6,9 +6,11 @@
 
 Windows에서 Codex CLI **0.160.1**과 Claude Code **2.1.296**의 실제 plugin 목록에 포함 스킬 6개가 발견되는 것을 확인했습니다. 2026-10-14에는 GitHub `june95/grill-us`의 main 커밋 `905e8fd66163c2da77335e6556a9a82666ae9a69`, package **0.1.0**을 양쪽 native 명령으로 설치하고 설치 cache에서 명시 `memory-explain` 호출과 형제 참조 읽기를 확인했습니다. 이는 시험한 버전이며 최소 지원 버전이나 다른 OS·Codex 앱/IDE/웹의 지원을 뜻하지 않습니다. 아래 설치는 사용자가 선택하여 수행하며 vendor 공개 store 게시나 자동 개인 설치를 제공하지 않습니다.
 
-현재 개발 snapshot은 기존 6개 스킬/0.1.0 구성을 유지하며 계획·리뷰 지침을 갱신했습니다. 위 native 시험은 당시 공개 커밋의 근거이며, 변경된 지침을 새로 설치하거나 모델로 실행한 검증은 아직 없습니다.
+현재 개발 snapshot은 기존 6개 스킬/0.1.0 구성을 유지하며 계획·리뷰 및 결정 작성·검색 지침을 갱신했습니다. 위 native 시험은 당시 공개 커밋의 근거이며, 변경된 지침을 새로 설치하거나 모델로 실행한 검증은 아직 없습니다.
 
 계획은 공개 API·DTO·저장/모듈 경계·중요 흐름·오류·상태·완료 조건과 검증을 고정합니다. 새 Task의 Constraints에는 작업별 Must / Must Not을 적고, 새 파일/추상화가 필요하면 기존 소유 위치에 둘 수 없는 이유를 남깁니다. 계약에 필수로 고정하지 않은 private helper 이름·분할·동등한 알고리즘은 실행자가 선택합니다. 리뷰는 계획 자체의 과설계와 구현의 계약 위반을 구분하며 helper 존재만으로 결함을 만들거나 승인 구조를 자동 재설계하지 않습니다.
+
+새 결정은 `Applies to`에 적용 기능·모듈·상황을 필수로 기록하며 `Revisit When`은 실제 조건이 있을 때만 작성합니다. `memory-explain 상품 모듈의 SKU 재고 결정을 찾아줘`처럼 ID·주제·적용 범위로 요청하면 명시 문서/연결 결정을 우선 읽고 필요한 경우 사용자 프로젝트의 `.memory/decisions`에서 후보를 찾습니다. 구형 기록도 출처·선택·기록된 이유·적용 범위를 구분해 설명하며, 범위 미기록을 전역 적용으로 추정하지 않습니다. 상충 후보는 근거와 함께 보여 주며 검색 보고·결정·상태를 쓰지 않습니다.
 
 ## 제공 스킬과 선택
 
@@ -18,7 +20,7 @@ Windows에서 Codex CLI **0.160.1**과 Claude Code **2.1.296**의 실제 plugin 
 | memory-intake | 명확한 수정·이슈를 등록 | `$grill-us:memory-intake` | `/grill-us:memory-intake` |
 | memory-plan | 확정 요청을 Plan/Phase/Task로 분할 | `$grill-us:memory-plan` | `/grill-us:memory-plan` |
 | memory-execute | 현재 Task 또는 명시 단계 실행 | `$grill-us:memory-execute` | `/grill-us:memory-execute` |
-| memory-explain | 기록·코드·Git 근거로 설명 | `$grill-us:memory-explain` | `/grill-us:memory-explain` |
+| memory-explain | 결정 검색·적용 범위·출처와 기록·코드·Git 근거 설명 | `$grill-us:memory-explain` | `/grill-us:memory-explain` |
 | visualize | 명시한 HTML 시각화 생성 | `$grill-us:visualize` | `/grill-us:visualize` |
 
 호출 표기는 에이전트에 입력하는 요청이며 터미널 실행 파일이 아닙니다. 동명 개인 스킬이 있으면 namespace를 포함하고, 실제 읽은 경로가 이 plugin의 `skills/`인지 확인합니다. GitHub 설치 시험에서는 양쪽 설치 cache에서 본문·형제 references를 읽었습니다. 기존 로컬 시험의 다른 5개 대표 흐름은 본문·참조·CLI 버전의 변경 영향을 대조해 재사용했으며 GitHub 설치 뒤 모든 요청을 다시 실행한 것은 아닙니다. 모든 이름 충돌 조합이나 암묵적 자동 선택까지 검증한 것도 아닙니다. Claude 표기는 [공식 skills 문서](https://code.claude.com/docs/en/skills)도 참고합니다.

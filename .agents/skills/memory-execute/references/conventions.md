@@ -17,6 +17,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | 리뷰 위임·자체 리뷰·finding 처리 | [Review Delegation](review.md#review-delegation) | 적용 review만 기본 위임, 불가 알림·자체 리뷰, finding 보존 |
 | 프로젝트·정본·명령 발견 | [project-profile.md](project-profile.md#discovery) | 실제 cwd/정본/명령 확인 |
 | 계획의 공유 계약·구현 재량 | [Planning Boundaries](#planning-boundaries) | 공유 경계는 정확히, 내부 구현은 계약 안에서 선택 |
+| 결정 작성·호환 읽기 | [Decision Fields](#decision-fields) | 새 결정의 적용 범위 필수, 실제 재검토 조건만 기록, 과거 기록 보존 |
 | Git 품질·후보·ignore·staging·intent | [commit-check.md](commit-check.md#quality-gate), [Staging](commit-check.md#staging), [Commit Intent](commit-check.md#commit-intent) | Task 후보와 사용자 index 분리 |
 | 재개·전환·복구 알고리즘 | [resume.md](resume.md#stale-evidence), [Switch](resume.md#switch), [Recovery](resume.md#recovery) | 미해결 intent 보존, 실제 결과 확인 후 재개 |
 
@@ -47,6 +48,24 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 - 경로와 링크는 작성한 문서 기준 상대 경로를 사용한다. 보고서의 Covered Files는 저장소 기준 상대 경로다. 경로를 쓰기 전에 의도한 프로젝트 안인지 확인한다.
 - 기본적으로 `.memory`는 로컬 관리한다. 명시적인 공유 예외는 실제 Git ignore 정책과 함께 확인하며 force-add로 우회하지 않는다.
 - `.memory` 경로는 확인한 사용자 작업공간 root 기준이며 plugin 설치/cache 경로와 구분한다. 설치된 스킬·참고 문서는 읽기 전용이고 실제 작업공간 발견/미확인 시 질문은 [Skill Installation and Workspace](project-profile.md#skill-installation-and-workspace)를 따른다. cache 안에 상태를 만들지 않는다.
+
+## Decision Fields
+
+결정 문서는 [Paths](#paths)의 독립 Decision ID와 문서 안의 안정적인 `DNN`으로 식별한다. 새 항목은 `## D01. 제목` 형식으로 쓰며 기존 DNN·파일명·링크를 재번호하거나 다른 문서의 같은 DNN을 하나로 합치지 않는다. 선택·이유·확인 근거와 변경 이력을 보존한다.
+
+| Field | 새 결정 작성 계약 |
+| :--- | :--- |
+| Chosen | 확정한 선택. 추천안·미답변·가정을 사용자 확정으로 쓰지 않음 |
+| Rationale | 기록할 수 있는 이유와 관련 제약. 확인하지 못한 이유를 창작하지 않음 |
+| Confirmation | 사용자 선택 / 사용자 명시 요청 / 코드 확인 사실을 구분한 실제 근거 |
+| Applies to | 필수이며 비어 있지 않은 설명 문자열. 적용 기능·모듈·상황을 구체적으로 명시하고 프로젝트 전체 적용은 그 근거가 있을 때만 작성 |
+| Revisit When | 선택 설명 문자열. 실제 재검토 조건이 있을 때만 작성하며 조건이 없으면 필드 자체를 생략. 빈값·가상 조건을 강제하지 않음 |
+
+새 결정에 적용하며, 기존 결정의 명시 수정은 그 변경 범위에 한정한다. 과거 결정·완료 기록을 일괄 변환하거나 없던 적용 범위·확인 근거를 소급 채우지 않는다. 교육용 결정은 실제 사용자 확정과 구분하여 표시한다.
+
+읽을 때는 현재 `## D01. 제목`과 구형 `## D01 제목`, `Rationale`/`Why`, 강조된 필드 표기 등 실제 표현을 의미에 따라 대응한다. 없는 필드는 **미기록**, 기록은 있으나 현재 적용을 확인하지 못한 경우는 **미확인**으로 구분한다. Applies to가 없다는 이유로 전역 적용을 추정하지 않으며 원문을 읽기 편한 형식으로 저장·변환하지 않는다.
+
+검색 결과는 결정 문서/Decision ID와 DNN, 선택·기록된 이유·적용 범위·재검토 조건(있을 때) 및 실제 출처로 설명한다. 명시된 변경/대체 근거, 연결 Plan, 실제 적용 조건을 함께 대조하고 날짜·검색 순위만으로 정본을 선택하지 않는다. 상충·동일 DNN·누락을 구분하며 검색만으로 결정을 수정하거나 새로 확정하지 않는다. 탐색 순서와 무쓰기 절차는 [memory-explain](../../memory-explain/SKILL.md#decision-search)이 소유한다.
 
 ## Task Fields
 
