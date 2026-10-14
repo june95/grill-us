@@ -1,10 +1,45 @@
 # grill-us plugin 호환성 확인
 
-2026-10-13에 생성 package 0.1.0을 개발 저장소 밖의 별도 Windows 가상 프로젝트에서 실제 CLI와 모델 요청으로 시험했습니다. 포함 스킬은 `grill-me`, `memory-intake`, `memory-plan`, `memory-execute`, `memory-explain`, `visualize` 6개이며 CodeBurn은 포함하지 않습니다. 현재 확인한 버전은 최소 지원 버전이 아닙니다.
+현재 로컬 package **0.2.0/7개 스킬**의 native 검증과 과거 **0.1.0/6개 스킬**의 로컬·GitHub 설치 검증을 구분합니다. 모두 개발 저장소 밖의 별도 Windows 가상 프로젝트를 사용했습니다. 시험한 버전은 최소 지원 버전이 아닙니다. CodeBurn은 package에 포함하지 않습니다.
 
-현재 저장소 snapshot은 **0.2.0/7개 스킬**이며 `memory-review`를 추가했습니다. 명시32개 원본 문서·38개 package 파일, 공통 검토/무쓰기 반환과 execution 기록 책임, 경로·소유·실패 복구·freshness·Git clone/LF를 정적 회귀와 문서 대조로 확인하는 범위입니다. 아래 0.1.0/6개 시험은 당시 공개 커밋/본문의 역사적 근거입니다. 0.2.0의 native 발견·모델 행동 검증은 후속 작업이며 공개 GitHub 설치·자동 upgrade도 아직 검증하지 않았습니다.
+현재 snapshot은 `memory-review`를 추가했고 명시32개 원본 문서·38개 package 파일, 공통 검토/무쓰기 반환과 execution 기록 책임, 경로·소유·실패 복구·freshness·Git clone/LF의 정적 근거를 유지합니다. 2026-10-14 로컬 native 발견·변경 동작 검증 결과는 다음 절과 같습니다. 0.2.0의 공개 GitHub 설치·버전 간 자동 upgrade는 미검증입니다.
 
 2026-10-14의 현재 정적 검사에는 Claude Code **2.1.299**로 `claude plugin validate --strict . --json`과 `claude plugin validate --strict plugins/grill-us --json`을 실행했습니다. 두 manifest 검사 모두 exit 0, errors/warnings 없음입니다. 이는 marketplace/package 형식 검사이며 0.2.0 설치·스킬 발견·모델 호출 성공의 증거는 아닙니다.
+
+## 로컬 0.2.0 변경 계약 검증 — 2026-10-14
+
+| 항목 | Codex CLI | Claude Code CLI |
+| :--- | :--- | :--- |
+| 실제 버전 / OS | 0.160.1 / Windows | 2.1.299 / Windows |
+| 모델 | 기존 선택 gpt-6-astra를 세션에 명시 | 실제 init의 claude-opus-5-5 |
+| 로드 | 전용 nonce local marketplace + native `plugin add` | `--plugin-dir`와 정확한 package `--add-dir` |
+| 발견 | 설치 전 0 → 설치 후 활성 7, `skills/list` errors 0 | init plugin 0.2.0 + qualified slash command 7 |
+| 본문·참조 | 전용 0.2.0 설치 cache의 `skills/` | 지정한 0.2.0 session package의 `skills/` |
+| 대표 호출 | R1/R2/P/Dwrite/Dquery 각 1회와 Dquery 본문 보완 1회, 모두 exit 0 | 같은 기본 5개 호출, 모두 exit 0 |
+
+발견한 이름은 `grill-me`, `memory-intake`, `memory-plan`, `memory-execute`, `memory-review`, `memory-explain`, `visualize`입니다. 기존 canonical `grill-us@grill-us`는 세션 설정으로 비활성화했습니다. 개발 저장소 스킬을 직접 읽은 결과를 native 발견으로 세지 않았습니다.
+
+| 사례 | 양쪽 실제 결과 |
+| :--- | :--- |
+| R1: 계획 없는 파일 리뷰 | 덧셈으로 구현된 곱셈 계약의 결함과 수정·검증 방향 반환, 계획 준수 해당 없음 |
+| R2: 비활성 Task + Phase | 출력 계약을 어긴 T01은 Needs Changes, 계획대로 작성한 T02 wrapper는 구현 준수와 계획 복잡성을 구분. Phase는 T01 때문에 Needs Changes |
+| P: 계획 작성 | 기존 모듈/테스트·공개 계약·AC·실제 명령을 고정한 단일 pending Task 생성. private helper/동등 알고리즘 재량, 미래 auto 유지 |
+| Dwrite: 확정 결정 저장 | checkout 배송비 표시 범위를 `Applies to`에 기록, 합의한 재검토 조건이 없어 `Revisit When` 생략 |
+| Dquery: 새·구형·상충 결정 조회 | 구형 `## D01`/`Why`와 새 형식 모두 검색. 문서별 동일 DNN·범위 누락·반대 선택·대체 근거 부재 구분, 최신 날짜만으로 권위 선택 없음 |
+
+R1/R2/Dquery는 fixture 파일 변경 0입니다. P는 새 Plan/Phase/Task와 이력, Dwrite는 새 결정과 이력만 작성했습니다. 모든 호출에서 제품·기존 current/checkpoint·Git HEAD/index/status와 `.git` 전체 파일 bytes, 시험 부모 폴더의 helper/catalog, package와 trial cache 변경은 없었습니다. 부모 폴더 대조는 별도 두 host fixture를 제외하고 각 fixture는 따로 대조했습니다. 실제 테스트·구현·staging·commit·위임은 모델에게 허용하지 않았으며 수행되지 않았습니다.
+
+독립 사전 검토에서 `.git` metadata와 부모 helper 관측 누락이 발견돼 호출 전에 보강했습니다. 소유 fixture의 설정 주석·helper 주석·새 sentinel 변화를 실제 검출하고 원 bytes 복원을 확인한 뒤 재검토를 통과했습니다. Codex 읽기 과정의 `Get-FileHash`·`rg` 부재는 원 오류를 보존하고 파일 읽기로 대체했습니다. 양쪽 모델의 hash 인용은 부모가 제공한 snapshot이며 독립 계산 성공이 아닙니다. 실행 담당이 전체 bytes와 실제 tool 명령을 별도로 대조했습니다.
+
+Codex Dquery는 올바른 조회·무쓰기를 반환했지만 automatic main prompt의 `memory-explain` 본문 truncation 경고가 있었고 전체 SKILL을 재읽지 않았습니다. 원 결과와 한계를 보존한 뒤, 독립 사전 검토를 거친 별도 DqueryRetry에서 같은 전용 native package를 사용해 전체 `memory-explain/SKILL.md`를 UTF-8로 읽도록 했습니다. 실제 command/output 전체가 package 본문과 일치했고 같은 세 결정의 해석과 변경 0을 확인했습니다. 자동 주입 경고는 보완 호출에도 남았으므로 기본 truncation이 해결됐다고 주장하지 않습니다. 원 로그의 비민감 plugin 설정 키 일부는 이메일 필터에 가려져 정확한 trial context와 대조했고, 보완 호출에서는 알려진 두 설정 키만 필터 예외로 두었습니다.
+
+모델 출력의 세부 표현까지 항상 정확함을 보장하지 않습니다. R1의 severity는 Codex High, Claude Critical로 달랐고 Claude의 전체 영향 표현은 실제 입력별 예외보다 넓었습니다. 계획에서는 비number/±0/검증 우선순위의 해석을 밝혔으며 별도 운영 설계 승인으로 삼지 않습니다. 모든 7개 스킬의 전체 workflow, staged diff/commit range의 모든 리뷰 입력, 새 인터뷰·intake·execute·visualize 실행을 다시 시험한 것은 아닙니다. intake에 추가된 공통 계획 경계는 P로, execute의 리뷰 대상 변경은 R1/R2로 해당 계약을 확인했지만 각 진입점의 전체 실행을 대체하지는 않습니다. visualize 본문·참조는 동일하여 아래 과거 근거를 재사용합니다. Claude CLI는 과거 2.1.296에서 2.1.299로 달라졌으므로 미실행 흐름을 현재 버전의 실제 성공으로 표시하지 않습니다.
+
+시험용 Codex identity만 native remove로 제거했고 재조회는 trial 스킬 0/errors 0, 전용 config entry 없음이었습니다. native 제거 뒤 남은 비어 있는 전용 cache root도 경로·소유를 확인하고 제거했습니다. 양쪽 기존 설치 목록과 Codex marketplace 목록, 무관 Codex cache 1,365개가 동일했습니다. Claude는 세션 로드였으므로 설치하지 않았고, 사용 중인 canonical Claude 0.1.0 cache는 읽기·hash·변경·제거 대상으로 삼지 않았습니다. 해당 cache의 보존은 native identity/version/path와 작업 범위로 확인했으며 bytes 동일성 검사를 했다는 뜻은 아닙니다. 소유한 가상 fixture와 호출 근거는 로컬에 보관합니다.
+
+Claude settings/설치 registry hash는 같았으나 Codex config와 `.claude.json` hash는 달라졌습니다. trial entry 제거와 기존 native 목록은 확인했지만 개인 설정 전체의 무관 본문 동일성이나 변화 원인은 단정하지 않습니다. 인증 복사·HOME/CODEX_HOME 재지정·새 로그인·보안 설정 변경·전체 개인 파일 복원은 하지 않았습니다. Codex의 기존 elevated/workspace-write와 Claude 제한 file tools에서 관측한 준수이며 OS 전체 무쓰기를 강제하거나 감시한 결과는 아닙니다.
+
+이 검증 이후 README와 생성 build/owner metadata만 갱신한 최종 package는 호출 당시 bytes와 구분합니다. 스킬·참조·manifest·version은 동일합니다. 문서 갱신을 새로운 native 재설치·공개 GitHub 설치·자동 upgrade 성공으로 표시하지 않습니다.
 
 ## GitHub 주소 설치 — 2026-10-14
 

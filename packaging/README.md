@@ -6,7 +6,13 @@
 
 과거 0.1.0 검증에서는 Windows의 Codex CLI **0.160.1**과 Claude Code **2.1.296**의 실제 plugin 목록에 포함 스킬 6개가 발견되는 것을 확인했습니다. 2026-10-14에는 GitHub `june95/grill-us`의 main 커밋 `905e8fd66163c2da77335e6556a9a82666ae9a69`, package **0.1.0**을 양쪽 native 명령으로 설치하고 설치 cache에서 명시 `memory-explain` 호출과 형제 참조 읽기를 확인했습니다. 이는 시험한 버전이며 최소 지원 버전이나 다른 OS·Codex 앱/IDE/웹의 지원을 뜻하지 않습니다. 아래 설치는 사용자가 선택하여 수행하며 vendor 공개 store 게시나 자동 개인 설치를 제공하지 않습니다.
 
-현재 **0.2.0/7개 스킬**은 memory-review를 추가한 정적 배포 준비 상태입니다. 명시32개 원본 문서/38개 package 파일, 참조·회귀·생성물 freshness와 Git clone/LF 경계를 확인하는 범위입니다. 위 실제 native 시험은 당시 0.1.0/6개와 공개 커밋의 근거이며 0.2.0의 native 모델 동작·공개 GitHub 설치나 자동 upgrade 성공을 뜻하지 않습니다. 개인 설치본·사용 중인 0.1.0 cache는 이 저장소 빌드로 갱신하지 않습니다.
+현재 **0.2.0/7개 스킬**은 2026-10-14 Windows의 Codex CLI **0.160.1**·Claude Code **2.1.299**에서 로컬 native 발견과 대표 호출을 확인했습니다. Codex는 전용 local marketplace의 `plugin add` 설치 cache, Claude는 `--plugin-dir` 세션 package를 사용했습니다. 양쪽에서 계획 없는 리뷰, 비활성 Task/Phase 리뷰, 계획 작성, 확정 결정 저장, 구형·상충 결정을 포함한 조회를 각각 실행했습니다. 공개 계약/내부 구현 재량, `Applies to`와 조건 없는 `Revisit When` 생략, 조회 무쓰기·활성 위치 보존을 확인했습니다.
+
+명시32개 원본 문서/38개 package 파일의 참조·회귀·생성물 freshness와 Git clone/LF 근거도 유지합니다. 현재 시험은 로컬 0.2.0의 변경된 대표 동작 범위이며 모든 7개 스킬의 전체 workflow를 새로 실행한 것은 아닙니다. 0.2.0 공개 GitHub 설치·버전 간 자동 upgrade는 미검증입니다. 시험용 Codex 설치만 제거했고 기존 양쪽 0.1.0 설치는 유지했습니다. 사용 중인 canonical Claude cache는 읽기·해시·삭제·갱신 대상으로 삼지 않았습니다. 개인 설치본은 저장소 빌드로 갱신되지 않습니다.
+
+모델의 무쓰기 준수는 실제 명령과 fixture·Git metadata·시험 부모 폴더·package/cache 전후 비교로 확인했습니다. 시스템 전체 읽기 전용 보장은 아닙니다. Codex의 `Get-FileHash`·`rg` 부재는 파일 읽기로 대체했고, 모델이 인용한 hash와 별도로 실행 담당이 실제 bytes를 대조했습니다. 기존 설치 목록과 무관 Codex cache 1,365개, Claude settings/설치 registry는 동일했으나 Codex config와 Claude 개인 상태 파일 hash는 달라졌습니다. 전체 개인 상태 보존이나 변화 원인을 단정하지 않으며 과거 파일로 복원하지 않았습니다.
+
+Codex 결정 조회에서는 자동 prompt에 들어간 `memory-explain` 본문이 잘렸다는 경고가 발생했습니다. 별도 보완 호출에서 설치 cache의 전체 SKILL.md를 UTF-8로 읽고 같은 조회 결과·무쓰기를 확인했습니다. 자동 주입의 truncation 자체가 해결된 것은 아닙니다. 해당 경고가 있으면 실제 plugin 경로의 전체 본문을 읽었는지 확인하세요.
 
 계획은 공개 API·DTO·저장/모듈 경계·중요 흐름·오류·상태·완료 조건과 검증을 고정합니다. 새 Task의 Constraints에는 작업별 Must / Must Not을 적고, 새 파일/추상화가 필요하면 기존 소유 위치에 둘 수 없는 이유를 남깁니다. 계약에 필수로 고정하지 않은 private helper 이름·분할·동등한 알고리즘은 실행자가 선택합니다. 리뷰는 계획 자체의 과설계와 구현의 계약 위반을 구분하며 helper 존재만으로 결함을 만들거나 승인 구조를 자동 재설계하지 않습니다.
 
@@ -24,7 +30,7 @@
 | memory-explain | 결정 검색·적용 범위·출처와 기록·코드·Git 근거 설명 | `$grill-us:memory-explain` | `/grill-us:memory-explain` |
 | visualize | 명시한 HTML 시각화 생성 | `$grill-us:visualize` | `/grill-us:visualize` |
 
-호출 표기는 에이전트에 입력하는 요청이며 터미널 실행 파일이 아닙니다. 동명 개인 스킬이 있으면 namespace를 포함하고, 실제 읽은 경로가 이 plugin의 `skills/`인지 확인합니다. GitHub 설치 시험에서는 양쪽 설치 cache에서 본문·형제 references를 읽었습니다. 기존 로컬 시험의 다른 5개 대표 흐름은 본문·참조·CLI 버전의 변경 영향을 대조해 재사용했으며 GitHub 설치 뒤 모든 요청을 다시 실행한 것은 아닙니다. 모든 이름 충돌 조합이나 암묵적 자동 선택까지 검증한 것도 아닙니다. Claude 표기는 [공식 skills 문서](https://code.claude.com/docs/en/skills)도 참고합니다.
+호출 표기는 에이전트에 입력하는 요청이며 터미널 실행 파일이 아닙니다. 동명 개인 스킬이 있으면 namespace를 포함하고, 실제 읽은 경로가 이 plugin의 `skills/`인지 확인합니다. 0.2.0 로컬 시험은 기존 canonical 설치를 세션에서 비활성화하고 trial package의 본문·형제 참조 출처를 확인했습니다. 과거 0.1.0 GitHub 설치 시험에서는 양쪽 설치 cache를 읽었고, 당시 다른 5개 대표 흐름은 본문·참조·CLI 변경 영향을 대조해 기존 로컬 근거를 재사용했습니다. 모든 이름 충돌 조합이나 암묵적 자동 선택까지 검증한 것은 아닙니다. Claude 표기는 [공식 skills 문서](https://code.claude.com/docs/en/skills)도 참고합니다.
 
 `$grill-us:memory-review 현재 staged diff를 검토해줘` 또는 `/grill-us:memory-review`에 명시 범위를 전달합니다. 계획 없는 코드에는 계획 준수 해당 없음을 표시하고 finding·근거·범위/한계를 반환합니다. 독립 호출/worker는 코드·.memory·Git을 쓰거나 테스트·추가 위임을 실행하지 않습니다. 기존 `memory-execute --stage review`는 같은 기준의 반환을 실행 담당이 review.md/Task 상태에 기록하는 단계이며 자동 수정·완료·전진은 하지 않습니다.
 
