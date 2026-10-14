@@ -3,6 +3,7 @@
 /.agents/skills/memory-intake/** text eol=lf
 /.agents/skills/memory-plan/** text eol=lf
 /.agents/skills/memory-execute/** text eol=lf
+/.agents/skills/memory-review/** text eol=lf
 /.agents/skills/memory-explain/** text eol=lf
 /.agents/skills/visualize/** text eol=lf
 /packaging/grill-us.json text eol=lf

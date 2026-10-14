@@ -36,6 +36,8 @@ function ownedRoot(t, seed = true) {
 }
 
 function verifyCatalogs(root) {
+  assert.equal(metadata.version, '0.2.0');
+  assert.deepEqual(metadata.skillNames, ['grill-me', 'memory-intake', 'memory-plan', 'memory-execute', 'memory-review', 'memory-explain', 'visualize']);
   const codex = readJSON(path.join(root, '.agents/plugins/marketplace.json'));
   const claude = readJSON(path.join(root, '.claude-plugin/marketplace.json'));
   assert.equal(codex.name, 'grill-us'); assert.equal(claude.name, codex.name);
@@ -53,6 +55,12 @@ function verifyCatalogs(root) {
     const manifest = readJSON(path.join(plugin, file)); assert.equal(manifest.name, entry.name); assert.equal(manifest.version, metadata.version);
   }
   assert.deepEqual(fs.readdirSync(path.join(plugin, 'skills')).sort(), metadata.skillNames.slice().sort());
+  for (const file of ['memory-review/SKILL.md', 'memory-review/references/scenarios.md']) {
+    assert(metadata.sourceFiles.includes(file));
+    for (const prefix of ['.agents/skills', 'plugins/grill-us/skills']) {
+      assert(!fs.readFileSync(path.join(root, prefix, file)).includes(Buffer.from('\r\n')), prefix + '/' + file + ' must retain LF');
+    }
+  }
   return plugin;
 }
 
@@ -65,7 +73,7 @@ function git(root, args) {
   assert.equal(result.status, 0, result.stderr); return result.stdout.trimEnd();
 }
 
-test('both repository catalogs resolve one complete source-preserving six-skill package', t => {
+test('both repository catalogs resolve one complete source-preserving seven-skill package', t => {
   const root = ownedRoot(t), released = buildPlugin({ repoRoot: root, outDir: path.join(root, 'plugins/grill-us') }), plugin = verifyCatalogs(root);
   assert.equal(released.files.length, metadata.sourceFiles.length + 6);
   for (const file of metadata.sourceFiles) assert.equal(digest(path.join(plugin, 'skills', file)), digest(path.join(root, '.agents/skills', file)));

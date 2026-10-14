@@ -2,7 +2,9 @@
 
 2026-10-13에 생성 package 0.1.0을 개발 저장소 밖의 별도 Windows 가상 프로젝트에서 실제 CLI와 모델 요청으로 시험했습니다. 포함 스킬은 `grill-me`, `memory-intake`, `memory-plan`, `memory-execute`, `memory-explain`, `visualize` 6개이며 CodeBurn은 포함하지 않습니다. 현재 확인한 버전은 최소 지원 버전이 아닙니다.
 
-현재 개발 snapshot에서는 6개 스킬/0.1.0 metadata를 유지한 채 공유 계약·내부 구현 재량·Constraints·리뷰 및 결정 작성·검색 지침을 갱신했습니다. 아래 시험은 당시 공개 커밋/본문에 대한 역사적 근거이며 현재 변경 지침의 native 재설치·모델 행동 검증으로 확대하지 않습니다. 현재 변경은 문서 대조·정적 회귀·생성물 freshness로 검증하며 새 native 검증은 별도 작업입니다.
+현재 저장소 snapshot은 **0.2.0/7개 스킬**이며 `memory-review`를 추가했습니다. 명시32개 원본 문서·38개 package 파일, 공통 검토/무쓰기 반환과 execution 기록 책임, 경로·소유·실패 복구·freshness·Git clone/LF를 정적 회귀와 문서 대조로 확인하는 범위입니다. 아래 0.1.0/6개 시험은 당시 공개 커밋/본문의 역사적 근거입니다. 0.2.0의 native 발견·모델 행동 검증은 후속 작업이며 공개 GitHub 설치·자동 upgrade도 아직 검증하지 않았습니다.
+
+2026-10-14의 현재 정적 검사에는 Claude Code **2.1.299**로 `claude plugin validate --strict . --json`과 `claude plugin validate --strict plugins/grill-us --json`을 실행했습니다. 두 manifest 검사 모두 exit 0, errors/warnings 없음입니다. 이는 marketplace/package 형식 검사이며 0.2.0 설치·스킬 발견·모델 호출 성공의 증거는 아닙니다.
 
 ## GitHub 주소 설치 — 2026-10-14
 
@@ -29,7 +31,7 @@ trial plugin과 marketplace는 정확한 identity의 native uninstall/remove로 
 
 정상 CLI 실행은 개인 상태 파일을 기록할 수 있습니다. `.claude.json`과 marketplace registry의 상태 hash 변화도 관측했고 원인이나 모든 metadata의 동일성을 단정하지 않았습니다. native 목록의 source·identity·기존 설치와 selected 설정 본문의 보존을 확인했으며 개인 상태 전체를 과거 파일로 복원하지 않았습니다. fixture 무쓰기를 개인 상태 전체 무쓰기로 확대하지 않습니다. 사용 중인 cache나 소유성이 불명확한 항목을 강제로 삭제하지 않습니다.
 
-이후 안내 문구만 바꿔 생성 README/build 목록을 갱신한 package는 위 실제 설치 당시 bytes와 구분합니다. 스킬·manifest·catalog·version은 유지하며 안내 변경을 새로운 GitHub 재설치나 자동 upgrade 성공으로 표시하지 않습니다. macOS/Linux·Codex 앱/IDE/웹·구버전·최소 지원 버전·버전 간 자동 upgrade는 미검증입니다.
+위 0.1.0 시험 직후 안내 문구만 바꿔 생성 README/build 목록을 갱신했던 package는 위 실제 설치 당시 bytes와 구분합니다. 스킬·manifest·catalog·version은 유지하며 안내 변경을 새로운 GitHub 재설치나 자동 upgrade 성공으로 표시하지 않습니다. macOS/Linux·Codex 앱/IDE/웹·구버전·최소 지원 버전·버전 간 자동 upgrade는 미검증입니다.
 
 ## 기존 로컬 시험의 표면과 로드 경로
 

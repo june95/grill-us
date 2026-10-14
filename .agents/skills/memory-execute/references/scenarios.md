@@ -113,13 +113,17 @@ E01~E08은 환경 변화에 대한 문서 판단 경계다. 실제 runtime 변�
 
 완료 조건을 입증하는 최소 관련 검증을 사용한다. 변경이 없는 case를 단계가 바뀌었다는 이유로 반복하지 않는다. 새 변경·실패·미해결 위험이 있는 부분만 재검토한다.
 
+## Standalone Review Integration
+
+독립 [memory-review](../../memory-review/SKILL.md)의 [사례](../../memory-review/references/scenarios.md)로 Task/Phase·일반파일/diff/commit·drift·알려진결함을 대조한다. 직접/worker 호출은 결과만 반환하고 execution 담당이 기존 review 단계의 보고·상태를 기록한다. 새스킬 추가로 중복 review·Phase완료gate를 만들지 않으며 기존 위임불가 알림후Self·finding보존·단독단계경계를 유지한다.
+
 ## Plugin Package Cases
 
 이 저장소의 개발용 `node scripts/build-plugin.mjs`와 `tests/build-plugin.test.mjs`로 확인한다. 생성 package는 개발 검증기·CodeBurn·사용자 `.memory`를 포함하지 않으며 설치/실제 호출은 별도 host 검증이다. 런타임 문서의 root 발견은 [Skill Installation and Workspace](project-profile.md#skill-installation-and-workspace)를 따른다.
 
 | Case | 입력 | 확인할 결과 / 경계 | 수준 |
 | :--- | :--- | :--- | :--- |
-| K01 | 단일 metadata와 6개 스킬/명시 sourceFiles | 세 manifest identity/version 일치, 본문 bytes/hash 보존, 같은 입력의 재생성 동일 | 생성기 회귀 |
+| K01 | 단일 metadata와 7개 스킬/0.2.0/명시 sourceFiles | 세 manifest identity/version 일치, 본문 bytes/hash 보존, 같은 입력의 재생성 동일 | 생성기 회귀 |
 | K02 | CodeBurn/기록/개인 파일 또는 scope·sourceFiles 변조 | 목록 밖 파일 제외, 누락·중복·탈출 입력 실패 | 생성기 회귀 |
 | K03 | 깨진 링크/anchor 또는 package 밖·파일URI 참조 | 실패하고 이전 생성물 보존, runtime 예시와 실제 문서 참조 구분 | 생성기 회귀 |
 | K04 | source/root/임의 출력 경로·junction/symlink | 쓰기·따라가기 거부, 대상 sentinel 보존 | 생성기 회귀; 실제 OS의 생성 권한/대체 확인 수준 기록 |

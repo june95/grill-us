@@ -2,16 +2,41 @@
 
 선택한 모드에 해당하는 절만 읽는다. [공통 규약](conventions.md)의 AC/증거·[Stage Isolation](conventions.md#stage-isolation)을 적용하며 과거 finding·실패와 사용자 위치를 보존한다.
 
+## Review Roles
+
+검토 기준·severity·verdict는 이 문서가 소유한다. [memory-review](../../memory-review/SKILL.md)는 Task/Phase 또는 명시 파일·diff·commit을 읽고 결과만 반환하는 진입점이다. 새 파일은 workflow 기록 책임 없이 일반 코드도 검토하는 요청 절차를 담으며, 공통 검토 기준을 복제하지 않는다.
+
+| 호출 역할 | 검토와 기록 책임 |
+| :--- | :--- |
+| 독립 memory-review 직접 호출 | 요청 범위만 검토해 채팅 반환. Task/보고/current 생성·변경이나 추가 리뷰어 위임 없음 |
+| workflow가 위임한 memory-review worker | 전달된 대상/Revision·commit·diff·snapshot을 검토해 실행 담당에게 반환. 상태·보고·Git 쓰기와 재귀 위임 없음 |
+| memory-execute의 review 단계 | 아래 Review Delegation으로 검토를 맡기고 반환 범위·버전을 확인하여 기존 review.md/Task metadata를 기록. 새 스킬 때문에 review 단계를 추가하거나 중복 검토하지 않음 |
+
+아래 Compliance의 Task 계약 대조는 계획이 있는 범위에 적용한다. 계획 없는 일반 코드에는 정확성·회귀·책임/재사용·불필요한 복잡성·기존 검증 충분성을 검토하고 계획 준수는 해당 없음으로 명시한다. Phase 검토는 포함된 Task별 계약/검토 범위를 구분하며 완료 집계·활성화·실행을 하지 않는다. 실행 중인 한 Task의 완료를 요청 밖 Phase 전체 검토에 종속시키지 않는다.
+
+## Review Result
+
+| Verdict | 의미 |
+| :--- | :--- |
+| Pass | 명시한 범위를 충분히 검토했고 actionable finding 없음. 미검토 범위까지 보장하지 않음 |
+| Pass with Issues | 범위의 수용을 막지 않는 finding/개선 사항이 있으며 실제 영향·한계를 함께 반환 |
+| Needs Changes | 실제 결함·계약 위반·필수 검증 공백 등 범위 수용 전에 수정/해소할 항목이 있음 |
+| Blocked | 대상·필수 근거 접근 불가나 버전 불일치 등으로 요청 범위의 판정이 불가능함. 확보한 부분 결과와 finding은 보존 |
+
+반환에는 실제 repository/worktree·대상·검토 버전(Task Revision 또는 commit/base-head/diff 범위), 검토 파일별 SHA256/missing/deleted snapshot, 계획 준수 적용 여부와 coverage를 포함한다. finding은 유일 ID·아래 Severity·계약/코드 근거·파일 위치·발생 조건/영향·최소 수정 방향·권장 검증을 갖는다. 기존 검증에서 관측한 결과와 미수행 검증을 구분하고, finding이 없더라도 검토 불충분을 Pass로 덮지 않는다.
+
+검토 전후 관련 revision/working bytes가 바뀌면 변경된 범위를 미검토로 표시하고 새 상태까지 판정을 확대하지 않는다. 필요한 재검토를 반환하며 원 finding을 지우지 않는다. 리뷰어는 테스트·수정·설정 변경·파일 생성·staging/commit·복구·후속 등록을 하지 않는다. workflow 보고와 상태 반영은 실행 담당만 수행한다.
+
 ## Compliance
 
-- 적용되는 review와 재리뷰는 아래 [Review Delegation](#review-delegation)을 따른다. 실행 담당만 보고·상태를 쓰고 리뷰어는 읽기 전용 결과만 반환한다.
+- workflow에 적용되는 review와 재리뷰는 아래 [Review Delegation](#review-delegation)을 따른다. 독립/worker 리뷰는 Review Roles의 무쓰기 반환 경계를 유지한다.
 - review는 현재 구현/조사 산출물을 task.md의 Goal·I01/I02·AC·검증 의무와 대조한다. 수행하지 않은 구현 보고를 형식상 강제하지 않고 제품 코드를 수정하지 않는다.
 - 계획대로 수행/누락/부분 충족/불명확/범위 밖을 구분한다. 파일/동작 차이는 기록된 조정·승인과 결과 보고를 확인한다.
 - 관련 버그·회귀·권한·예외·주석·검증 공백을 찾고 일반 취향이나 무관한 기존 정리를 finding으로 확대하지 않는다.
 - [계획 경계](conventions.md#planning-boundaries)에 따라 불필요한 파일·추상화·wrapper·간접 참조와 놓친 재사용을 검토한다. 실제 유지보수·동작 비용의 근거를 제시하며 helper 존재 자체나 동등한 내부 구현을 결함으로 판정하지 않는다.
 - 계획이 불필요한 구조를 요구한 경우에는 **계획 문제**, 승인된 책임·공유 계약·Constraints를 어긴 경우에는 **구현 위반**으로 구분한다. 계획 문제도 실제 영향에 따라 기존 severity/AC 기준으로 판정하고, 동의 없는 재설계나 구현자에게 모순된 수정 지시를 하지 않는다.
 - 조사 대상 제품 실패와 조사 산출물 자체의 오류는 [Investigation Outcomes](conventions.md#investigation-outcomes)로 구분한다. 통과 목표 실패·필수 근거 부족은 완료 차단이며 후속 등록만으로 해소되지 않는다.
-- 필요한 승인·선행 evidence를 확인하고 aggregate gate를 만들지 않는다. review.md에 Pass / Pass with Issues / Needs Changes / Blocked, AC 대응·finding·한계·다음 행동을 [Stage Report](templates.md#stage-report)로 기록한다.
+- 필요한 승인·선행 evidence를 확인하고 aggregate gate를 만들지 않는다. [Review Result](#review-result)를 반환하며 workflow 실행 담당은 review.md에 AC 대응·finding·한계·다음 행동을 [Stage Report](templates.md#stage-report)로 기록한다. 독립 리뷰어는 보고 파일을 만들지 않는다.
 
 ## Review Delegation
 
@@ -24,6 +49,8 @@
 ### Request and Result
 
 실행 담당은 대상 Task의 승인 scope·Goal/AC·Revision, 명시 대상 경로와 현재 SHA256 snapshot, 관련 diff·선행 evidence·필요한 정본 링크만 전달한다. 리뷰어 지시문에는 다음 경계를 명시한다.
+
+[memory-review](../../memory-review/SKILL.md)와 이 공통 기준을 함께 제공한다. 반환한 실제 범위·Revision/commit/diff·snapshot을 현재 요청과 대조하고 기존 review 단계의 결과로 기록한다. fallback Self에서도 같은 검토/결과 기준을 쓰되 실행 담당의 기록 책임을 유지한다.
 
 - 제품·`.memory`·Git·설정 쓰기, staging/commit·외부 전송·추가 위임 금지. 읽기 조회만 허용하며 테스트 실행과 파일 생성·설정 변경 등 부수 효과가 있는 명령을 실행하지 않는다. 기록·검증 실행은 실행 담당에게 반환한다.
 - 검토는 [Compliance](#compliance)/[Severity](#severity)를 따라 승인 scope와 AC에 한정한다. 결과를 채팅/도구 반환으로만 제공하며 `review.md`, current, checkpoint, history를 직접 작성하지 않는다.

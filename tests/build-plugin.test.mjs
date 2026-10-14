@@ -15,6 +15,7 @@ const metadataAt = root => path.join(root, 'packaging', 'grill-us.json');
 const metadata = root => JSON.parse(fs.readFileSync(metadataAt(root), 'utf8'));
 const updateMetadata = (root, change) => fs.writeFileSync(metadataAt(root), JSON.stringify(change(metadata(root)), null, 2) + '\n');
 const outputAt = root => path.join(root, 'dist', 'grill-us');
+const expectedSkills = ['grill-me', 'memory-intake', 'memory-plan', 'memory-execute', 'memory-review', 'memory-explain', 'visualize'];
 
 // tests가 직접 만든 표식 있는 temp root에서만 fixture를 변경·삭제한다.
 function fixture(t) {
@@ -40,15 +41,20 @@ function fixture(t) {
 
 function manifest(root, relative) { return JSON.parse(fs.readFileSync(path.join(root, relative), 'utf8')); }
 
-test('package contains exactly six skills, aligned manifests and unchanged source bytes', t => {
+test('package contains exactly seven skills, aligned manifests and unchanged source bytes', t => {
   const root = fixture(t);
   const result = buildPlugin({ repoRoot: root });
+  assert.deepEqual(metadata(root).skillNames, expectedSkills);
+  assert.equal(metadata(root).sourceFiles.length, 32);
+  for (const file of ['memory-review/SKILL.md', 'memory-review/references/scenarios.md']) assert(metadata(root).sourceFiles.includes(file));
+  assert.deepEqual(result.files, [...metadata(root).sourceFiles.map(file => 'skills/' + file),
+    'plugin.json', '.codex-plugin/plugin.json', '.claude-plugin/plugin.json', 'README.md', 'build.json', '.grill-us-build.json'].sort());
   assert.deepEqual(fs.readdirSync(path.join(result.outputRoot, 'skills')).sort(), metadata(root).skillNames.slice().sort());
   const portable = manifest(result.outputRoot, 'plugin.json');
   const codex = manifest(result.outputRoot, '.codex-plugin/plugin.json');
   const claude = manifest(result.outputRoot, '.claude-plugin/plugin.json');
   for (const document of [portable, codex, claude]) {
-    assert.equal(document.name, 'grill-us'); assert.equal(document.version, '0.1.0');
+    assert.equal(document.name, 'grill-us'); assert.equal(document.version, '0.2.0');
     assert.deepEqual(document.author, { name: 'grill-us' });
     assert.equal(document.description, metadata(root).description);
     assert.equal(Object.hasOwn(document, 'license'), false);
@@ -94,10 +100,13 @@ test('unlisted CodeBurn, memory, runtime, tests and private source files never e
 test('metadata rejects changed scope, duplicate files and source traversal before writing output', t => {
   for (const change of [
     m => ({ ...m, skillNames: [...m.skillNames, 'codeburn'] }),
+    m => ({ ...m, skillNames: m.skillNames.filter(name => name !== 'memory-review') }),
     m => ({ ...m, sourceFiles: [...m.sourceFiles, m.sourceFiles[0]] }),
     m => ({ ...m, sourceFiles: [...m.sourceFiles, '../private.md'] }),
     m => ({ ...m, sourceRoot: '../skills' }),
-    m => ({ ...m, sourceFiles: [...m.sourceFiles, 'memory-plan/references/.env'] })
+    m => ({ ...m, sourceFiles: [...m.sourceFiles, 'memory-plan/references/.env'] }),
+    m => ({ ...m, sourceFiles: [...m.sourceFiles, 'memory-review/references/runtime.js'] }),
+    m => ({ ...m, sourceFiles: [...m.sourceFiles, 'codeburn/SKILL.md'] })
   ]) {
     const root = fixture(t); updateMetadata(root, change);
     assert.throws(() => buildPlugin({ repoRoot: root }), /metadata|sourceFiles|상대 경로/);
@@ -123,6 +132,19 @@ test('broken local references, missing anchors and package escapes fail before p
     assert.throws(() => buildPlugin({ repoRoot: root }), /패키지 내부 문서 참조 실패/);
     assert(!fs.existsSync(outputAt(root)));
     assert.deepEqual(fs.readdirSync(path.join(root, 'dist')), []);
+  }
+});
+
+test('missing review skill or references cannot silently reduce a valid package', t => {
+  for (const file of ['memory-review/SKILL.md', 'memory-review/references/scenarios.md']) {
+    for (const mode of ['source-file', 'metadata-entry']) {
+      const root = fixture(t), built = buildPlugin({ repoRoot: root });
+      const before = Object.fromEntries(built.files.map(p => [p, sha(path.join(built.outputRoot, p))]));
+      if (mode === 'source-file') fs.unlinkSync(path.join(root, '.agents/skills', file));
+      else updateMetadata(root, m => ({ ...m, sourceFiles: m.sourceFiles.filter(p => p !== file) }));
+      assert.throws(() => buildPlugin({ repoRoot: root }), /ENOENT|필수 스킬 누락|문서 참조 실패/);
+      assert.deepEqual(Object.fromEntries(built.files.map(p => [p, sha(path.join(built.outputRoot, p))])), before);
+    }
   }
 });
 

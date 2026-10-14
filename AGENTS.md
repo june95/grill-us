@@ -10,9 +10,12 @@
 | 설계 검토·중요한 미결정 | [grill-me](.agents/skills/grill-me/SKILL.md) | 한 질문씩 선택·이유 확정 |
 | 확정 요청의 작업 분할 | [memory-plan](.agents/skills/memory-plan/SKILL.md) | Plan → Phase → Task 청사진 |
 | 현재 작업·지정 단계 실행 | [memory-execute](.agents/skills/memory-execute/SKILL.md) | 구현·검증·완료 판정·재개 |
+| Task·Phase 또는 파일·diff·commit 독립 검토 | [memory-review](.agents/skills/memory-review/SKILL.md) | 무쓰기 검토 결과·finding·범위/근거·한계 반환 |
 | 결정 검색·설계·계획·진행·완료 설명 | [memory-explain](.agents/skills/memory-explain/SKILL.md) | 결정 후보·적용 범위·출처와 기록·코드·Git 근거의 읽기 전용 설명 |
 
 ## Essential Boundaries
+
+- 독립 memory-review는 코드·메모리·Git·설정을 쓰거나 테스트·추가 위임을 실행하지 않는다. 계획 없는 코드도 검토하되 계획 준수는 해당 없음이다. memory-execute의 review는 같은 기준으로 위임하고 기존 보고·Task 상태를 기록하는 단계이며, 두 역할 때문에 리뷰를 중복 추가하지 않는다([Review Roles](.agents/skills/memory-execute/references/review.md#review-roles)).
 
 - 명확한 요청에 인터뷰를 강제하지 않는다. 확정된 선택은 재질문하지 않고 코드 사실은 직접 확인한다. 중요한 미결정은 한 질문씩 2~3개 선택지와 추천안을 제시한다.
 - 등록·계획은 제품/테스트 코드·공유 정본 변경·staging·commit을 하지 않는다. 상세 계약은 Task 폴더의 task.md 하나다. 결정 문서는 독립 ID의 실제 링크로 연결한다.

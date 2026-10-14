@@ -35,7 +35,7 @@ T01부터 T03까지 순서대로 진행해줘
 | reference | [analysis.md](references/analysis.md) | 근거 조사, 제품/공유 정본 수정 없음 |
 | design-guide-update | [guides.md](references/guides.md#design-mode) | 승인된 계약을 의존 구현 전에 |
 | implementation | [implementation.md](references/implementation.md) | Task scope 구현·최소 검증 |
-| review | [Compliance](references/review.md#compliance), [Review Delegation](references/review.md#review-delegation) | 읽기 전용 위임·불가 알림 후 자체 리뷰, finding 보존·제품 수정 없음 |
+| review | [memory-review](../memory-review/SKILL.md), [Compliance](references/review.md#compliance), [Review Delegation](references/review.md#review-delegation) | 같은 기준으로 읽기 전용 위임, 실행 담당이 기존 review.md/Task 상태 기록 |
 | review-action | [review.md](references/review.md#triage) | 실제 finding만 분류·처리 |
 | test | [testing.md](references/testing.md) | 필요한 검증, 단독 요청의 제품 자동 수정 없음 |
 | guide-update | [guides.md](references/guides.md#implementation-mode) | 검증된 공유 안내 영향만 |
@@ -49,6 +49,7 @@ T01부터 T03까지 순서대로 진행해줘
 1. 새 단계/staging/commit 전에 intent의 실제 결과부터 확인한다. 이미 성공한 같은 commit이면 [Recovery](references/resume.md#recovery)로 tree를 확인하고 누락 finalize만 복구한다.
 2. 아직 필요한 첫 적용 단계의 선행 근거와 승인을 확인하고 running으로 기록한다. 해당 지침만 읽어 수행하며 실제 결과·현재 Revision/snapshot/관련 환경 근거를 남긴다.
    적용 review와 재리뷰는 기본 위임하며 사용자 자체 리뷰 지시가 우선이다. 실행 담당만 결과·상태를 기록하고 위임 불가 시 사유 알림 후 자체 리뷰로 계속한다. 실제 finding/Needs Changes는 대체 사유가 아니다([Review Delegation](references/review.md#review-delegation)).
+   리뷰어에게 memory-review와 공통 기준·명시 대상/Revision·diff/snapshot을 제공한다. 반환한 범위·버전을 대조해 기존 review 단계에 반영하며 리뷰를 중복 추가하지 않는다. 직접 memory-review 호출의 무쓰기 결과 반환과 이 단계의 기록 책임을 구분한다.
 3. 승인 범위 결함은 수정 단계로 돌아가 해결하고 영향받은 증거를 갱신한다. 조사 전용의 대상 실패는 [Investigation Outcomes](references/conventions.md#investigation-outcomes)로 보존하며 자동 수정/후속 등록하지 않는다.
 4. 범위 안 조정은 기록하고, 중요한 새 동작/계약 선택은 [Change Boundaries](references/conventions.md#change-boundaries)를 따른다. 환경·설계 blocker는 원인·재개 행동을 남기고 멈춘다.
 5. [Quality Gate](references/commit-check.md#quality-gate)로 AC·근거·최종 품질을 판정한다. ready는 done이 아니다. Task 범위 변경과 사용자 정책에 따라 [Staging](references/commit-check.md#staging), [Commit Intent](references/commit-check.md#commit-intent) 또는 [No Commit](references/commit-check.md#no-commit)을 처리한다.

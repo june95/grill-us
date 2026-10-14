@@ -1,6 +1,6 @@
 # Project Memory Starter Kit
 
-요구사항·설계 결정·구현 청사진·검증 결과를 파일로 남기고, 다음 작업을 이어갈 위치를 관리하는 에이전트 스킬 묶음입니다. 작업 관리 진입점 네 개와 기록을 읽어 설명하는 보조 진입점을 제공합니다.
+요구사항·설계 결정·구현 청사진·검증 결과를 파일로 남기고, 다음 작업을 이어갈 위치를 관리하는 에이전트 스킬 묶음입니다. 작업 관리 진입점 네 개와 무쓰기 리뷰·설명 진입점을 제공합니다.
 
 | 스킬 | 사용할 때 | 결과 |
 | :--- | :--- | :--- |
@@ -8,19 +8,22 @@
 | [grill-me](.agents/skills/grill-me/SKILL.md) | 설계 검토나 중요한 미결정이 있을 때 | 한 질문씩 선택·이유 확정 |
 | [memory-plan](.agents/skills/memory-plan/SKILL.md) | 확정 요청을 실행 단위로 나눌 때 | Plan·Phase·Task 청사진 작성 |
 | [memory-execute](.agents/skills/memory-execute/SKILL.md) | 현재 Task 또는 지정 단계만 수행할 때 | 구현·검증·완료 판정·재개 |
+| [memory-review](.agents/skills/memory-review/SKILL.md) | Task·Phase 또는 파일·diff·commit을 독립 검토할 때 | 수정·보고 저장 없이 finding·근거·검토 한계 반환 |
 | [memory-explain](.agents/skills/memory-explain/SKILL.md) | 결정 검색·설계 이유·계획·진행·완료 결과를 이해할 때 | 결정 후보·적용 범위·출처와 기록·코드·Git 근거에 따른 채팅 설명 |
 
 스킬은 에이전트가 따르는 업무 지침입니다. 별도 workflow 실행 프로그램이나 제품 앱을 포함하지 않습니다.
 
 계획은 공개 API·DTO·저장/모듈 경계·중요 흐름·오류·상태·완료 조건과 검증을 고정합니다. 새 Task의 Constraints에는 작업별 Must / Must Not을 적고, 새 파일/추상화가 필요하면 기존 소유 위치에 둘 수 없는 이유를 남깁니다. 계약에 필수로 고정하지 않은 private helper 이름·분할·동등한 알고리즘은 실행자가 선택합니다. 리뷰는 계획 자체의 과설계와 구현의 계약 위반을 구분하며 helper 존재만으로 결함을 만들거나 승인 구조를 자동 재설계하지 않습니다.
 
-현재 개발 snapshot은 기존 6개 스킬/0.1.0 구성에서 계획·리뷰 및 결정 작성·검색 지침을 갱신한 상태입니다. 아래 native 설치 기록은 당시 공개 커밋의 검증이며 현재 변경 지침의 모델 실행 성공을 뜻하지 않습니다.
+현재 저장소 snapshot은 독립 `memory-review`를 포함한 **7개 스킬·0.2.0**입니다. 32개 원본 문서와 38개 package 파일을 정적 검증·생성물·Git clone/LF 회귀로 확인하는 범위이며, 0.2.0의 native 모델 동작·공개 GitHub 설치는 아직 검증하지 않았습니다. 아래 실제 설치 기록은 당시 공개된 0.1.0/6개 스킬의 근거입니다.
 
 새 결정은 `Applies to`에 적용 기능·모듈·상황을 반드시 남기고, `Revisit When`은 실제 조건이 있을 때만 작성합니다. `memory-explain 상품 모듈의 SKU 재고 결정을 찾아줘`처럼 ID·주제·적용 범위로 검색할 수 있습니다. 명시 결정이나 Plan/Task 연결을 먼저 읽고 필요한 경우 확인한 프로젝트의 `.memory/decisions`에서 후보를 찾습니다. 구형 기록의 적용 범위는 미기록으로 설명하고, 출처·이유·상충 근거를 보여 줍니다. 검색 결과 저장이나 과거 결정 변환은 하지 않습니다.
 
+`memory-review`는 Task/Phase뿐 아니라 계획 없는 파일·diff·commit도 검토합니다. 계획이 없으면 계획 준수는 해당 없음으로 설명합니다. 직접 호출은 결과만 반환하며 코드·기록·Git 변경, 테스트 실행, 추가 위임을 하지 않습니다. `memory-execute --stage review`는 같은 기준으로 위임하고 실행 담당이 기존 review.md/Task 상태를 기록하는 단계입니다. 새 스킬 때문에 리뷰가 중복 실행되지 않습니다.
+
 ## 다른 프로젝트에 적용하기
 
-공식 배포 경로는 공통 `.agents/skills` 정본에서 생성하는 `grill-us` plugin입니다. 메모리 5개와 visualize를 함께 포함하며 CodeBurn과 개발용 검증기는 포함하지 않습니다. 도구별 프로젝트 폴더의 수동 사본을 새 공식 배포 방식으로 관리하지 않고, 기존 설치본을 자동 삭제·변환하지 않습니다.
+공식 배포 경로는 공통 `.agents/skills` 정본에서 생성하는 `grill-us` plugin입니다. 메모리 6개와 visualize를 함께 포함하며 CodeBurn과 개발용 검증기는 포함하지 않습니다. 도구별 프로젝트 폴더의 수동 사본을 새 공식 배포 방식으로 관리하지 않고, 기존 설치본을 자동 삭제·변환하지 않습니다.
 
 배포 정본과 생성물은 다음과 같이 구분합니다.
 
@@ -232,7 +235,7 @@ node scripts/validate-skills.mjs
 
 ## 플러그인 패키지 생성과 검사
 
-저장소 root에서 다음 명령으로 패키지를 생성합니다. 이름·버전·포함 원본의 정본은 [패키지 metadata](packaging/grill-us.json)이며, 생성기는 명시한 6개 스킬과 문서만 복사합니다.
+저장소 root에서 다음 명령으로 패키지를 생성합니다. 이름·버전·포함 원본의 정본은 [패키지 metadata](packaging/grill-us.json)이며, 생성기는 명시한 7개 스킬과 문서만 복사합니다.
 
 ~~~powershell
 node scripts/build-plugin.mjs

@@ -15,6 +15,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | 보고 의미·일일 이력 | [Reporting](#reporting), [History](#history) | 실제 수행·근거·한계만 보고 |
 | 문서 형식 | [templates.md](templates.md#stage-report) | 적용 필드만 실제 자료로 채움 |
 | 리뷰 위임·자체 리뷰·finding 처리 | [Review Delegation](review.md#review-delegation) | 적용 review만 기본 위임, 불가 알림·자체 리뷰, finding 보존 |
+| 독립 리뷰와 workflow 결과 경계 | [Review Roles](review.md#review-roles), [Review Result](review.md#review-result) | reviewer는 무쓰기 반환, 실행 담당만 기존 단계에 기록 |
 | 프로젝트·정본·명령 발견 | [project-profile.md](project-profile.md#discovery) | 실제 cwd/정본/명령 확인 |
 | 계획의 공유 계약·구현 재량 | [Planning Boundaries](#planning-boundaries) | 공유 경계는 정확히, 내부 구현은 계약 안에서 선택 |
 | 결정 작성·호환 읽기 | [Decision Fields](#decision-fields) | 새 결정의 적용 범위 필수, 실제 재검토 조건만 기록, 과거 기록 보존 |
@@ -220,6 +221,8 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 - 현재 요청과 해당 Task에 유효한 사용자 커밋 지시가 우선한다. 명시한 커밋 금지는 취소될 때까지 보존하고, 단독 단계 실행을 Task의 auto 정책이 영구 check_only로 바뀐 것으로 해석하지 않는다.
 
 ### Reporting
+
+독립 [memory-review](../../memory-review/SKILL.md)의 직접 호출/worker는 결과만 반환하며 아래 실행 보고·History 의무를 적용하지 않는다. 기존 workflow review를 호출한 실행 담당은 반환 범위·버전을 확인해 해당 단계 보고·상태를 기록한다. 독립 리뷰를 Task 실행이나 자동 위임 요청으로 해석하지 않는다.
 
 실제로 수행한 단계만 보고하고 [Stage Report](templates.md#stage-report) 형식을 사용한다. 완료/차단 결과는 아래 History에 기록하며, 실행하지 않은 단계의 빈 보고서를 만들지 않는다. 채팅에는 무엇·왜, 실제 검증과 한계, commit/정책 결과·다음 위치/행동, 범위 밖 발견의 영향·권고를 간결히 설명한다. 필요한 짧은 코드/계약 인용은 근거를 돕는 범위로 쓰고 처음 쓰는 패턴/API는 한 줄로 설명한다. 발견이 없으면 특이사항 없음이라고 적는다. 설명만 하는 호출은 보고·이력 작성 의무를 적용하지 않는다.
 

@@ -315,6 +315,8 @@ Candidate Snapshot 형식은 path·A/M/D·working SHA256·staged mode/blob다. �
 
 ## Stage Report
 
+이 파일 형식은 workflow 실행 담당의 기록용이다. 독립 memory-review/worker는 [공통 반환 계약](review.md#review-result)에 따라 채팅/도구로 결과만 반환하며 이 보고 파일을 만들지 않는다. 실행 담당은 반환 대상·Revision/commit/diff·snapshot을 확인해 기존 review 보고에 반영한다.
+
 실제 수행한 단계의 [Reporting](conventions.md#reporting) 형식이다. 고유 verdict/목적 판정과 workflow 상태의 대응을 설명하고 필요한 finding·검증·commit audit만 추가한다.
 
 ```markdown

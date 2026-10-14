@@ -1,12 +1,12 @@
 # grill-us plugin
 
-공통 원본에서 생성한 메모리 5개와 visualize의 패키지입니다. 이 문서는 생성 package의 사용자 안내 원본이며 아래 `skills/` 경로는 package root 기준입니다. 개별 스킬 이름은 유지하고 grill-me 별칭은 추가하지 않습니다.
+공통 원본에서 생성한 메모리 6개와 visualize, 총 7개 스킬의 0.2.0 패키지입니다. 이 문서는 생성 package의 사용자 안내 원본이며 아래 `skills/` 경로는 package root 기준입니다. 개별 스킬 이름은 유지하고 grill-me 별칭은 추가하지 않습니다.
 
 ## 검증 상태
 
-Windows에서 Codex CLI **0.160.1**과 Claude Code **2.1.296**의 실제 plugin 목록에 포함 스킬 6개가 발견되는 것을 확인했습니다. 2026-10-14에는 GitHub `june95/grill-us`의 main 커밋 `905e8fd66163c2da77335e6556a9a82666ae9a69`, package **0.1.0**을 양쪽 native 명령으로 설치하고 설치 cache에서 명시 `memory-explain` 호출과 형제 참조 읽기를 확인했습니다. 이는 시험한 버전이며 최소 지원 버전이나 다른 OS·Codex 앱/IDE/웹의 지원을 뜻하지 않습니다. 아래 설치는 사용자가 선택하여 수행하며 vendor 공개 store 게시나 자동 개인 설치를 제공하지 않습니다.
+과거 0.1.0 검증에서는 Windows의 Codex CLI **0.160.1**과 Claude Code **2.1.296**의 실제 plugin 목록에 포함 스킬 6개가 발견되는 것을 확인했습니다. 2026-10-14에는 GitHub `june95/grill-us`의 main 커밋 `905e8fd66163c2da77335e6556a9a82666ae9a69`, package **0.1.0**을 양쪽 native 명령으로 설치하고 설치 cache에서 명시 `memory-explain` 호출과 형제 참조 읽기를 확인했습니다. 이는 시험한 버전이며 최소 지원 버전이나 다른 OS·Codex 앱/IDE/웹의 지원을 뜻하지 않습니다. 아래 설치는 사용자가 선택하여 수행하며 vendor 공개 store 게시나 자동 개인 설치를 제공하지 않습니다.
 
-현재 개발 snapshot은 기존 6개 스킬/0.1.0 구성을 유지하며 계획·리뷰 및 결정 작성·검색 지침을 갱신했습니다. 위 native 시험은 당시 공개 커밋의 근거이며, 변경된 지침을 새로 설치하거나 모델로 실행한 검증은 아직 없습니다.
+현재 **0.2.0/7개 스킬**은 memory-review를 추가한 정적 배포 준비 상태입니다. 명시32개 원본 문서/38개 package 파일, 참조·회귀·생성물 freshness와 Git clone/LF 경계를 확인하는 범위입니다. 위 실제 native 시험은 당시 0.1.0/6개와 공개 커밋의 근거이며 0.2.0의 native 모델 동작·공개 GitHub 설치나 자동 upgrade 성공을 뜻하지 않습니다. 개인 설치본·사용 중인 0.1.0 cache는 이 저장소 빌드로 갱신하지 않습니다.
 
 계획은 공개 API·DTO·저장/모듈 경계·중요 흐름·오류·상태·완료 조건과 검증을 고정합니다. 새 Task의 Constraints에는 작업별 Must / Must Not을 적고, 새 파일/추상화가 필요하면 기존 소유 위치에 둘 수 없는 이유를 남깁니다. 계약에 필수로 고정하지 않은 private helper 이름·분할·동등한 알고리즘은 실행자가 선택합니다. 리뷰는 계획 자체의 과설계와 구현의 계약 위반을 구분하며 helper 존재만으로 결함을 만들거나 승인 구조를 자동 재설계하지 않습니다.
 
@@ -20,10 +20,13 @@ Windows에서 Codex CLI **0.160.1**과 Claude Code **2.1.296**의 실제 plugin 
 | memory-intake | 명확한 수정·이슈를 등록 | `$grill-us:memory-intake` | `/grill-us:memory-intake` |
 | memory-plan | 확정 요청을 Plan/Phase/Task로 분할 | `$grill-us:memory-plan` | `/grill-us:memory-plan` |
 | memory-execute | 현재 Task 또는 명시 단계 실행 | `$grill-us:memory-execute` | `/grill-us:memory-execute` |
+| memory-review | Task/Phase·일반 파일/diff/commit 무쓰기 검토 | `$grill-us:memory-review` | `/grill-us:memory-review` |
 | memory-explain | 결정 검색·적용 범위·출처와 기록·코드·Git 근거 설명 | `$grill-us:memory-explain` | `/grill-us:memory-explain` |
 | visualize | 명시한 HTML 시각화 생성 | `$grill-us:visualize` | `/grill-us:visualize` |
 
 호출 표기는 에이전트에 입력하는 요청이며 터미널 실행 파일이 아닙니다. 동명 개인 스킬이 있으면 namespace를 포함하고, 실제 읽은 경로가 이 plugin의 `skills/`인지 확인합니다. GitHub 설치 시험에서는 양쪽 설치 cache에서 본문·형제 references를 읽었습니다. 기존 로컬 시험의 다른 5개 대표 흐름은 본문·참조·CLI 버전의 변경 영향을 대조해 재사용했으며 GitHub 설치 뒤 모든 요청을 다시 실행한 것은 아닙니다. 모든 이름 충돌 조합이나 암묵적 자동 선택까지 검증한 것도 아닙니다. Claude 표기는 [공식 skills 문서](https://code.claude.com/docs/en/skills)도 참고합니다.
+
+`$grill-us:memory-review 현재 staged diff를 검토해줘` 또는 `/grill-us:memory-review`에 명시 범위를 전달합니다. 계획 없는 코드에는 계획 준수 해당 없음을 표시하고 finding·근거·범위/한계를 반환합니다. 독립 호출/worker는 코드·.memory·Git을 쓰거나 테스트·추가 위임을 실행하지 않습니다. 기존 `memory-execute --stage review`는 같은 기준의 반환을 실행 담당이 review.md/Task 상태에 기록하는 단계이며 자동 수정·완료·전진은 하지 않습니다.
 
 ## 저장소 주소로 설치
 
