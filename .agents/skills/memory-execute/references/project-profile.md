@@ -5,12 +5,29 @@
 ## Discovery
 
 1. 사용자 명시 대상 경로를 우선 확인한다. 없으면 현재 작업 폴더와 열려 있는 대상 파일의 프로젝트를 확인한다. 여러 프로젝트가 실제로 혼동될 때만 한 질문으로 대상을 확정한다.
-2. Git 저장소에서는 `git rev-parse --show-toplevel`, `git branch --show-current`, `git status --short`로 root·branch·기존 변경을 확인한다. 지침에 특정 PC의 절대 경로를 고정하지 않는다.
+2. Git 저장소에서는 `git --no-optional-locks rev-parse --show-toplevel`, `git --no-optional-locks branch --show-current`로 root·branch를 확인한다. 기존 변경과 파일 수는 아래 [Change Inventory](#change-inventory)로 구분한다. 지침에 특정 PC의 절대 경로를 고정하지 않는다.
 3. 적용 가능한 AGENTS 등 프로젝트 지침을 읽는다. 이어 `.memory/project.md`가 있으면 확인한다.
 4. README와 기존 설계·API·데이터·운영 문서, 관련 코드·manifest·CI·테스트를 필요한 범위에서 확인한다. 정본의 위치와 우선순위는 프로젝트에서 확인한다.
 5. 현재 Plan·Task·결정·단계 증거를 재사용한다. 이미 알려진 근거 때문에 같은 코드 전체를 재조사하지 않는다.
 
 Git이 없으면 프로젝트 root를 사용자 지시·실제 작업 폴더에서 확인하고 등록·조사·계획은 수행할 수 있다. Git 커밋이 필수인 Task의 실행에서는 Git 부재를 blocker로 기록한다. 로컬 조사·명시적 no-commit 작업에 가상의 commit을 만들지 않는다.
+
+## Change Inventory
+
+전체 변경 현황·파일 개수·Task 귀속을 설명하거나 staging 경계를 정할 때 다음 읽기 전용 조회를 사용한다.
+
+~~~text
+git --no-optional-locks status --porcelain=v1 -z --untracked-files=all
+~~~
+
+1. 명령의 실제 cwd·성공 exit·완전한 출력을 먼저 확인한다. 조회 실패, Git 부재, 잘린 출력은 **미확인/부분 확인**이다. 성공한 빈 결과와 구분하며 변경 0개로 대체하지 않는다.
+2. 출력은 NUL 구분 레코드로 읽는다. 일반 항목은 `XY path`이고, rename/copy는 첫 레코드의 **대상 경로 다음에 이전 경로가 별도 NUL 항목**으로 온다. X 또는 Y에 R/C가 있으면 뒤의 이전 경로를 소비한다. 사람이 보는 줄 수·공백·`->`로 경로를 분리하지 않고 파일명을 trim/재해석하지 않는다. 공백·한글·개행·따옴표가 있어도 해당 경로 하나를 보존한다. NUL을 보존하는 호스트 도구나 일회성 읽기 계산을 쓰며 영구 parser/helper를 프로젝트에 만들지 않는다.
+3. `??`는 untracked다. 일반 tracked 항목은 X(index)가 공백이 아니면 staged, Y(worktree)가 공백이 아니면 tracked working 변경으로 집계한다. 두 범주에 동시에 속한 파일은 각 범주에 포함하되 **전체 합계는 대상 경로의 합집합**으로 한 번만 센다. rename/copy의 이전 경로는 보조 정보이며 별도 변경 파일로 더하지 않는다. unmerged 상태는 충돌로 따로 밝히고 정상 staging/commit 준비로 해석하지 않는다.
+4. `git status --short`의 `folder/` 한 줄을 파일 하나로 세지 않는다. 위 명령은 ignored 파일을 무조건 펼치는 명령이 아니며, 서브모듈은 부모 저장소의 항목으로 표시될 수 있다. 내부 파일까지 센 결과나 OS 전체 변경 수로 확대하지 않는다. 예상 밖 형식·불완전한 rename 쌍이 있으면 추정 집계 대신 한계를 보고한다.
+5. **범주별 개수, 전체 고유 경로 수, 확인 범위**를 설명한다. 예: tracked working 0, staged 0, untracked 73이면 전체 73개이며 “미커밋 변경 없음”이 아니다. 한 파일이 staged와 unstaged에 함께 있으면 각각 1개, 전체는 1개다.
+6. Task의 후보 경로·실제 diff/commit·기존 기록과 대조하여 관련·무관·귀속 불명확을 구분한다. 후보와 겹치는 사실만으로 작성 주체·의도를 확정하지 않는다. untracked를 자동으로 현재 Task 산출물이나 사용자가 작성한 파일로 단정하지 않는다. 파일 개수와 Task done/미완료는 별개이며, 집계만으로 Task를 생성·완료 취소·전환하지 않는다.
+
+독립 설명/리뷰는 상태를 확인하기 위해 add/reset/checkout/clean/init·보고/current 쓰기를 하지 않는다. 원래 있던 사용자 변경과 index를 유지한다. Git 없는 명시 파일 검토는 파일 근거로 계속할 수 있지만 저장소 전체 집계는 미확인으로 남긴다.
 
 ## Skill Installation and Workspace
 

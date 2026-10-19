@@ -17,7 +17,7 @@
 
 ## Staging
 
-- 시작 시 `git status --short`와 `git diff --cached --name-status`로 기존 사용자 변경·index를 확인한다.
+- 시작 시 [Change Inventory](project-profile.md#change-inventory)의 NUL 집계와 `git --no-optional-locks diff --cached --name-status`로 기존 사용자 변경·index를 확인한다. tracked working·staged·untracked와 Task 관련 후보를 구분하며 디렉터리 축약을 파일 수로 세지 않는다. 집계 결과만으로 무관 untracked를 stage/삭제/ignore하지 않는다.
 - Task에 포함되는 명시적 파일 목록을 만든다. 코드·테스트·공유 가이드·설정 등 관련 변경만 포함하며 기본 로컬 `.memory`, 다른 작업, 임시 파일, 비밀 파일, 생성 노이즈는 제외한다.
 - 후보마다 `git check-ignore -v --no-index -- <명시적 경로>`를 확인한다. tracked 파일도 검사한다. verbose 출력은 부정 패턴에도 exit 0을 반환하므로 종료 코드만으로 ignored를 판정하지 않는다. 아래 Ignore Result 규칙으로 실제 적용 패턴을 읽는다.
 - `git add -- <명시적 파일 목록>`만 사용한다. `git add .`, `git add -A`, `git add -f`, `git add --force`를 사용하지 않는다.

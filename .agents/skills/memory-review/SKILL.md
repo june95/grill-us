@@ -15,7 +15,7 @@ description: Review an explicit Task, Phase, file list, diff, or commit range an
 
 1. [작업공간 경계](../memory-execute/references/project-profile.md#skill-installation-and-workspace)에 따라 실제 대상 root를 확인하고 알려진 경로를 재사용한다. plugin/cache를 제품 작업공간으로 추정하지 않는다.
 2. Task는 명시 task.md의 Goal/Scope/AC/Dependencies·Revision 및 관련 정본·구현 근거를 읽는다. Phase는 해당 표의 실제 Task 링크와 요청 범위를 읽고 Task별 검토 대상/근거/미검토를 구분한다. 비활성·완료 대상도 current로 전환하지 않는다.
-3. 일반 코드 요청은 파일 또는 diff의 base/head, staged/working 범위와 요청된 untracked 파일을 구분한다. Git 대상은 실제 commit ID와 변경 경로를 확인하고, Git 없는 파일 요청은 실제 bytes snapshot으로 식별한다. 제공된 patch만 있고 파일/호출부를 읽을 수 없으면 그 제한을 알린다.
+3. 일반 코드 요청은 파일 또는 diff의 base/head, staged/working 범위와 요청된 untracked 파일을 구분한다. 전체 변경 수와 Task 귀속은 [Change Inventory](../memory-execute/references/project-profile.md#change-inventory)로 확인한다. staged 검토 범위를 집계에 나타난 모든 untracked 내용 검토로 확대하지 않는다. Git 대상은 실제 commit ID와 변경 경로를 확인하고, Git 없는 파일 요청은 실제 bytes snapshot으로 식별한다. 제공된 patch만 있고 파일/호출부를 읽을 수 없으면 그 제한을 알린다.
 4. 계획이 없는 범위에서는 계획 준수를 **해당 없음**으로 둔다. 코드·명시 요구·프로젝트 정본에 근거해 검토하며 가상의 AC나 승인을 만들어 적용하지 않는다. 필요한 호출부·타입·기존 테스트는 읽을 수 있지만 무관한 전체 저장소로 범위를 확장하지 않는다.
 
 ## Inspect and Return

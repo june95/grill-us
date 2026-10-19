@@ -21,6 +21,8 @@
 
 `memory-review`는 Task/Phase뿐 아니라 계획 없는 파일·diff·commit도 검토합니다. 계획이 없으면 계획 준수는 해당 없음으로 설명합니다. 직접 호출은 결과만 반환하며 코드·기록·Git 변경, 테스트 실행, 추가 위임을 하지 않습니다. `memory-execute --stage review`는 같은 기준으로 위임하고 실행 담당이 기존 review.md/Task 상태를 기록하는 단계입니다. 새 스킬 때문에 리뷰가 중복 실행되지 않습니다.
 
+변경사항은 tracked working·staged·untracked를 나누고 전체 고유 경로 수를 따로 설명합니다. 미추적 폴더를 펼쳐 파일 단위로 확인하며, 같은 파일의 staged/unstaged 변경은 전체 합계에서 한 번만 셉니다. “tracked 수정 0개”와 “전체 변경 없음”, 현재 변경과 Task 완료 상태를 구분합니다. 자세한 판정은 [Change Inventory](.agents/skills/memory-execute/references/project-profile.md#change-inventory)를 따릅니다.
+
 ## 다른 프로젝트에 적용하기
 
 공식 배포 경로는 공통 `.agents/skills` 정본에서 생성하는 `grill-us` plugin입니다. 메모리 6개와 visualize를 함께 포함하며 CodeBurn과 개발용 검증기는 포함하지 않습니다. 도구별 프로젝트 폴더의 수동 사본을 새 공식 배포 방식으로 관리하지 않고, 기존 설치본을 자동 삭제·변환하지 않습니다.

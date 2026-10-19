@@ -16,6 +16,8 @@
 | R10 | memory-execute가 위임한 Task review | 같은 기준으로 한 번 검토하고 실행 담당에게 결과·snapshot 반환 | worker 추가 위임/기록 없음; 실행 담당만 기존 단계 보고 작성 |
 | R11 | 직접 memory-review 호출, finding 없음 | 충분히 검토한 범위·한계와 공통 verdict를 채팅 반환 | 독립 호출만으로 workflow review passed·Task done으로 기록하지 않음 |
 | R12 | 위임 도구 실패 후 execution의 Self | 실행 담당이 실제 실패/부분 결과 보존·사유 알림 후 같은 기준으로 검토/기록 | 별도 독립리뷰 성공으로 주장하거나 기존 finding을 지우지 않음 |
+| R13 | staged/unstaged가 같은 경로,untracked 폴더와 rename이 함께 있음 | 공통 NUL 집계로 범주별 수/전체 합집합·이전 경로를 구분 | staged 대상 버전만 검토하며 집계만으로 untracked 내용까지 읽거나 stage하지 않음 |
+| R14 | 현재 변경과 명시 Task의 후보가 일부 겹침 | 관련 경로·실제 diff/commit·귀속 불명확을 구분 | 경로 겹침만으로 작성자/의도·Task 미완료를 단정하지 않음 |
 
 ## Known Defect Fixture
 

@@ -46,6 +46,18 @@
 
 현재 교육용 결정의 강조된 Chosen/Rationale 필드도 같은 의미로 읽는다. 과거 파일에서 Applies to·Confirmation·ID metadata가 없으면 누락 사실을 말하고 실제 파일 경로와 DNN으로 출처를 식별한다.
 
+## Change Inventory Cases
+
+아래 수치는 가상 입력의 예상 결과이며 현재 프로젝트의 실행 결과가 아니다. [공통 집계](../../memory-execute/references/project-profile.md#change-inventory)를 따른다.
+
+| Case | 입력 | 예상 설명 | 금지/한계 |
+| :--- | :--- | :--- | :--- |
+| X20 | untracked 폴더 안 71개와 HTML 2개, tracked/index 변경 없음 | working 0/staged 0/untracked 73,전체 73 | 짧은 status 3줄을 3파일 또는 변경 없음으로 설명하지 않음 |
+| X21 | 같은 경로에 index와 worktree 변경이 모두 있음 | working 1/staged 1,전체 1 | 범주 합을 전체 수로 쓰지 않음 |
+| X22 | staged rename/copy,공백·한글·개행 경로 | NUL 쌍의 대상 경로 1개와 이전 경로 보조 표시 | 공백/줄/화살표로 이름을 분해하지 않음; 실제 OS 지원 범위와 합성 framing 검증 구분 |
+| X23 | Git 부재/명령 거부/출력 잘림 | 전체 집계 미확인 또는 부분 확인과 원 오류 | 변경 0/가짜 repo 생성/설정 수정으로 덮지 않음 |
+| X24 | Task done과 현재 untracked 참고 자료가 함께 있음 | Task 당시 완료 근거와 현재 변경 범주·귀속을 각각 설명 | untracked를 작성 주체/현재 Task 증거로 단정하거나 done을 되돌리지 않음 |
+
 ## Walkthrough Method
 
 상태/증거/완료 의미는 [공통 규약](../../memory-execute/references/conventions.md#rule-ownership), 설명 자체의 읽기 경계·깊이·근거 선택은 [설명 스킬](../SKILL.md#boundaries)이 소유한다. 아래 사례는 정본과 소비 지침의 대응을 대조하는 자료다.

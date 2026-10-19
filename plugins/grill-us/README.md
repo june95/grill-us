@@ -38,6 +38,8 @@ Codex 결정 조회에서는 자동 prompt에 들어간 `memory-explain` 본문�
 
 `$grill-us:memory-review 현재 staged diff를 검토해줘` 또는 `/grill-us:memory-review`에 명시 범위를 전달합니다. 계획 없는 코드에는 계획 준수 해당 없음을 표시하고 finding·근거·범위/한계를 반환합니다. 독립 호출/worker는 코드·.memory·Git을 쓰거나 테스트·추가 위임을 실행하지 않습니다. 기존 `memory-execute --stage review`는 같은 기준의 반환을 실행 담당이 review.md/Task 상태에 기록하는 단계이며 자동 수정·완료·전진은 하지 않습니다.
 
+변경 개수와 Task 귀속을 물으면 `skills/memory-execute/references/project-profile.md`의 Change Inventory에 따라 tracked working·staged·untracked와 전체 고유 경로 수를 구분합니다. 디렉터리 축약을 파일 하나로 세거나 tracked 수정 0개를 전체 변경 없음으로 설명하지 않습니다. 같은 파일의 staged/unstaged는 전체 합계에서 중복하지 않고 rename/copy의 이전 경로는 보조 정보로 표시합니다. 조회 실패는 미확인으로 남기며 집계를 이유로 파일/Task/current/Git을 변경하지 않습니다.
+
 ## 저장소 주소로 설치
 
 저장소 main에 공개된 catalog와 완성된 package를 도구가 받아 설치합니다. 2026-10-14의 공개 0.1.0에서는 양쪽 source 등록·최초 설치·목록 6개와 설치 cache 출처를 확인했고, 2026-10-15의 공개 0.2.0에서는 기존 설치 업데이트·목록 7개를 별도로 확인했습니다. 설치하는 사용자에게 ZIP 다운로드·수동 clone·Node 빌드를 요구하지 않습니다.

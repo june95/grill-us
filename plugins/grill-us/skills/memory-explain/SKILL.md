@@ -44,6 +44,8 @@ description: Find and explain recorded decisions, designs, plans, progress, and 
 
 전후 비교에는 실제 이전 자료가 필요하고 관계/Dependencies도 실제 링크가 있어야 한다. 현재 코드 drift를 과거 실패/의도로 단정하지 않는다. 현재 유효성을 주장할 때만 [증거·환경](../memory-execute/references/conventions.md#evidence-and-completion)을 읽기 비교하며 테스트를 새로 실행하지 않는다. 누락/stale/충돌은 제한하는 주장에만 한계를 밝히고 상태를 고치지 않는다.
 
+현재 변경 개수·미커밋 파일·“어느 T인가”를 물으면 [Change Inventory](../memory-execute/references/project-profile.md#change-inventory)를 적용한다. tracked working·staged·untracked와 전체 고유 경로 수를 구분하고 Task 후보/실제 commit과 대조한다. tracked 수정 0개를 전체 변경 없음으로 표현하거나, 기존 untracked 수만으로 과거 done을 취소하지 않는다. Git 조회 실패는 미확인이며 Task/상태 복구는 실행하지 않는다.
+
 ## Explain by State
 
 [Task Fields](../memory-execute/references/conventions.md#task-fields)와 [완료 의미](../memory-execute/references/conventions.md#evidence-and-completion)를 따른다. ready와 done, 단계 목적 달성과 제품 성공은 다르다. [Investigation Outcomes](../memory-execute/references/conventions.md#investigation-outcomes)에 따라 조사 완료와 관측 검사 실패를 함께 설명한다.
