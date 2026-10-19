@@ -9,7 +9,7 @@ description: Create or extend a .memory Plan with Phase and independently execut
 
 ## Inputs
 
-- decision 또는 조사한 Source·scope·AC를 받고 필요한 실제 파일/정본/명령을 [Discovery](../memory-execute/references/project-profile.md#discovery)로 확인한다.
+- decision 또는 조사한 Source·scope·AC를 받고 필요한 실제 파일/정본/명령을 [Discovery](../memory-execute/references/project-profile.md#discovery)로 확인한다. [Bounded Exploration](../memory-execute/references/project-profile.md#bounded-exploration)의 제한 경로 탐색/후보 검증으로 기존 근거를 재사용하며 계획을 위해 repo 전체를 다시 조사하거나 새 도구를 설치하지 않는다.
 - 중요한 미결정만 [grill-me](../grill-me/SKILL.md)에 연결한다. 명확한 요청에 decisions 파일을 형식상 강제하거나 확정 선택을 다시 묻지 않는다.
 - 기존 근거를 재사용하되 확인되지 않은 가정·승인·성공을 채우지 않는다.
 

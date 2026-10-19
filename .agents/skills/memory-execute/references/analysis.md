@@ -10,6 +10,8 @@ reference를 실행할 때만 읽는다. 충분한 기존 조사·결정은 재�
 
 ## Evidence
 
+코드 근거를 찾을 때는 [Bounded Exploration](project-profile.md#bounded-exploration)을 따른다. 명시 파일과 기존 조사에서 출발하고, 개념/심볼 검색 후보를 실제 정의·조건·호출부로 확인한다. 결과 없음·도구 부재·권한 오류·출력 잘림을 서로 다른 관측으로 기록하며 미확인 부분을 구현 결론으로 채우지 않는다.
+
 reference.md에는 다음 조사 산출물을 남긴다.
 
 | Item | 내용 |

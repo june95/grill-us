@@ -13,7 +13,7 @@ description: Register a clear change, bug, or issue as a .memory task without im
 
 ## Inspect
 
-1. [Discovery](../memory-execute/references/project-profile.md#discovery)로 실제 대상·정본·suite/명령을 찾고 current·관련 Plan/Task·코드를 읽는다.
+1. [Discovery](../memory-execute/references/project-profile.md#discovery)로 실제 대상·정본·suite/명령을 찾고 current·관련 Plan/Task·코드를 읽는다. [Bounded Exploration](../memory-execute/references/project-profile.md#bounded-exploration)에 따라 명시 경로/Related Files부터 확인하고 필요한 범위만 넓힌다. 탐색 도구 설치나 등록 중 구현으로 확대하지 않는다.
 2. [analysis](../memory-execute/references/analysis.md#problem)로 Source·기대 동작·scope·AC·검증 경로를 확인한다. 원하는 동작이 명확한 버그는 코드 조사부터 하며 원인을 사용자에게 추측하게 하지 않는다.
 3. 버그의 [Bug Investigation](../memory-execute/references/conventions.md#bug-investigation)을 실제 관찰 수준으로 작성한다. 재현과 원인 확신을 독립 판단하고 로그 출처·환경·한계를 보존한다.
 4. 등록 중 제품/테스트/설정/index를 바꾸는 재현 명령은 실행하지 않는다. 부족한 재현 정보나 중요한 실제 결정만 질문한다.
