@@ -65,6 +65,8 @@ description: Find and explain recorded decisions, designs, plans, progress, and 
 
 목표와 결론을 먼저 설명한다. 기본은 일반·간결, 비개발자는 사용자 동작/가치, 개발자 상세는 path::symbol·흐름/계약·검증 한계·의존 관계를 포함한다. 이유/비교는 기록된 근거를 우선하고 자료가 없는 비교는 제한한다. 작은 질문에 모든 항목을 출력하거나 설명 중 자동 재설계하지 않는다.
 
+[Reporting](../memory-execute/references/conventions.md#reporting)의 의미 보존 기준을 설명에도 적용한다. 자연스러운 띄어쓰기와 짧은 문장으로 중복을 줄이되 조건·부정·예외·실패·출처와 정확한 command/cwd/path/ID·검증 한계를 남긴다. source의 관측·추론·예정/미실행을 구분해 대조하며 없는 원인을 덧붙이지 않는다. 상세 기록은 링크로 연결하고, 설명을 위해 기록·history·current를 저장하거나 과거 완료 자료를 재작성하지 않는다.
+
 ## Boundaries
 
 설명 호출은 읽기 전용이다. memory/history/current/checkpoint·Revision·제품·Git 쓰기, 새 Task 등록, 테스트 실행, staging/commit/push·복구를 하지 않는다. 발견·차이·권고는 채팅에만 남기며 실제 변경 요청이면 적절한 기존 진입점으로 연결한다. 사용자 working/index와 과거 증거를 보존하고 비밀 원문을 노출하지 않는다.

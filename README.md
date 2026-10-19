@@ -25,6 +25,8 @@
 
 코드 조사는 명시 파일·Related Files·기존 근거에서 출발해 필요한 모듈로만 넓힙니다. 정확한 검색과 심볼/개념 탐색을 구분하고 후보를 실제 정의·호출부로 확인합니다. 도구 부재·검색 결과 없음·권한 오류·출력 잘림을 구분하며, 기존 호스트 도구로 대체하고 새로운 검색 도구 설치를 요구하지 않습니다. [Bounded Exploration](.agents/skills/memory-execute/references/project-profile.md#bounded-exploration)에 상세 기준이 있습니다.
 
+새 기록은 자연스러운 한국어와 띄어쓰기로 중복을 줄이면서 조건·예외·실패·출처·정확한 명령과 경로·다음 행동을 보존합니다. 상세 근거는 Task/보고에 두고 current에는 위치와 다음 행동을 연결합니다. [작성 기준](.agents/skills/memory-execute/references/conventions.md#reporting)과 [합성 입력·작성 예제·사실 대응표](examples/readable-records.md)를 참고하세요. 과거 완료 기록은 일괄 변환하지 않습니다.
+
 ## 다른 프로젝트에 적용하기
 
 공식 배포 경로는 공통 `.agents/skills` 정본에서 생성하는 `grill-us` plugin입니다. 메모리 6개와 visualize를 함께 포함하며 CodeBurn과 개발용 검증기는 포함하지 않습니다. 도구별 프로젝트 폴더의 수동 사본을 새 공식 배포 방식으로 관리하지 않고, 기존 설치본을 자동 삭제·변환하지 않습니다.

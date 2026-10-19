@@ -42,6 +42,8 @@ Codex 결정 조회에서는 자동 prompt에 들어간 `memory-explain` 본문�
 
 intake·plan의 코드 탐색은 명시 경로/Related Files와 기존 근거부터 확인합니다. 위치를 모를 때만 관련 모듈로 범위를 넓히고 검색 후보를 실제 정의·호출부로 검증합니다. `skills/memory-execute/references/project-profile.md`의 Bounded Exploration은 도구 부재·결과 없음·출력 잘림을 구분하고 기존 호스트 도구로 대체하도록 합니다. 새로운 필수 MCP/CLI·인덱스 설치나 무관한 vendor 전체 조사를 요구하지 않습니다.
 
+새 계획·보고·설명은 `skills/memory-execute/references/conventions.md`의 Reporting에 따라 자연스러운 문장과 띄어쓰기를 사용합니다. 중복을 줄여도 조건·부정·예외·실패·출처와 정확한 command/cwd/path/ID·검증 한계를 유지하며 예정/미실행을 성공으로 바꾸지 않습니다. current에는 위치·다음 행동을 두고 상세 근거를 연결합니다. 고정 글자/토큰 수나 과거 완료 기록의 일괄 변환을 요구하지 않습니다.
+
 ## 저장소 주소로 설치
 
 저장소 main에 공개된 catalog와 완성된 package를 도구가 받아 설치합니다. 2026-10-14의 공개 0.1.0에서는 양쪽 source 등록·최초 설치·목록 6개와 설치 cache 출처를 확인했고, 2026-10-15의 공개 0.2.0에서는 기존 설치 업데이트·목록 7개를 별도로 확인했습니다. 설치하는 사용자에게 ZIP 다운로드·수동 clone·Node 빌드를 요구하지 않습니다.

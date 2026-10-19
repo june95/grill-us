@@ -2,6 +2,8 @@
 
 [conventions.md](conventions.md)의 필드·상태를 사용한다. 아래 fenced 문서는 작성 형식이며 placeholder를 실제 요청·코드 근거·명령으로 채운다. 적용되지 않는 API·스키마 항목은 만들지 않는다. 계획만으로 테스트 결과나 커밋 hash를 생성하지 않는다.
 
+새 기록은 [Reporting](conventions.md#reporting)에 따라 자연스러운 문장과 띄어쓰기로 작성한다. 조건·부정·예외·실패·출처와 정확한 command/cwd/path/ID를 보존하며, 필요한 사실이 없는 짧은 요약이나 불필요한 빈 표로 대체하지 않는다. 아래 형식을 이유로 과거 완료 기록을 변환하지 않는다.
+
 ## Task
 
 task.md의 상세 계약·Revision은 [Task Fields](conventions.md#task-fields), 단계 선택은 [Workflow](conventions.md#workflow)를 따른다. 아래는 해당 계약을 채우는 형식이다.
@@ -27,7 +29,7 @@ Implementation에는 적용 작업을 적는다. 분석 전용이면 조사 절�
 
 ## Goal
 
-{관찰 가능한 단일 결과, 대상, 필요한 이유}
+{관찰 가능한 단일 결과, 대상, 필요한 이유와 결과를 제한하는 조건}
 
 ## Decision Summary
 
@@ -88,7 +90,7 @@ Implementation에는 적용 작업을 적는다. 분석 전용이면 조사 절�
 - Execution Flow:
   1. {사전 검증}
   2. {핵심 처리}
-  3. {오류·예외·롤백}
+  3. {조건·부정·오류·예외·롤백; 적용되는 경우}
   4. {상태 변경·반환}
 - 문서 작업이면: {정확한 변경 섹션·의미·참조 계약}
 
@@ -264,7 +266,7 @@ active Plan/Phase는 in_progress로 표시할 수 있어도 Task가 실제 시�
 
 ## Next Step
 
-{활성 Task의 구체적인 다음 행동}
+{활성 Task의 구체적인 다음 행동과 필요한 재개 조건; 상세 계약·로그는 Task/보고 링크로 연결}
 ```
 
 활성 Task가 없으면 Active Task·Active Stage에 `없음`을 적고 가짜 링크를 만들지 않는다. Plan 완료 시 완료한 Plan 링크와 완료 상태는 보존할 수 있다. 다른 Plan 자동 전환은 하지 않는다.
@@ -338,7 +340,7 @@ Candidate Snapshot 형식은 path·A/M/D·working SHA256·staged mode/blob다. �
 
 ## Details
 
-{실제 변경·판단·검증 근거, command/cwd/result 또는 필요한 대응표}
+{무엇을 왜 변경/판단했는지, source와 실제 확인 수준, 조건·예외·실패를 포함한 command/cwd/result. 예정·미실행은 구분하고 필요한 경우에만 표를 사용한다.}
 
 {review 보고에만 아래 항목을 실제 시도 근거로 작성한다. 다른 단계에서는 제거한다. 재리뷰도 해당 시도와 검토 snapshot을 구분해 추가한다.}
 
