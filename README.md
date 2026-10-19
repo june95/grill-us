@@ -15,7 +15,7 @@
 
 계획은 공개 API·DTO·저장/모듈 경계·중요 흐름·오류·상태·완료 조건과 검증을 고정합니다. 새 Task의 Constraints에는 작업별 Must / Must Not을 적고, 새 파일/추상화가 필요하면 기존 소유 위치에 둘 수 없는 이유를 남깁니다. 계약에 필수로 고정하지 않은 private helper 이름·분할·동등한 알고리즘은 실행자가 선택합니다. 리뷰는 계획 자체의 과설계와 구현의 계약 위반을 구분하며 helper 존재만으로 결함을 만들거나 승인 구조를 자동 재설계하지 않습니다.
 
-현재 저장소 snapshot은 독립 `memory-review`를 포함한 **7개 스킬·0.2.0**입니다. 2026-10-14 Windows의 Codex CLI 0.160.1·Claude Code 2.1.299에서 로컬 package의 7개 스킬 발견과 계획 없는 리뷰·비활성 Task/Phase 리뷰·계획 작성·결정 저장/조회 대표 호출을 확인했습니다. 32개 원본 문서와 38개 package 파일의 정적 검증·생성물·Git clone/LF 회귀도 유지합니다. 0.2.0의 공개 GitHub 설치·버전 간 자동 upgrade는 미검증이며, 아래 GitHub 설치 기록은 당시 공개된 0.1.0/6개 스킬의 근거입니다.
+현재 저장소 snapshot은 독립 `memory-review`를 포함한 **7개 스킬·0.2.0**입니다. 2026-10-14 Windows의 Codex CLI 0.160.1·Claude Code 2.1.299에서 로컬 package의 7개 스킬 발견과 계획 없는 리뷰·비활성 Task/Phase 리뷰·계획 작성·결정 저장/조회 대표 호출을 확인했습니다. 2026-10-15에는 공개 커밋 `e8d67c3388a820cc9d2359c4601faed75cc6be75`를 source로 Codex CLI 0.160.1·Claude Code 2.1.300의 기존 설치를 **0.1.0 → 0.2.0**으로 명시 업데이트하고, 양쪽 설치 cache의 38개 파일 일치와 새 세션의 7개 발견·`memory-review` 호출을 확인했습니다. 이 결과는 시험한 업데이트 경로이며 무인 자동 갱신이나 모든 host 버전의 지원을 보장하지 않습니다. 날짜별 범위와 한계는 [호환성 안내](docs/plugin-compatibility.md)에 있습니다.
 
 새 결정은 `Applies to`에 적용 기능·모듈·상황을 반드시 남기고, `Revisit When`은 실제 조건이 있을 때만 작성합니다. `memory-explain 상품 모듈의 SKU 재고 결정을 찾아줘`처럼 ID·주제·적용 범위로 검색할 수 있습니다. 명시 결정이나 Plan/Task 연결을 먼저 읽고 필요한 경우 확인한 프로젝트의 `.memory/decisions`에서 후보를 찾습니다. 구형 기록의 적용 범위는 미기록으로 설명하고, 출처·이유·상충 근거를 보여 줍니다. 검색 결과 저장이나 과거 결정 변환은 하지 않습니다.
 
@@ -25,6 +25,8 @@
 
 공식 배포 경로는 공통 `.agents/skills` 정본에서 생성하는 `grill-us` plugin입니다. 메모리 6개와 visualize를 함께 포함하며 CodeBurn과 개발용 검증기는 포함하지 않습니다. 도구별 프로젝트 폴더의 수동 사본을 새 공식 배포 방식으로 관리하지 않고, 기존 설치본을 자동 삭제·변환하지 않습니다.
 
+배포 채널은 공개 GitHub 저장소 `june95/grill-us`를 사용한 **자체 marketplace**입니다. 사용자가 저장소를 source로 직접 추가해 설치하며, OpenAI·Anthropic 공식 공개 스토어의 등록·심사를 받은 항목은 아닙니다.
+
 배포 정본과 생성물은 다음과 같이 구분합니다.
 
 - `.agents/skills`와 `packaging/grill-us.json`·`packaging/README.md`: 편집 정본.
@@ -33,7 +35,7 @@
 
 생성물은 수동 편집하지 않습니다. 배포 입력과 snapshot은 Git 속성으로 LF를 유지해 checkout 뒤에도 해시가 일치하게 합니다. `--publish`로 배포 snapshot을 갱신하고 `--check-published`로 source drift·누락·수동 변경을 쓰기 없이 확인하는 절차를 사용합니다. 2026-10-14 Windows의 Codex CLI 0.160.1·Claude Code 2.1.296에서 GitHub 직접 설치·목록 6개·설치 cache의 명시 설명 호출을 확인했습니다. 실제 공개 커밋과 한계는 [호환성 안내](docs/plugin-compatibility.md)에 기록합니다.
 
-포함 스킬·로컬 설치/세션 로드·명시 호출·업데이트·기존 사본 전환은 [패키지 사용자 안내](packaging/README.md)를 참고합니다. 이 안내도 빌드할 때 생성 패키지의 README로 복사됩니다. 현재 로컬 0.2.0과 과거 GitHub 0.1.0의 호출별 근거·출력·보존 한계는 [호환성 안내](docs/plugin-compatibility.md)에 구분합니다. 시험한 버전은 최소 지원 버전이 아닙니다.
+포함 스킬·로컬 설치/세션 로드·명시 호출·업데이트·기존 사본 전환은 [패키지 사용자 안내](packaging/README.md)를 참고합니다. 이 안내도 빌드할 때 생성 패키지의 README로 복사됩니다. 로컬 0.2.0, 과거 GitHub 0.1.0 최초 설치, GitHub 0.2.0 명시 업데이트의 호출별 근거·출력·보존 한계는 [호환성 안내](docs/plugin-compatibility.md)에 구분합니다. 시험한 버전은 최소 지원 버전이 아닙니다.
 
 1. 주소 `june95/grill-us`를 marketplace에 등록해 설치합니다. 소비자는 ZIP·수동 clone·Node 빌드가 필요하지 않습니다([저장소 주소 설치](packaging/README.md#저장소-주소로-설치)). 실제 확인한 CLI 버전·공개 커밋·호출 범위는 [호환성 안내](docs/plugin-compatibility.md)에 있습니다.
 2. 로컬 시험은 기존 `dist/grill-us` 생성/Claude `--plugin-dir`/Codex local catalog 경로도 사용할 수 있습니다([로컬 구성](packaging/README.md#로컬-로드와-설치)). `$grill-us:memory-explain` 또는 `/grill-us:memory-explain`처럼 namespace를 명시하고 실제 읽은 plugin 경로를 확인합니다. 개발 원본 직접 로딩과 설치 plugin을 같은 시험 세션에서 혼용하지 않습니다.

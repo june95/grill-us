@@ -3,7 +3,7 @@
   "generator": "scripts/build-plugin.mjs",
   "sourceSnapshot": {
     "packaging/grill-us.json": "512a1ec53d6959ac8db39d1fe176e32337e26d2a11a47218874e09898e4e190a",
-    "packaging/README.md": "5e7327b94bdb1fc6fa5684d5e2eb5f0f4ed554dcd92b8c4cd770909d0130e20c",
+    "packaging/README.md": "06cd4e0f7b49e7575ece1f19e252c990718a9eff341ebc937c7c31e35862d187",
     ".agents/skills/grill-me/SKILL.md": "bd5a11cc9ef255fbd57338f5e8154f059939938c8dd1b6150600381968fb7260",
     ".agents/skills/memory-execute/SKILL.md": "1a4295565e650c5c6dc5b1edc6348c18a2abf2379024eb2b97da5edde3a72724",
     ".agents/skills/memory-execute/references/analysis.md": "b6567506372c942e5187698da5ccb2bf856f578509b9c113a3d31af5f2d4ec30",
@@ -48,7 +48,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "5e7327b94bdb1fc6fa5684d5e2eb5f0f4ed554dcd92b8c4cd770909d0130e20c"
+      "sha256": "06cd4e0f7b49e7575ece1f19e252c990718a9eff341ebc937c7c31e35862d187"
     },
     {
       "path": "plugin.json",

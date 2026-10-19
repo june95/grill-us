@@ -1,10 +1,32 @@
 # grill-us plugin 호환성 확인
 
-현재 로컬 package **0.2.0/7개 스킬**의 native 검증과 과거 **0.1.0/6개 스킬**의 로컬·GitHub 설치 검증을 구분합니다. 모두 개발 저장소 밖의 별도 Windows 가상 프로젝트를 사용했습니다. 시험한 버전은 최소 지원 버전이 아닙니다. CodeBurn은 package에 포함하지 않습니다.
+package **0.2.0/7개 스킬**의 로컬 native 검증, 2026-10-15 GitHub source의 기존 설치 업데이트, 과거 **0.1.0/6개 스킬** 최초 설치 검증을 구분합니다. 모두 개발 저장소 밖의 별도 Windows 가상 프로젝트를 사용했습니다. 시험한 버전은 최소 지원 버전이 아닙니다. CodeBurn은 package에 포함하지 않습니다.
 
-현재 snapshot은 `memory-review`를 추가했고 명시32개 원본 문서·38개 package 파일, 공통 검토/무쓰기 반환과 execution 기록 책임, 경로·소유·실패 복구·freshness·Git clone/LF의 정적 근거를 유지합니다. 2026-10-14 로컬 native 발견·변경 동작 검증 결과는 다음 절과 같습니다. 0.2.0의 공개 GitHub 설치·버전 간 자동 upgrade는 미검증입니다.
+현재 snapshot은 `memory-review`를 추가했고 명시32개 원본 문서·38개 package 파일, 공통 검토/무쓰기 반환과 execution 기록 책임, 경로·소유·실패 복구·freshness·Git clone/LF의 정적 근거를 유지합니다. 아래는 날짜별 실제 결과입니다. 이 저장소는 source를 직접 추가하는 자체 GitHub marketplace이며, OpenAI·Anthropic 공식 공개 스토어 등록·심사를 진행한 것은 아닙니다.
 
 2026-10-14의 현재 정적 검사에는 Claude Code **2.1.299**로 `claude plugin validate --strict . --json`과 `claude plugin validate --strict plugins/grill-us --json`을 실행했습니다. 두 manifest 검사 모두 exit 0, errors/warnings 없음입니다. 이는 marketplace/package 형식 검사이며 0.2.0 설치·스킬 발견·모델 호출 성공의 증거는 아닙니다.
+
+## GitHub 0.2.0 명시 업데이트 — 2026-10-15
+
+공개 `june95/grill-us`의 main을 `f293bdacf6bd6e6594dbf7c4b3d638e0f5835f19`에서 **`e8d67c3388a820cc9d2359c4601faed75cc6be75`**로 일반 fast-forward push한 뒤, 기존 `grill-us@grill-us` 설치를 **0.1.0 → 0.2.0**으로 명시 업데이트했습니다. 새 0.2.0 최초 설치나 무인 자동 갱신을 시험한 것은 아닙니다.
+
+| 항목 | Codex CLI | Claude Code CLI |
+| :--- | :--- | :--- |
+| 실제 버전 / OS | 0.160.1 / Windows | 2.1.300 / Windows |
+| source 갱신 | `codex plugin marketplace upgrade grill-us --json` | `claude plugin marketplace update grill-us --json` |
+| plugin 업데이트 | marketplace 갱신 후 설치본 0.2.0 확인; add/remove 미실행 | `claude plugin update grill-us@grill-us --scope user --json`, oldVersion 0.1.0 / newVersion 0.2.0 |
+| 공개 source 대조 | Git origin은 june95/grill-us, HEAD e8d67c3 | 같은 origin/HEAD |
+| 설치 cache | 0.2.0의 38개 파일 hash가 공개 package와 일치 | 0.2.0의 38개 파일 hash가 공개 package와 일치 |
+| 새 세션 발견 | `skills/list` 활성 namespace 7개, errors 0 | init plugin 0.2.0과 qualified slash command 7개 |
+| 대표 요청 | 설치 cache의 `memory-review` / gpt-6-astra | 설치 cache의 `memory-review` / claude-opus-5-5 |
+
+두 모델은 설치된 0.2.0의 전체 SKILL과 형제 review 규약을 읽고, 계획 없는 가상 계산 코드의 덧셈/곱셈 결함을 High로 반환했습니다. 계획 준수는 해당 없음이며 최소 수정 방향과 권장 검증을 설명했고, 실제 테스트나 코드 수정은 하지 않았습니다. 두 호출은 exit 0이며 fixture 전체 파일(`.git` 포함)·부모 helper·새 설치 cache 변경은 0이었습니다. `--plugin-dir`나 개발 source를 직접 읽는 방법으로 GitHub 설치 결과를 대신하지 않았습니다.
+
+양쪽 무관 설치 목록은 같았고 기존 사용자 세션은 종료·reload하지 않았습니다. Claude 0.1.0 디렉터리는 존재했으나 내부 파일을 읽거나 hash·수동 삭제하지 않았으므로 bytes 동일성을 검증했다는 뜻은 아닙니다. 저장소 tracked 9,737개와 사용자 untracked 73개의 hash가 같고 index는 비어 있었습니다. Claude settings hash는 같았지만 Codex config·Claude 설치 registry·`.claude.json` hash 변화가 관측됐습니다. 설치 registry의 버전 전환은 목록으로 확인했으며 개인 metadata 전체의 보존·변화 원인을 단정하거나 과거 파일로 복원하지 않았습니다.
+
+Claude 답변의 전체 영향 표현은 같은 답변에 기록된 정상 입력 예외보다 넓었습니다. 유효한 결함·수정 방향과 모델의 표현 한계를 구분합니다. 부모가 제공한 hash와 모델의 내용 재읽기를 독립 hash 계산으로 세지 않았고, 실행 담당이 실제 bytes를 대조했습니다. 무쓰기 관측은 사용한 sandbox·제한 file tools와 전후 비교 범위이며 OS 전체 읽기 전용 보장이 아닙니다. 모든 7개 workflow·다른 OS/scope/CLI 버전·향후 자동 업데이트까지 시험한 것은 아닙니다. 이전 `memory-explain` 자동 본문 truncation도 이 리뷰 요청으로 해결됐다고 주장하지 않습니다.
+
+이 결과는 공개 커밋 e8d67c3의 당시 package에 대한 근거입니다. 이후 안내와 생성 README/build metadata의 변경을 새로운 native 업데이트 성공으로 표시하지 않습니다. 스킬·manifest·version의 변경 영향과 필요한 재검증은 아래 절을 따릅니다. 사용자용 명령과 새 세션 적용 절차는 [패키지 사용자 안내](../packaging/README.md)에 있습니다.
 
 ## 로컬 0.2.0 변경 계약 검증 — 2026-10-14
 
