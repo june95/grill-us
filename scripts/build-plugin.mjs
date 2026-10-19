@@ -7,7 +7,7 @@ import { checkLinks, checkSkillFrontmatter, readFences } from './validate-skills
 
 const scriptPath = fileURLToPath(import.meta.url);
 const defaultRepoRoot = path.resolve(path.dirname(scriptPath), '..');
-const skillNames = ['grill-me', 'memory-intake', 'memory-plan', 'memory-execute', 'memory-review', 'memory-explain', 'visualize'];
+const skillNames = ['grill-me', 'memory-intake', 'memory-plan', 'memory-execute', 'memory-review', 'memory-explain', 'page-capture', 'visualize'];
 const fixtureMarker = '.grill-us-fixture.json';
 const ownerMarker = '.grill-us-build.json';
 const generator = 'scripts/build-plugin.mjs';
@@ -107,7 +107,7 @@ function inputs(repository) {
     const [name, ...parts] = entry.split('/');
     if (!skillNames.includes(name) || !(parts.length === 1 && parts[0] === 'SKILL.md' ||
         parts.length >= 2 && parts[0] === 'references' && parts.slice(1).every(part => /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(part)) && entry.endsWith('.md'))) {
-      throw new Error('sourceFiles는 7개 SKILL.md/references Markdown만 허용: ' + entry);
+      throw new Error('sourceFiles는 ' + skillNames.length + '개 SKILL.md/references Markdown만 허용: ' + entry);
     }
     const source = path.join(sourceRoot, ...entry.split('/'));
     noLinks(source);
@@ -278,6 +278,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === scriptPath) {
     const checking = args[0] === '--check-published';
     const result = checking ? checkPublishedPlugin() : buildPlugin(args[0] === '--publish'
       ? { outDir: path.join(defaultRepoRoot, 'plugins', 'grill-us') } : {});
-    console.log((checking ? 'Verified ' : 'Built ') + result.outputRoot + ': ' + result.files.length + ' files, 7 skills. Native host validation and GitHub installation are separate checks.');
+    console.log((checking ? 'Verified ' : 'Built ') + result.outputRoot + ': ' + result.files.length + ' files, ' + skillNames.length + ' skills. Native host validation and GitHub installation are separate checks.');
   } catch (error) { console.error(error.message); process.exitCode = 1; }
 }

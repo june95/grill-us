@@ -1,10 +1,16 @@
 # grill-us plugin 호환성 확인
 
-package **0.2.0/7개 스킬**의 로컬 native 검증, 2026-10-15 GitHub source의 기존 설치 업데이트, 과거 **0.1.0/6개 스킬** 최초 설치 검증을 구분합니다. 모두 개발 저장소 밖의 별도 Windows 가상 프로젝트를 사용했습니다. 시험한 버전은 최소 지원 버전이 아닙니다. CodeBurn은 package에 포함하지 않습니다.
+현재 개발 snapshot은 page-capture를 포함한 **0.3.0/8개 스킬**, 명시35개 원본 문서·41개 package 파일입니다. Markdown-only 구성과 특정 호스트의 실제 UI 캡처 성공, 과거 **0.2.0/7개**·**0.1.0/6개** 설치 결과를 구분합니다. 시험 버전은 최소 지원 버전이 아니며 CodeBurn·개발 검증기·브라우저 실행 코드는 배포하지 않습니다.
 
-현재 snapshot은 `memory-review`를 추가했고 명시32개 원본 문서·38개 package 파일, 공통 검토/무쓰기 반환과 execution 기록 책임, 경로·소유·실패 복구·freshness·Git clone/LF의 정적 근거를 유지합니다. 아래는 날짜별 실제 결과입니다. 이 저장소는 source를 직접 추가하는 자체 GitHub marketplace이며, OpenAI·Anthropic 공식 공개 스토어 등록·심사를 진행한 것은 아닙니다.
+## 0.3.0 page-capture 호스트 경계
 
-2026-10-14의 현재 정적 검사에는 Claude Code **2.1.299**로 `claude plugin validate --strict . --json`과 `claude plugin validate --strict plugins/grill-us --json`을 실행했습니다. 두 manifest 검사 모두 exit 0, errors/warnings 없음입니다. 이는 marketplace/package 형식 검사이며 0.2.0 설치·스킬 발견·모델 호출 성공의 증거는 아닙니다.
+현재 에이전트의 Chrome extension browser API는 JPEG를 반환하고 Windows의 기존 PowerShell7.6.7/System.Drawing으로 PNG를 저장할 수 있었습니다. 소유 fixture의 기본·모달 PNG를1600×865로 저장해 실제 이미지를 열었고 JSON에 실제 CSS viewport1600×865·DPR2·JPEG→PNG 변환·fullPage=false를 구분했습니다. viewport pixel과 device-pixel fidelity를 같다고 주장하지 않습니다. 합성 입력은 마스킹됐고 sidecar에는 fill value와 URL query/fragment를 넣지 않았습니다.
+
+브라우저 제어가 한때 응답하지 않았고 내장 IAB 브라우저는 제공되지 않았습니다. 같은 Chrome의 새 소유 탭에서 제어가 다시 응답한 뒤 CSS viewport375×812/DPR1을 실제 확인해 좁은 화면도 촬영했습니다. 받은 JPEG와 저장 PNG는360×780이며 이 차이·원인 미확인·아래 영역 미포함을 sidecar에 남겼고 요청 크기에 맞춰 이미지를 늘리지 않았습니다. 임시 viewport는1600×865/DPR2로 복구했습니다. 준비 중 화면에서1200ms 조건 timeout도 확인했으며 PNG/JSON은 만들지 않았습니다. 원 연결 실패를 보존하고 복구 원인이나 모든 호스트 지원을 단정하지 않습니다.
+
+직접 캡처는 산출만 쓰고 test 담당이 상태/evidence를 기록합니다. 독립 review/explain은 기존 PNG/JSON만 읽습니다. browser API·viewport·PNG 저장 도구가 없는 세션은 미완료를 안내하며 자동 설치·숨은 대체 runtime·개인 설정 변경·인증 자동화를 하지 않습니다. 이번 개발 snapshot을 개인 canonical 설치나 공개 GitHub 배포로 자동 갱신하지 않습니다.
+
+아래는 이전 버전의 날짜별 실제 결과입니다. 자체 GitHub marketplace의 기록이며 공식 공개 스토어 등록·심사 성공을 뜻하지 않습니다. 2026-10-14 Claude2.1.299의 두 strict manifest 검사 exit0도 당시 형식 검사이며0.3.0 UI 캡처 성공의 근거로 쓰지 않습니다.
 
 ## GitHub 0.2.0 명시 업데이트 — 2026-10-15
 

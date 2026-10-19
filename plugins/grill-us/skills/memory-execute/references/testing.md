@@ -24,6 +24,12 @@ test가 적용되거나 요청됐을 때만 읽는다. [공통 규약](conventio
 
 위험과 AC를 입증하는 최소 수준을 선택한다. 단계 이름 때문에 충분한 검사를 반복/확대하지 않으며 새 변경·실패·미해결 위험만 추가 확인한다.
 
+## UI Evidence
+
+명시 UI 상태의 캡처가 필요한 test 담당은 현재 호스트 capability가 있을 때 [page-capture](../../page-capture/SKILL.md)를 적용할 수 있다. 실제 PNG와 같은 basename의 정제된 JSON, 화면/viewport/준비·조작·한계를 읽어 Task의 검증 근거에 연결한다. 저장된 이미지를 열어 실제 상태를 확인하며 이미지나 metadata 존재만으로 제품 테스트 통과를 선언하지 않는다.
+
+직접 capture는 요청 산출만 쓰고, test.md·Task/current/history 기록은 기존 실행 담당이 맡는다. browser/PNG 저장 수단 부재·준비/조작/저장 실패와 시각적 finding을 구분한다. PNG가 없는 경우 정적 검사로 실제 캡처 성공을 대체하지 않는다. 독립 review/explain에게 증거를 읽으라고 전달한 것을 재캡처 권한으로 해석하지 않는다.
+
 ## Failures
 
 - 제품 실패·setup 실패·환경 blocker·생략을 구분하고 하위 실패가 막는 검사는 Blocked로 남긴다. 독립 확인은 계속할 수 있다.

@@ -1,6 +1,6 @@
 # grill-us plugin
 
-공통 원본에서 생성한 메모리 6개와 visualize, 총 7개 스킬의 0.2.0 패키지입니다. 이 문서는 생성 package의 사용자 안내 원본이며 아래 `skills/` 경로는 package root 기준입니다. 개별 스킬 이름은 유지하고 grill-me 별칭은 추가하지 않습니다.
+공통 원본에서 생성한 메모리6개와 page-capture·visualize, 총8개 스킬의0.3.0 개발 패키지입니다. 명시35개 원본 문서에서41개 package 파일을 생성하며 실행 도우미는 포함하지 않습니다. 이 문서는 생성 package의 사용자 안내 원본이며 아래 `skills/` 경로는 package root 기준입니다. 개별 스킬 이름은 유지하고 grill-me 별칭은 추가하지 않습니다.
 
 `grill-us`는 공개 GitHub 저장소 `june95/grill-us`를 source로 직접 추가하는 **자체 marketplace**입니다. OpenAI·Anthropic 공식 공개 스토어 등록·심사를 진행한 것은 아닙니다.
 
@@ -10,7 +10,7 @@
 
 **0.2.0/7개 스킬**은 2026-10-14 Windows의 Codex CLI **0.160.1**·Claude Code **2.1.299**에서 로컬 native 발견과 대표 호출을 확인했습니다. Codex는 전용 local marketplace의 `plugin add` 설치 cache, Claude는 `--plugin-dir` 세션 package를 사용했습니다. 양쪽에서 계획 없는 리뷰, 비활성 Task/Phase 리뷰, 계획 작성, 확정 결정 저장, 구형·상충 결정을 포함한 조회를 각각 실행했습니다. 공개 계약/내부 구현 재량, `Applies to`와 조건 없는 `Revisit When` 생략, 조회 무쓰기·활성 위치 보존을 확인했습니다.
 
-명시32개 원본 문서/38개 package 파일의 참조·회귀·생성물 freshness와 Git clone/LF 근거도 유지합니다. 위 2026-10-14 시험은 로컬 0.2.0의 변경된 대표 동작 범위이며 모든 7개 스킬의 전체 workflow를 새로 실행한 것은 아닙니다. 당시에는 공개 GitHub 0.2.0 업데이트를 시험하지 않았고, 시험용 Codex 설치만 제거해 기존 양쪽 0.1.0 설치를 유지했습니다. 사용 중인 canonical Claude cache는 읽기·해시·삭제·갱신 대상으로 삼지 않았습니다.
+당시0.2.0의 명시32개 원본 문서/38개 package 파일에 대한 참조·회귀·생성물 freshness와 Git clone/LF 근거를 보존합니다. 위 2026-10-14 시험은 로컬 0.2.0의 변경된 대표 동작 범위이며 모든 7개 스킬의 전체 workflow를 새로 실행한 것은 아닙니다. 당시에는 공개 GitHub 0.2.0 업데이트를 시험하지 않았고, 시험용 Codex 설치만 제거해 기존 양쪽 0.1.0 설치를 유지했습니다. 사용 중인 canonical Claude cache는 읽기·해시·삭제·갱신 대상으로 삼지 않았습니다.
 
 별도로 2026-10-15에는 공개 커밋 **`e8d67c3388a820cc9d2359c4601faed75cc6be75`**를 source로 Windows의 Codex CLI **0.160.1**·Claude Code **2.1.300**에서 기존 `grill-us@grill-us`를 **0.1.0 → 0.2.0**으로 명시 업데이트했습니다. 양쪽 Git marketplace의 origin/HEAD와 각 설치 cache 38개 파일을 공개 package와 대조했고, 새 세션의 7개 발견·설치 cache 본문/참조 읽기·계획 없는 `memory-review` 호출을 확인했습니다. 무인 자동 갱신이나 모든 7개 workflow의 재시험 결과는 아닙니다. 기존 사용자 세션은 종료·reload하지 않았고, Claude 0.1.0 디렉터리는 남아 있었으며 그 안의 bytes는 검사하지 않았습니다. 개인 설치본은 저장소 빌드만으로 갱신되지 않습니다.
 
@@ -32,6 +32,7 @@ Codex 결정 조회에서는 자동 prompt에 들어간 `memory-explain` 본문�
 | memory-execute | 현재 Task 또는 명시 단계 실행 | `$grill-us:memory-execute` | `/grill-us:memory-execute` |
 | memory-review | Task/Phase·일반 파일/diff/commit 무쓰기 검토 | `$grill-us:memory-review` | `/grill-us:memory-review` |
 | memory-explain | 결정 검색·적용 범위·출처와 기록·코드·Git 근거 설명 | `$grill-us:memory-explain` | `/grill-us:memory-explain` |
+| page-capture | 명시 UI 상태의 PNG·정제된 JSON 증거 | `$grill-us:page-capture` | `/grill-us:page-capture` |
 | visualize | 명시한 HTML 시각화 생성 | `$grill-us:visualize` | `/grill-us:visualize` |
 
 호출 표기는 에이전트에 입력하는 요청이며 터미널 실행 파일이 아닙니다. 동명 개인 스킬이 있으면 namespace를 포함하고, 실제 읽은 경로가 이 plugin의 `skills/`인지 확인합니다. 0.2.0 로컬 시험은 기존 canonical 설치를 세션에서 비활성화하고 trial package의 본문·형제 참조 출처를 확인했습니다. 과거 0.1.0 GitHub 설치 시험에서는 양쪽 설치 cache를 읽었고, 당시 다른 5개 대표 흐름은 본문·참조·CLI 변경 영향을 대조해 기존 로컬 근거를 재사용했습니다. 모든 이름 충돌 조합이나 암묵적 자동 선택까지 검증한 것은 아닙니다. Claude 표기는 [공식 skills 문서](https://code.claude.com/docs/en/skills)도 참고합니다.
@@ -43,6 +44,14 @@ Codex 결정 조회에서는 자동 prompt에 들어간 `memory-explain` 본문�
 intake·plan의 코드 탐색은 명시 경로/Related Files와 기존 근거부터 확인합니다. 위치를 모를 때만 관련 모듈로 범위를 넓히고 검색 후보를 실제 정의·호출부로 검증합니다. `skills/memory-execute/references/project-profile.md`의 Bounded Exploration은 도구 부재·결과 없음·출력 잘림을 구분하고 기존 호스트 도구로 대체하도록 합니다. 새로운 필수 MCP/CLI·인덱스 설치나 무관한 vendor 전체 조사를 요구하지 않습니다.
 
 새 계획·보고·설명은 `skills/memory-execute/references/conventions.md`의 Reporting에 따라 자연스러운 문장과 띄어쓰기를 사용합니다. 중복을 줄여도 조건·부정·예외·실패·출처와 정확한 command/cwd/path/ID·검증 한계를 유지하며 예정/미실행을 성공으로 바꾸지 않습니다. current에는 위치·다음 행동을 두고 상세 근거를 연결합니다. 고정 글자/토큰 수나 과거 완료 기록의 일괄 변환을 요구하지 않습니다.
+
+## page-capture의 도구와 산출
+
+`$grill-us:page-capture 이 화면의 모달이 열린 상태를 캡처해줘`처럼 URL/탭과 필요한 상태를 명시합니다. 실제 사용자 project root를 확인하고 기본은 `.memory/captures/`의 충돌 없는 PNG와 JSON입니다. 명시한 viewport는 실제 적용 값을 기록하고 임시 override를 복구합니다. PNG만 있거나 sidecar·시각 확인이 실패하면 부분 결과이며 파일 존재를 제품/DB 검증 통과로 확대하지 않습니다.
+
+필요한 navigation/interaction/screenshot·viewport 확인·PNG 파일 저장 수단이 이미 있어야 합니다. JPEG만 반환되면 기존 PNG 인코더로 실제 변환하고 한계를 기록합니다. 없으면 미완료와 준비 조건을 안내하며 새 브라우저·MCP·runtime 설치나 credentials 설정을 하지 않습니다. URL query/fragment·입력값을 metadata에 복사하지 않고 이미지의 실제 민감정보 표시도 확인합니다. 결제·전송·삭제·인증 자동화는 캡처 요청으로 승인되지 않습니다.
+
+직접 호출은 요청된 이미지/JSON만 작성합니다. test 담당만 기존 Task/보고에 연결하며 독립 review/explain은 기존 이미지·metadata를 읽고 재캡처나 상태 쓰기를 하지 않습니다. `skills/page-capture/references/capture-contract.md`에 필드·실패·경로 경계가 있습니다. UI API의 존재, 파일 저장·시각 확인은 호스트/세션별로 확인합니다. 아래0.2.0/0.1.0 이력을0.3.0 캡처 성공으로 해석하지 않습니다.
 
 ## 저장소 주소로 설치
 

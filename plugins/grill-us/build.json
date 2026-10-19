@@ -2,8 +2,8 @@
   "formatVersion": 1,
   "generator": "scripts/build-plugin.mjs",
   "sourceSnapshot": {
-    "packaging/grill-us.json": "512a1ec53d6959ac8db39d1fe176e32337e26d2a11a47218874e09898e4e190a",
-    "packaging/README.md": "74fe771caf1f3c85b74b3374c92165e7d5e2f5aa8bfcbcafc4dbf8e572a61ae2",
+    "packaging/grill-us.json": "fade4083434012105a3c5b6d41a4870d1845aa2cf19299f8948620a6aecfcde0",
+    "packaging/README.md": "e634455d754d5227f5c1391afd764796d2f22d16f20aea5ffc435b13ecd537a4",
     ".agents/skills/grill-me/SKILL.md": "bd5a11cc9ef255fbd57338f5e8154f059939938c8dd1b6150600381968fb7260",
     ".agents/skills/memory-execute/SKILL.md": "1a4295565e650c5c6dc5b1edc6348c18a2abf2379024eb2b97da5edde3a72724",
     ".agents/skills/memory-execute/references/analysis.md": "8a84306fbcff0eae953a442fc7bd2be23f85daeca8bcc4444b30429b364dd3dc",
@@ -16,14 +16,17 @@
     ".agents/skills/memory-execute/references/review.md": "127e81283bbb0710c3f6ab5335c58752da6a416b5bd9c2c951d69e4929cfebbe",
     ".agents/skills/memory-execute/references/scenarios.md": "cc1792d2f41f86f04d38fa53ea820b3a05901bd3cba50a6a44629c16f005019e",
     ".agents/skills/memory-execute/references/templates.md": "c3099e4c25f686aa5014b14303fcc1005d69764040b088deec0494d64d2cea19",
-    ".agents/skills/memory-execute/references/testing.md": "1e6e0d949743edd3b632f9a5e355da6d32dd9245e8ac115461eeb8d29728c4a6",
+    ".agents/skills/memory-execute/references/testing.md": "996c6c7a5a94b32e6121040189a0cac511ea8d7c83002055226b3ccae93665fc",
     ".agents/skills/memory-execute/references/validation-scope.md": "3d0314630a1432ca2c43c54a002595eca7d4eaaf0daac37d4b77b2e0c3524e36",
     ".agents/skills/memory-explain/SKILL.md": "389ae5d8a9007a6fdbccb7830969e3d1265bfcfea1761c52699cc1f76ca31028",
     ".agents/skills/memory-explain/references/scenarios.md": "2f06fa373a14276a759c2e0596ec1ce04eee5e4dbc28965a08f15f7340b1a228",
     ".agents/skills/memory-intake/SKILL.md": "33a603fd7b501823aed0603058dff45023c18bfd7ad80fb3ef69649b97e35534",
     ".agents/skills/memory-plan/SKILL.md": "0ccbae16d3363159165890c841f88acc8e4ab2511e4d74224e26671e0d26650f",
     ".agents/skills/memory-review/SKILL.md": "6b5229f325c1f147ebac3795b1c670dc557bd70d3c978cf8b1e74c2023b768c3",
-    ".agents/skills/memory-review/references/scenarios.md": "d8884318eeebe950c140ed7c731023b05cee60cdb40f926bea81e1d205f7b022",
+    ".agents/skills/memory-review/references/scenarios.md": "7ece11b4c6870f35d7f2d5aba4901db047cc32010f91eaaa877213d207ce4c43",
+    ".agents/skills/page-capture/SKILL.md": "2188615b9e9ca2b69dcca6bc68be7d6ba670eb95b06ebff3f1d21f1fe0a45d3f",
+    ".agents/skills/page-capture/references/capture-contract.md": "c363a006a5de50ab8eb0742fa60f9d93aa7657c50a5f47814c8c0f57436efb57",
+    ".agents/skills/page-capture/references/scenarios.md": "c61abd8bfd86e41ce036db5c947c22b54163fe9e6838c9e11ef395e64fd912ad",
     ".agents/skills/visualize/SKILL.md": "e2006615c7e1d96ceb25c0bdea12bbfb8000066f98d0181a55eca6f6806d50d4",
     ".agents/skills/visualize/references/animations.md": "8a78f7f21237971cefe3e8850b8dd4e3ddfb37dbd3fdf27feeb1c811789799c7",
     ".agents/skills/visualize/references/anthropic-skill-guide-notes.md": "951e56b3cdc9f095c2184d80177ffe8840f3b02685f553fb56a2711a72f2e80e",
@@ -40,19 +43,19 @@
   "files": [
     {
       "path": ".claude-plugin/plugin.json",
-      "sha256": "3fe556e04bfef99ed5d38b15909aa1a8499e62399c6ff7b93555264249ff65ec"
+      "sha256": "2538e830cee5499b2640b5ffb6cf63d85d91a64f38fafc3a0a19fa4a68f8270a"
     },
     {
       "path": ".codex-plugin/plugin.json",
-      "sha256": "9f3946b2a4042d27c7556d514bbf15a087a04a64c0836d56494b60e9cf217273"
+      "sha256": "2ab163ac824be428a82133b3d91914c069cd17b5b7f66f8a150f4abed9fc2c80"
     },
     {
       "path": "README.md",
-      "sha256": "74fe771caf1f3c85b74b3374c92165e7d5e2f5aa8bfcbcafc4dbf8e572a61ae2"
+      "sha256": "e634455d754d5227f5c1391afd764796d2f22d16f20aea5ffc435b13ecd537a4"
     },
     {
       "path": "plugin.json",
-      "sha256": "d7baa02d35fb576f293af69852aa7449c48ddd51f887c96efd21c3f1a26ffca6"
+      "sha256": "6d2b24ff887c628de143cb95867d1f9ecd828261fb8d4f93801adcd0485abeea"
     },
     {
       "path": "skills/grill-me/SKILL.md",
@@ -104,7 +107,7 @@
     },
     {
       "path": "skills/memory-execute/references/testing.md",
-      "sha256": "1e6e0d949743edd3b632f9a5e355da6d32dd9245e8ac115461eeb8d29728c4a6"
+      "sha256": "996c6c7a5a94b32e6121040189a0cac511ea8d7c83002055226b3ccae93665fc"
     },
     {
       "path": "skills/memory-execute/references/validation-scope.md",
@@ -132,7 +135,19 @@
     },
     {
       "path": "skills/memory-review/references/scenarios.md",
-      "sha256": "d8884318eeebe950c140ed7c731023b05cee60cdb40f926bea81e1d205f7b022"
+      "sha256": "7ece11b4c6870f35d7f2d5aba4901db047cc32010f91eaaa877213d207ce4c43"
+    },
+    {
+      "path": "skills/page-capture/SKILL.md",
+      "sha256": "2188615b9e9ca2b69dcca6bc68be7d6ba670eb95b06ebff3f1d21f1fe0a45d3f"
+    },
+    {
+      "path": "skills/page-capture/references/capture-contract.md",
+      "sha256": "c363a006a5de50ab8eb0742fa60f9d93aa7657c50a5f47814c8c0f57436efb57"
+    },
+    {
+      "path": "skills/page-capture/references/scenarios.md",
+      "sha256": "c61abd8bfd86e41ce036db5c947c22b54163fe9e6838c9e11ef395e64fd912ad"
     },
     {
       "path": "skills/visualize/SKILL.md",
