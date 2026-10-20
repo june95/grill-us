@@ -26,6 +26,29 @@ Claude의 원문 부재 보고 중 “현재 원문과 일치하지 않음(원�
 
 대표 경계 비교20개와 초기 실패1개를 구분해 보존했습니다. 전용 설치 제거 뒤 발견0/errors0·nonce config/cache 부재를 확인했고 CLI가 남긴 소유 nonce의 빈 cache 디렉터리만 비재귀 제거했습니다. 기존 설치 목록과 Codex canonical38개 파일 SHA는 같았습니다. old Claude0.1 cache 내부를 직접 읽거나 hash하지 않았습니다. Claude settings/설치 registry hash는 같고 Codex config·`.claude.json` hash는 달랐으며 전체 개인 상태의 보존·변화 원인을 단정하거나 과거 metadata로 복원하지 않았습니다. 자동 도구 설치·중앙 DB·Decision/Task 자동 생성·push·개인 설치 업데이트는 하지 않았습니다.
 
+## GitHub 0.4.0 명시 업데이트 — 2026-10-20
+
+검증을 시작했을 때 공개 `june95/grill-us`의 main은 이미 **`164327e0568dbb4fd9f8b0a36653fbe592b2afaa`**였습니다. 같은 payload를 중복 push하지 않고 공개 tree를 대조한 뒤, 기존 `grill-us@grill-us` 설치를 양쪽에서 **0.2.0 → 0.4.0**으로 명시 업데이트했습니다. 앞선 payload push의 수행 주체는 이 관측으로 단정하지 않습니다.
+
+| 항목 | Codex CLI | Claude Code CLI |
+| :--- | :--- | :--- |
+| 실제 버전 / 모델 | 0.160.1 / gpt-6.1-sol, medium | 2.1.301 / 실제 init claude-opus-5-5, medium |
+| source 갱신 | `codex plugin marketplace upgrade grill-us --json` | `claude plugin marketplace update grill-us --json` |
+| 설치 업데이트 | marketplace 갱신만으로0.4.0 확인, add/remove 미실행 | `claude plugin update grill-us@grill-us --scope user --json`, oldVersion0.2.0/newVersion0.4.0 |
+| 출처와 내용 | source clone origin은 기대 GitHub URL, HEAD164327e, 신규 canonical46개 SHA가 공개 package와 일치 | 같은 origin/HEAD, user scope·신규 canonical46개 SHA 일치 |
+| 새 세션 발견 | canonical 경로의 qualified9개, errors0 | init plugin0.4.0과 qualified command9개 |
+| 대표 호출 | 설치본 Wiki query와 page-capture capability 응답 | 같은 두 요청, 설치 cache만 읽기 허용한 제한 file tools |
+
+네 최종 호출은 실제 설치 cache의 SKILL과 해당 query/capture-contract를 직접 읽었습니다. Wiki는 부모가 만든 합성 seed이며 native ingest 성공으로 세지 않았습니다. 두 모델은 같은 범위의 정책 표시와 변경 초안의 상충·출처·승인 미확인을 설명했고, 최신 날짜만으로 현행 정책을 고르지 않았습니다. 캡처 요청은 capability 평가만 수행했으며, 현재 노출된 도구로 로컬 UI 이동·조작·촬영·viewport 확인과 PNG 저장을 할 수 없다고 설명했습니다. 실제 브라우저 화면이나 PNG/sidecar 생성 성공을 검증한 것은 아닙니다.
+
+최종 네 호출에서 비교한 전체 fixture의 파일·빈 디렉터리·Git, 소유 부모 및 양쪽 신규 plugin cache의 변화는0이었습니다. 초기 Claude 두 호출은 별도로 보존했습니다. 처음에는 restricted 도구가 cache 직접 읽기를 거부했고, 초기 capability 호출에서는 fixture 안의 CLI 임시 상태 JSON1개가 생겨 무변경 검사를 실패했습니다. 정확한 신규 canonical cache만 `--add-dir`로 읽기 허용하고 CLI TEMP를 별도 소유 디렉터리로 분리한 새 호출에서 동일한 fixture0변경 기준을 확인했습니다. `--plugin-dir` 로컬 로드나 개발 source로 GitHub 설치 검증을 대신하지 않았습니다. CLI 임시 디렉터리의 metadata 변화는 따로 관측했고 OS 전체 무쓰기를 주장하지 않습니다.
+
+Codex의 `mcp_servers={}`는 비활성 설정 의도이며 전체 도구 차단을 입증하지 않습니다. 일부 앱 도구 노출은 모델의 보고로 남겼고 전체 목록은 독립 열거하지 않았습니다. 해당 trace에는 MCP·네트워크 도구 사용이 없었습니다. Claude-W도 일부 공통 workspace/Reporting 참조는 읽지 않았고, Wiki파일7개·Skill까지 사용했다는 자기보고와 달리 trace의 Wiki Read는6개, 실제 호출 도구는 Read/Glob/Grep3종입니다. 제공된4종 도구와 실제 사용을 구분했으며 모든 지침·참조를 완전히 확인했다고 확대하지 않습니다. 원 자기보고·읽기 오류·인코딩/출력 잘림과 `rg` 부재는 보존했습니다.
+
+무관한 설치 목록은 같고 사용자 파일·index와 비교한 신규 cache는 보존됐습니다. 기존 사용자 세션 종료/reload나 cache 수동 삭제·복원은 수행하지 않았습니다. Codex0.2.0 디렉터리는 사전 존재·사후 부재였고, 변화 원인·당시 사용 여부·기존 세션 영향은 미확인입니다. 모든 기존 cache/세션 상태의 보존을 입증한 것은 아닙니다. Claude0.2.0/0.1.0 디렉터리는 존재했으며 내부 bytes 보존을 검사한 것은 아닙니다. Codex config·Claude 설치 registry·`.claude.json` SHA는 달랐고 Claude settings SHA는 같았습니다. 개인 metadata 전체를 복사·복원하거나 변화 원인을 단정하지 않았습니다.
+
+이 검증은 위 payload의 package와 해당 시점의 Windows/CLI/새 세션에 한정됩니다. 이후 이 안내 문서만 바뀌고 package46개가 같다면 그 변경을 별도의 native 업데이트 성공으로 세지 않습니다. 기존 세션에 새 버전이 적용됐다고 가정하지 말고 새 세션에서 설치 경로/version을 확인합니다. 명시 설치·업데이트 사용법은 [패키지 안내](../packaging/README.md)를 참고합니다.
+
 ## 0.3.0 page-capture 호스트 경계
 
 현재 에이전트의 Chrome extension browser API는 JPEG를 반환하고 Windows의 기존 PowerShell7.6.7/System.Drawing으로 PNG를 저장할 수 있었습니다. 소유 fixture의 기본·모달 PNG를1600×865로 저장해 실제 이미지를 열었고 JSON에 실제 CSS viewport1600×865·DPR2·JPEG→PNG 변환·fullPage=false를 구분했습니다. viewport pixel과 device-pixel fidelity를 같다고 주장하지 않습니다. 합성 입력은 마스킹됐고 sidecar에는 fill value와 URL query/fragment를 넣지 않았습니다.
