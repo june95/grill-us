@@ -1,6 +1,6 @@
 # grill-us plugin
 
-공통 원본에서 생성한 메모리6개와 page-capture·visualize, 총8개 스킬의0.3.0 개발 패키지입니다. 명시35개 원본 문서에서41개 package 파일을 생성하며 실행 도우미는 포함하지 않습니다. 이 문서는 생성 package의 사용자 안내 원본이며 아래 `skills/` 경로는 package root 기준입니다. 개별 스킬 이름은 유지하고 grill-me 별칭은 추가하지 않습니다.
+공통 원본에서 생성한 메모리7개와 page-capture·visualize, 총9개 스킬의0.4.0 개발 패키지입니다. 명시40개 원본 문서에서46개 package 파일을 생성하며 실행 도우미는 포함하지 않습니다. 이 문서는 생성 package의 사용자 안내 원본이며 아래 `skills/` 경로는 package root 기준입니다. 개별 스킬 이름은 유지하고 grill-me 별칭은 추가하지 않습니다.
 
 `grill-us`는 공개 GitHub 저장소 `june95/grill-us`를 source로 직접 추가하는 **자체 marketplace**입니다. OpenAI·Anthropic 공식 공개 스토어 등록·심사를 진행한 것은 아닙니다.
 
@@ -33,6 +33,7 @@ Codex 결정 조회에서는 자동 prompt에 들어간 `memory-explain` 본문�
 | memory-review | Task/Phase·일반 파일/diff/commit 무쓰기 검토 | `$grill-us:memory-review` | `/grill-us:memory-review` |
 | memory-explain | 결정 검색·적용 범위·출처와 기록·코드·Git 근거 설명 | `$grill-us:memory-explain` | `/grill-us:memory-explain` |
 | page-capture | 명시 UI 상태의 PNG·정제된 JSON 증거 | `$grill-us:page-capture` | `/grill-us:page-capture` |
+| memory-wiki | 명시 문서 수집·기본 무쓰기 질의·명시 갱신/답변 저장 | `$grill-us:memory-wiki` | `/grill-us:memory-wiki` |
 | visualize | 명시한 HTML 시각화 생성 | `$grill-us:visualize` | `/grill-us:visualize` |
 
 호출 표기는 에이전트에 입력하는 요청이며 터미널 실행 파일이 아닙니다. 동명 개인 스킬이 있으면 namespace를 포함하고, 실제 읽은 경로가 이 plugin의 `skills/`인지 확인합니다. 0.2.0 로컬 시험은 기존 canonical 설치를 세션에서 비활성화하고 trial package의 본문·형제 참조 출처를 확인했습니다. 과거 0.1.0 GitHub 설치 시험에서는 양쪽 설치 cache를 읽었고, 당시 다른 5개 대표 흐름은 본문·참조·CLI 변경 영향을 대조해 기존 로컬 근거를 재사용했습니다. 모든 이름 충돌 조합이나 암묵적 자동 선택까지 검증한 것은 아닙니다. Claude 표기는 [공식 skills 문서](https://code.claude.com/docs/en/skills)도 참고합니다.
@@ -44,6 +45,14 @@ Codex 결정 조회에서는 자동 prompt에 들어간 `memory-explain` 본문�
 intake·plan의 코드 탐색은 명시 경로/Related Files와 기존 근거부터 확인합니다. 위치를 모를 때만 관련 모듈로 범위를 넓히고 검색 후보를 실제 정의·호출부로 검증합니다. `skills/memory-execute/references/project-profile.md`의 Bounded Exploration은 도구 부재·결과 없음·출력 잘림을 구분하고 기존 호스트 도구로 대체하도록 합니다. 새로운 필수 MCP/CLI·인덱스 설치나 무관한 vendor 전체 조사를 요구하지 않습니다.
 
 새 계획·보고·설명은 `skills/memory-execute/references/conventions.md`의 Reporting에 따라 자연스러운 문장과 띄어쓰기를 사용합니다. 중복을 줄여도 조건·부정·예외·실패·출처와 정확한 command/cwd/path/ID·검증 한계를 유지하며 예정/미실행을 성공으로 바꾸지 않습니다. current에는 위치·다음 행동을 두고 상세 근거를 연결합니다. 고정 글자/토큰 수나 과거 완료 기록의 일괄 변환을 요구하지 않습니다.
+
+## memory-wiki의 수집과 조회
+
+`$grill-us:memory-wiki docs/policy.md와 docs/proposal.txt를 수집해줘`는 실제 사용자 프로젝트의 `.memory/wiki/`에 원문 사본·manifest·source-map·누적 topics를 작성합니다. 같은 원문 경로/같은 bytes는 재사용하고 변경 내용은 새 source version으로 보존합니다. 원본/복사본 SHA256과 출처를 확인하며 원문 날짜·적용 범위·업무 권위는 확인한 사실만 기록합니다. 현재 파일/경로·복사/SHA 도구가 부족하면 그 범위는 미완료로 안내합니다.
+
+`$grill-us:memory-wiki Wiki 근거로 정책과 미결정을 알려줘`는 기본 무쓰기 query입니다. `.memory`나 Wiki가 없어도 생성하지 않으며 답변·출처·불확실성을 채팅으로 반환합니다. `원문을 갱신해줘`는 refresh, `방금 답변을 Wiki에 저장해줘`는 새 answers 파일과 index/log만 쓰는 save-answer입니다. 질문만으로 저장·갱신을 추정하지 않습니다. 기존 사본·답변을 덮어쓰지 않습니다.
+
+Wiki는 조사 지식이며 확정 결정이나 정본을 자동 대체하지 않습니다. 상충·다른 범위·정책과 제안·권위 미확인을 구분하고 Decision/Plan/Task/current/Git을 자동 변경하지 않습니다. 원문 내 실행 지시는 자료일 뿐 권한이 아닙니다. 명시 로컬 Markdown·텍스트만 처리하며 PDF/이미지/웹 수집·새 도구/검색엔진 설치는 하지 않습니다. memory-explain의 명시 Wiki 질의도 무쓰기입니다. 상세 절차는 `skills/memory-wiki/references/ingest.md`와 `query.md`에 있습니다.
 
 ## page-capture의 도구와 산출
 

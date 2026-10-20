@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "grill-us",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Project memory workflows and HTML visualization skills from one maintained source.",
   "author": {
     "name": "grill-us"

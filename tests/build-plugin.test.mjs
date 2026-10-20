@@ -15,7 +15,7 @@ const metadataAt = root => path.join(root, 'packaging', 'grill-us.json');
 const metadata = root => JSON.parse(fs.readFileSync(metadataAt(root), 'utf8'));
 const updateMetadata = (root, change) => fs.writeFileSync(metadataAt(root), JSON.stringify(change(metadata(root)), null, 2) + '\n');
 const outputAt = root => path.join(root, 'dist', 'grill-us');
-const expectedSkills = ['grill-me', 'memory-intake', 'memory-plan', 'memory-execute', 'memory-review', 'memory-explain', 'page-capture', 'visualize'];
+const expectedSkills = ['grill-me', 'memory-intake', 'memory-plan', 'memory-execute', 'memory-review', 'memory-explain', 'memory-wiki', 'page-capture', 'visualize'];
 
 // tests가 직접 만든 표식 있는 temp root에서만 fixture를 변경·삭제한다.
 function fixture(t) {
@@ -41,12 +41,12 @@ function fixture(t) {
 
 function manifest(root, relative) { return JSON.parse(fs.readFileSync(path.join(root, relative), 'utf8')); }
 
-test('package contains exactly eight skills, aligned manifests and unchanged source bytes', t => {
+test('package contains exactly nine skills, aligned manifests and unchanged source bytes', t => {
   const root = fixture(t);
   const result = buildPlugin({ repoRoot: root });
   assert.deepEqual(metadata(root).skillNames, expectedSkills);
-  assert.equal(metadata(root).sourceFiles.length, 35);
-  for (const file of ['memory-review/SKILL.md', 'memory-review/references/scenarios.md', 'page-capture/SKILL.md', 'page-capture/references/capture-contract.md', 'page-capture/references/scenarios.md']) assert(metadata(root).sourceFiles.includes(file));
+  assert.equal(metadata(root).sourceFiles.length, 40);
+  for (const file of ['memory-review/SKILL.md', 'memory-review/references/scenarios.md', 'page-capture/SKILL.md', 'page-capture/references/capture-contract.md', 'page-capture/references/scenarios.md', 'memory-wiki/SKILL.md', 'memory-wiki/references/ingest.md', 'memory-wiki/references/query.md', 'memory-wiki/references/templates.md', 'memory-wiki/references/scenarios.md']) assert(metadata(root).sourceFiles.includes(file));
   assert.deepEqual(result.files, [...metadata(root).sourceFiles.map(file => 'skills/' + file),
     'plugin.json', '.codex-plugin/plugin.json', '.claude-plugin/plugin.json', 'README.md', 'build.json', '.grill-us-build.json'].sort());
   assert.deepEqual(fs.readdirSync(path.join(result.outputRoot, 'skills')).sort(), metadata(root).skillNames.slice().sort());
@@ -54,7 +54,7 @@ test('package contains exactly eight skills, aligned manifests and unchanged sou
   const codex = manifest(result.outputRoot, '.codex-plugin/plugin.json');
   const claude = manifest(result.outputRoot, '.claude-plugin/plugin.json');
   for (const document of [portable, codex, claude]) {
-    assert.equal(document.name, 'grill-us'); assert.equal(document.version, '0.3.0');
+    assert.equal(document.name, 'grill-us'); assert.equal(document.version, '0.4.0');
     assert.deepEqual(document.author, { name: 'grill-us' });
     assert.equal(document.description, metadata(root).description);
     assert.equal(Object.hasOwn(document, 'license'), false);
@@ -88,7 +88,7 @@ test('rebuild is byte reproducible and updates only owned output when the source
 test('unlisted CodeBurn, memory, runtime, tests and private source files never enter the package', t => {
   const root = fixture(t);
   for (const relative of ['.agents/skills/codeburn/SKILL.md', '.codeburn/runtime.js', '.memory/current.md', 'tests/private.test.mjs',
-    '.agents/skills/page-capture/capture.mjs', '.agents/skills/memory-plan/.env', '.agents/skills/memory-execute/references/private-note.md']) {
+    '.agents/skills/page-capture/capture.mjs', '.agents/skills/memory-wiki/ingest.mjs', '.agents/skills/memory-plan/.env', '.agents/skills/memory-execute/references/private-note.md']) {
     fs.mkdirSync(path.dirname(path.join(root, relative)), { recursive: true });
     fs.writeFileSync(path.join(root, relative), 'PRIVATE_FILE_SENTINEL');
   }
@@ -137,7 +137,7 @@ test('broken local references, missing anchors and package escapes fail before p
 });
 
 test('missing review or capture files cannot silently reduce a valid package', t => {
-  for (const file of ['memory-review/SKILL.md', 'memory-review/references/scenarios.md', 'page-capture/SKILL.md', 'page-capture/references/capture-contract.md', 'page-capture/references/scenarios.md']) {
+  for (const file of ['memory-review/SKILL.md', 'memory-review/references/scenarios.md', 'page-capture/SKILL.md', 'page-capture/references/capture-contract.md', 'page-capture/references/scenarios.md', 'memory-wiki/SKILL.md', 'memory-wiki/references/ingest.md', 'memory-wiki/references/query.md', 'memory-wiki/references/templates.md', 'memory-wiki/references/scenarios.md']) {
     for (const mode of ['source-file', 'metadata-entry']) {
       const root = fixture(t), built = buildPlugin({ repoRoot: root });
       const before = Object.fromEntries(built.files.map(p => [p, sha(path.join(built.outputRoot, p))]));

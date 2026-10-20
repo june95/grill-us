@@ -21,6 +21,12 @@ description: Find and explain recorded decisions, designs, plans, progress, and 
 
 결정을 찾는 요청은 아래 Decision Search를 적용한다. 주제·키워드가 명시됐는데도 current의 활성 Task로 대상을 바꾸지 않는다. 이미 확인한 같은 작업공간·자료를 반복 조사하지 않는다.
 
+## Wiki Questions
+
+Wiki 자료에 대한 명시 질의는 [memory-wiki](../memory-wiki/SKILL.md)의 query와 [읽기 전용 절차](../memory-wiki/references/query.md#read-only-query)로 연결한다. 기본 설명·결정 검색을 Wiki 전체 수집으로 확대하지 않는다. Wiki가 없으면 생성하지 않고 확인한 범위의 자료 부재를 설명한다.
+
+관련 topic/원문 사본을 읽어 답변·출처·상충/범위/현재성·업무 권위 미확인을 설명한다. Wiki는 결정이나 정본을 자동 대체하지 않는다. 설명 호출에서 answers/index/log·current·Task·Decision을 쓰거나 수집/refresh/답변 저장을 수행하지 않는다. 명시 write 요청은 memory-wiki의 별도 해당 모드로 구분하며 이 설명의 무쓰기 경계를 유지한다.
+
 ## Decision Search
 
 1. 명시 결정 경로/Decision ID 또는 Plan/Task에 실제로 연결된 결정을 먼저 읽는다. `D01`만으로 문서를 식별하지 않으며 같은 DNN은 문서/Decision ID와 함께 구분한다. 오래된 파일에 ID metadata가 없으면 실제 파일 경로를 출처로 쓰고 누락을 알린다.

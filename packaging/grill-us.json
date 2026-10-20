@@ -1,6 +1,6 @@
 {
   "name": "grill-us",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Project memory workflows and HTML visualization skills from one maintained source.",
   "author": {
     "name": "grill-us"
@@ -13,6 +13,7 @@
     "memory-execute",
     "memory-review",
     "memory-explain",
+    "memory-wiki",
     "page-capture",
     "visualize"
   ],
@@ -37,6 +38,11 @@
     "memory-plan/SKILL.md",
     "memory-review/SKILL.md",
     "memory-review/references/scenarios.md",
+    "memory-wiki/SKILL.md",
+    "memory-wiki/references/ingest.md",
+    "memory-wiki/references/query.md",
+    "memory-wiki/references/templates.md",
+    "memory-wiki/references/scenarios.md",
     "page-capture/SKILL.md",
     "page-capture/references/capture-contract.md",
     "page-capture/references/scenarios.md",

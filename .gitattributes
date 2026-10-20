@@ -5,6 +5,7 @@
 /.agents/skills/memory-execute/** text eol=lf
 /.agents/skills/memory-review/** text eol=lf
 /.agents/skills/memory-explain/** text eol=lf
+/.agents/skills/memory-wiki/** text eol=lf
 /.agents/skills/page-capture/** text eol=lf
 /.agents/skills/visualize/** text eol=lf
 /packaging/grill-us.json text eol=lf

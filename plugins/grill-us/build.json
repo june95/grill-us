@@ -2,13 +2,13 @@
   "formatVersion": 1,
   "generator": "scripts/build-plugin.mjs",
   "sourceSnapshot": {
-    "packaging/grill-us.json": "fade4083434012105a3c5b6d41a4870d1845aa2cf19299f8948620a6aecfcde0",
-    "packaging/README.md": "e634455d754d5227f5c1391afd764796d2f22d16f20aea5ffc435b13ecd537a4",
+    "packaging/grill-us.json": "d781a3b2c40b1ab5db1b4dd80abfe30ce415338bf12bc7b85504f38ea5eca358",
+    "packaging/README.md": "72ed138878a05edc553dc1596f07a30919e93f485b5211c65884cf5f44cf7e06",
     ".agents/skills/grill-me/SKILL.md": "bd5a11cc9ef255fbd57338f5e8154f059939938c8dd1b6150600381968fb7260",
     ".agents/skills/memory-execute/SKILL.md": "1a4295565e650c5c6dc5b1edc6348c18a2abf2379024eb2b97da5edde3a72724",
     ".agents/skills/memory-execute/references/analysis.md": "8a84306fbcff0eae953a442fc7bd2be23f85daeca8bcc4444b30429b364dd3dc",
     ".agents/skills/memory-execute/references/commit-check.md": "976551c478c520889d2460ef5e8950f714b0628b126b7bf0c7fd8dfd7ca38119",
-    ".agents/skills/memory-execute/references/conventions.md": "91f65c91154cba48b2e4bfc306dd23c57143fdd73a538415ec75f6471d6a5803",
+    ".agents/skills/memory-execute/references/conventions.md": "24b6d9a16fd8e9d77d5ac731914687d1dc1cf804a30da6bf190211306ab89804",
     ".agents/skills/memory-execute/references/guides.md": "c3416edcede23a5f3abc4904092d5b608632cb412985c8ee74e5cf052732c392",
     ".agents/skills/memory-execute/references/implementation.md": "1724467cbb95c228b04f365001dc7f10243cbbcc4e46d71257b638af2c6e93bf",
     ".agents/skills/memory-execute/references/project-profile.md": "7e4e0c2b11156987d0a78dd2689522da661f6465cfbc5cae1cfae730eac03a51",
@@ -18,12 +18,17 @@
     ".agents/skills/memory-execute/references/templates.md": "c3099e4c25f686aa5014b14303fcc1005d69764040b088deec0494d64d2cea19",
     ".agents/skills/memory-execute/references/testing.md": "996c6c7a5a94b32e6121040189a0cac511ea8d7c83002055226b3ccae93665fc",
     ".agents/skills/memory-execute/references/validation-scope.md": "3d0314630a1432ca2c43c54a002595eca7d4eaaf0daac37d4b77b2e0c3524e36",
-    ".agents/skills/memory-explain/SKILL.md": "389ae5d8a9007a6fdbccb7830969e3d1265bfcfea1761c52699cc1f76ca31028",
+    ".agents/skills/memory-explain/SKILL.md": "81fdec153cd9f2821bfee72754620ea4a3230a16b5fdc52b7bda155a6545cea2",
     ".agents/skills/memory-explain/references/scenarios.md": "2f06fa373a14276a759c2e0596ec1ce04eee5e4dbc28965a08f15f7340b1a228",
     ".agents/skills/memory-intake/SKILL.md": "33a603fd7b501823aed0603058dff45023c18bfd7ad80fb3ef69649b97e35534",
     ".agents/skills/memory-plan/SKILL.md": "0ccbae16d3363159165890c841f88acc8e4ab2511e4d74224e26671e0d26650f",
     ".agents/skills/memory-review/SKILL.md": "6b5229f325c1f147ebac3795b1c670dc557bd70d3c978cf8b1e74c2023b768c3",
     ".agents/skills/memory-review/references/scenarios.md": "7ece11b4c6870f35d7f2d5aba4901db047cc32010f91eaaa877213d207ce4c43",
+    ".agents/skills/memory-wiki/SKILL.md": "1065e795dc8c58681cdc1c87284de18ad19166162c139e18108ae70a9baa0472",
+    ".agents/skills/memory-wiki/references/ingest.md": "6caa338b4eb91948d6868a9a3d68f2cac308511fc59972b7ea66bb5523bbcc70",
+    ".agents/skills/memory-wiki/references/query.md": "a09e4afd72f3ceac879ab12eabe9f419399b246c8539b78e4663574d6d431bef",
+    ".agents/skills/memory-wiki/references/scenarios.md": "84227e2610c2cef73f01e1c764dc26bf2a0fc8e529be414334257a36b4f5e15c",
+    ".agents/skills/memory-wiki/references/templates.md": "6eb6178512907cabe65254ceeb8f465d25c059fc4fd643b4cf6ecb443c1caae4",
     ".agents/skills/page-capture/SKILL.md": "2188615b9e9ca2b69dcca6bc68be7d6ba670eb95b06ebff3f1d21f1fe0a45d3f",
     ".agents/skills/page-capture/references/capture-contract.md": "c363a006a5de50ab8eb0742fa60f9d93aa7657c50a5f47814c8c0f57436efb57",
     ".agents/skills/page-capture/references/scenarios.md": "c61abd8bfd86e41ce036db5c947c22b54163fe9e6838c9e11ef395e64fd912ad",
@@ -43,19 +48,19 @@
   "files": [
     {
       "path": ".claude-plugin/plugin.json",
-      "sha256": "2538e830cee5499b2640b5ffb6cf63d85d91a64f38fafc3a0a19fa4a68f8270a"
+      "sha256": "13003d44dfd2e436ce7e656d4970e32d50075b4acef4966a8bf59cbf8b121613"
     },
     {
       "path": ".codex-plugin/plugin.json",
-      "sha256": "2ab163ac824be428a82133b3d91914c069cd17b5b7f66f8a150f4abed9fc2c80"
+      "sha256": "430ba2bde434cb2f146b83116ce1a52470053ee9c7cab0f2863ba7a6d5866b2f"
     },
     {
       "path": "README.md",
-      "sha256": "e634455d754d5227f5c1391afd764796d2f22d16f20aea5ffc435b13ecd537a4"
+      "sha256": "72ed138878a05edc553dc1596f07a30919e93f485b5211c65884cf5f44cf7e06"
     },
     {
       "path": "plugin.json",
-      "sha256": "6d2b24ff887c628de143cb95867d1f9ecd828261fb8d4f93801adcd0485abeea"
+      "sha256": "1b07317b63a7388d6f8d06e9bbc96be345f7e3bfa1231e0c8c4d12baee852c04"
     },
     {
       "path": "skills/grill-me/SKILL.md",
@@ -75,7 +80,7 @@
     },
     {
       "path": "skills/memory-execute/references/conventions.md",
-      "sha256": "91f65c91154cba48b2e4bfc306dd23c57143fdd73a538415ec75f6471d6a5803"
+      "sha256": "24b6d9a16fd8e9d77d5ac731914687d1dc1cf804a30da6bf190211306ab89804"
     },
     {
       "path": "skills/memory-execute/references/guides.md",
@@ -115,7 +120,7 @@
     },
     {
       "path": "skills/memory-explain/SKILL.md",
-      "sha256": "389ae5d8a9007a6fdbccb7830969e3d1265bfcfea1761c52699cc1f76ca31028"
+      "sha256": "81fdec153cd9f2821bfee72754620ea4a3230a16b5fdc52b7bda155a6545cea2"
     },
     {
       "path": "skills/memory-explain/references/scenarios.md",
@@ -136,6 +141,26 @@
     {
       "path": "skills/memory-review/references/scenarios.md",
       "sha256": "7ece11b4c6870f35d7f2d5aba4901db047cc32010f91eaaa877213d207ce4c43"
+    },
+    {
+      "path": "skills/memory-wiki/SKILL.md",
+      "sha256": "1065e795dc8c58681cdc1c87284de18ad19166162c139e18108ae70a9baa0472"
+    },
+    {
+      "path": "skills/memory-wiki/references/ingest.md",
+      "sha256": "6caa338b4eb91948d6868a9a3d68f2cac308511fc59972b7ea66bb5523bbcc70"
+    },
+    {
+      "path": "skills/memory-wiki/references/query.md",
+      "sha256": "a09e4afd72f3ceac879ab12eabe9f419399b246c8539b78e4663574d6d431bef"
+    },
+    {
+      "path": "skills/memory-wiki/references/scenarios.md",
+      "sha256": "84227e2610c2cef73f01e1c764dc26bf2a0fc8e529be414334257a36b4f5e15c"
+    },
+    {
+      "path": "skills/memory-wiki/references/templates.md",
+      "sha256": "6eb6178512907cabe65254ceeb8f465d25c059fc4fd643b4cf6ecb443c1caae4"
     },
     {
       "path": "skills/page-capture/SKILL.md",

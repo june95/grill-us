@@ -7,7 +7,7 @@ import { checkLinks, checkSkillFrontmatter, readFences } from './validate-skills
 
 const scriptPath = fileURLToPath(import.meta.url);
 const defaultRepoRoot = path.resolve(path.dirname(scriptPath), '..');
-const skillNames = ['grill-me', 'memory-intake', 'memory-plan', 'memory-execute', 'memory-review', 'memory-explain', 'page-capture', 'visualize'];
+const skillNames = ['grill-me', 'memory-intake', 'memory-plan', 'memory-execute', 'memory-review', 'memory-explain', 'memory-wiki', 'page-capture', 'visualize'];
 const fixtureMarker = '.grill-us-fixture.json';
 const ownerMarker = '.grill-us-build.json';
 const generator = 'scripts/build-plugin.mjs';

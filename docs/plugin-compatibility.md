@@ -1,6 +1,30 @@
 # grill-us plugin 호환성 확인
 
-현재 개발 snapshot은 page-capture를 포함한 **0.3.0/8개 스킬**, 명시35개 원본 문서·41개 package 파일입니다. Markdown-only 구성과 특정 호스트의 실제 UI 캡처 성공, 과거 **0.2.0/7개**·**0.1.0/6개** 설치 결과를 구분합니다. 시험 버전은 최소 지원 버전이 아니며 CodeBurn·개발 검증기·브라우저 실행 코드는 배포하지 않습니다.
+현재 개발 snapshot은 memory-wiki를 포함한 **0.4.0/9개 스킬**, 명시40개 원본 문서·46개 package 파일입니다. Markdown-only 구성과 특정 호스트의 실제 UI 캡처 성공, 과거 **0.2.0/7개**·**0.1.0/6개** 설치 결과를 구분합니다. 시험 버전은 최소 지원 버전이 아니며 CodeBurn·개발 검증기·브라우저 실행 코드는 배포하지 않습니다.
+
+## 0.4.0 memory-wiki 검증 범위
+
+2026-10-20 Windows의 소유 합성 fixture에서 다음 네이티브 흐름을 실제 수행했습니다. 공개 GitHub 설치·개인 canonical 업데이트나 모든 호스트의 지원을 뜻하지 않습니다.
+
+| 항목 | Codex CLI | Claude Code CLI |
+| :--- | :--- | :--- |
+| 실제 버전 / 모델 | 0.160.1 / gpt-6.1-sol, medium | 2.1.301 / 실제 init claude-opus-5-5, medium |
+| 로드 | 전용 nonce local marketplace와 native 설치 cache | `--plugin-dir`로 지정한 전용 session package |
+| 발견 | 설치 전0 → 설치 후9개, errors0 | init plugin0.4.0과 qualified command9개 |
+| package 대조 | local·trial·native46개 파일 SHA 일치 | 같은46개 trial package 사용 |
+| 대표 흐름 | 수집·검증 재개·반복 수집·질의·새 version 갱신·충돌 질의·명시 저장·원문 부재 | 같은 흐름 |
+
+두 문서의 원문/사본 SHA와 출처를 대조하고, 같은 원문·같은 bytes의 반복 수집은 새 ID·사본·manifest·log 없이 재사용했습니다. 원문을 반대 내용의 초안으로 바꾸면 새 source version을 추가하면서 과거 사본·manifest·주장과 같은 범위의 상충을 보존했습니다. 다른 매장/거래 범위의 제안, 반품 범위 미기록, 업무 승인 미확인을 구분했고 최신 날짜/version으로 승인 정책을 선택하지 않았습니다. 원문 부재는 현재성 미확인으로 기록하고 기존 사본·주장·답변을 보존했습니다.
+
+native 도구가 직접 SHA를 계산하지 못한 수집/갱신은 새 사본 검증 대기로 보고했습니다. 부모가 실제 bytes/SHA를 사후 대조한 뒤 같은 ID·사본을 재사용하는 별도 완료 manifest로 그 대기만 해소했고 원 pending 기록은 보존했습니다. 부모 검증의 출처·시점을 모델의 자체 계산과 구분했습니다. Claude 일부 Imported At/Created At은 실제 날짜·관측 범위와 정확 시각 미확인을 기록했으며 정확한 수집/저장 timestamp를 확인했다는 뜻이 아닙니다.
+
+양쪽 query와 memory-explain의 명시 Wiki 질의는 비교한 전체 fixture의 파일·빈 디렉터리·Git 및 trial/native/canonical plugin cache 변화0이었습니다. 수집/갱신의 모델 쓰기는 허용한 Wiki 기록에, 명시 save-answer는 새 답변과 index/log에 한정됐습니다. current·Decision·Plan·Task는 바뀌지 않았고 원문 안의 파일 수정/private 읽기 지시는 실행되지 않았습니다. 각 호스트의 정확한 package 본문 직접 읽기는 실제 사례에서 확인했지만, Claude의 한 갱신 재개 호출에서는 SKILL.md 직접 Read와 자동 전체본문 주입 여부가 events로 미입증입니다.
+
+처음 Claude query는 호스트 임시 빈 디렉터리 하나가 생겨 무변경 검사를 실패했습니다. 원 결과를 보존하고 임시 경로를 사전 준비한 새 호출에서 같은 엄격한 기준의 변화0을 확인했습니다. 또한 큰 Grep 결과가 `.claude/projects/.../tool-results`에 저장됐다는 호스트 내부 쓰기를 관측했습니다. 모델은 해당 외부 파일을 읽지 않고 범위를 줄여 재조회했습니다. 따라서 위 결과는 비교한 fixture/Git/package/plugin cache 경계의 관측이며 Wiki 밖 또는 OS 전체 쓰기0을 보장하지 않습니다.
+
+Claude의 원문 부재 보고 중 “현재 원문과 일치하지 않음(원문 부재)”이라는 표현은 내용 SHA 불일치 검출 성공으로 세지 않았습니다. 실제 관측은 보존 버전과 사본은 일치하고, 현재 원문은 부재해 비교할 수 없다는 것입니다. 원 표현과 이 해석 한계를 보존했습니다.
+
+대표 경계 비교20개와 초기 실패1개를 구분해 보존했습니다. 전용 설치 제거 뒤 발견0/errors0·nonce config/cache 부재를 확인했고 CLI가 남긴 소유 nonce의 빈 cache 디렉터리만 비재귀 제거했습니다. 기존 설치 목록과 Codex canonical38개 파일 SHA는 같았습니다. old Claude0.1 cache 내부를 직접 읽거나 hash하지 않았습니다. Claude settings/설치 registry hash는 같고 Codex config·`.claude.json` hash는 달랐으며 전체 개인 상태의 보존·변화 원인을 단정하거나 과거 metadata로 복원하지 않았습니다. 자동 도구 설치·중앙 DB·Decision/Task 자동 생성·push·개인 설치 업데이트는 하지 않았습니다.
 
 ## 0.3.0 page-capture 호스트 경계
 
