@@ -107,6 +107,9 @@ function inputs(repository) {
   return { documents, sourceSnapshot };
 }
 
+// 후보 준비도 동일한 입력 검증/allowlist를 사용한다. 원본 읽기만 수행하는 개발용 API다.
+export { inputs as readSkillInputs };
+
 /** public identity만 바꾸고 license/author/description과 나머지 metadata는 보존한다. */
 function publicFrontmatter(text, sourceName) {
   return text.replace(/^(---\n)([\s\S]*?)(\n---)/, (_, open, body, close) => {

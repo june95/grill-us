@@ -37,3 +37,13 @@
 ## 검증 경계
 
 생성기 검증은 정확한 이름·개별 필수 문서·지원 anchor·입력/소유권 오류·불변성과 기존 배포 회귀를 다룬다. 실제 설치기의 발견·링크/복사·두 호스트 호출·업데이트·공개 GitHub 주소 설치는 별도 근거가 필요하다. 기존 plugin 설치를 새 경로 성공으로 재사용하지 않는다.
+
+## 최종 전환 전 후보 준비
+
+`node scripts/prepare-skills-cutover.mjs`는 새 소유 OS temp root에 전환 후보를 생성하고 JSON으로 경로를 반환한다. 실제 source·metadata·catalog·기존 plugin은 변경하지 않는다. `--check <candidate-root>`는 원 입력/도구 SHA·후보 목록/내용·public freshness와 참조를 읽기만 확인한다. 정상0, missing/stale/변조·알 수 없는 항목/빈 디렉터리·경로 링크는1이며 자동 복구하지 않는다.
+
+후보에는 명시40개 source 문서와 metadata, 내부 CodeBurn SKILL만 복사한다. 후보 source10개는 internal=true이며 public9개는 숨김 표시를 제거한다. 미래 배포 단락은 후보의 project-profile에만 적용한다. 후보의 `skills/`는 기존 생성기로 만들고 legacy catalog/plugin·CodeBurn runtime·사용자 기록은 포함하지 않는다. `.git` metadata는 clone 검증을 위해 후보 내용 비교에서 제외한다.
+
+입력은 실제 개발 저장소 또는 표식 있는 OS temp test source만 허용한다. 기존 생성기의 `readSkillInputs(repository)` 검증과 allowlist를 재사용한다. 반환은 `documents: Map<string,string>` 및 `sourceSnapshot: Record<relativePath,SHA256>`이며 원본을 수정하지 않는다. 준비 명령은 임의 출력/적용/삭제 옵션을 제공하지 않는다.
+
+미래 사용자 안내는 [설치 안내 초안](skills-installation.md)에 둔다. 준비 후보의 README와 LF 정책은 후보에만 생성하며 실제 저장소에 그대로 적용하지 않는다. 현재 공개 GitHub 명령·기본 경로 전환, 실제 source/internal 변경, 기존 catalog·plugin 제거는 Claude 검증과 변경 영향 native 검증 후의 최종 작업이다.
