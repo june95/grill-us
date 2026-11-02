@@ -83,12 +83,16 @@ function requiredScalar(raw) {
 }
 
 /** 스킬 필수 필드·폴더 식별자와 중복 이름을 문서 위치에 대응한다. */
-export function checkSkillFrontmatter(root, files) {
+export function checkSkillFrontmatter(root, files, { skillRoot = '.agents/skills' } = {}) {
   const out = result();
   const names = new Map();
+  const directory = path.resolve(root, skillRoot);
+  if (!within(root, directory)) throw new Error('스킬 검사 root는 저장소 내부여야 함');
+  const relativeRoot = path.relative(root, directory).split(path.sep).join('/');
+  const prefix = relativeRoot ? relativeRoot + '/' : '';
   for (const file of files) {
     const relative = path.relative(root, file).split(path.sep).join('/');
-    if (!relative.startsWith('.agents/skills/') || path.basename(file) !== 'SKILL.md') continue;
+    if (!within(directory, file) || !relative.startsWith(prefix) || path.basename(file) !== 'SKILL.md') continue;
     out.checked++;
     const lines = fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').split('\n');
     if (!/^---[ \t]*$/.test(lines[0])) {
@@ -199,6 +203,34 @@ function inlineDestination(text, start) {
     }
   }
   return null;
+}
+
+/** 실제 Markdown 목적지만 치환한다. fence/inline code/주석/본문의 URL은 원문을 보존한다. */
+export function rewriteMarkdownLinks(source, transform) {
+  const original = source.split('\n');
+  const outside = markdownOutside(source).split('\n');
+  let text = withoutInlineCode(outside.map((line, index) => line.padEnd(original[index].length, ' ')).join('\n'));
+  const edits = [];
+  function add(target, start) {
+    const next = transform(target);
+    if (next !== undefined && next !== target) edits.push({ start, end: start + target.length, next });
+  }
+  const definition = /^([ \t]*\[[^\]]+\]:[ \t]*)(<[^>]+>|\S+).*$/gm;
+  for (const match of text.matchAll(definition)) {
+    const angled = match[2].startsWith('<');
+    add(angled ? match[2].slice(1, -1) : match[2], match.index + match[1].length + (angled ? 1 : 0));
+  }
+  text = text.replace(definition, match => ' '.repeat(match.length));
+  for (const match of text.matchAll(/!?\[[^\]\n]*\]\(/g)) {
+    const start = match.index + match[0].length;
+    const parsed = inlineDestination(text, start);
+    if (!parsed) throw new Error('닫히지 않은 Markdown 링크');
+    const leading = text.slice(start).match(/^[ \t]*/)[0].length;
+    add(parsed.target, start + leading + (text[start + leading] === '<' ? 1 : 0));
+  }
+  let result = source;
+  for (const edit of edits.sort((a, b) => b.start - a.start)) result = result.slice(0, edit.start) + edit.next + result.slice(edit.end);
+  return result;
 }
 
 /** fence/frontmatter/comment를 지우되 진단에 필요한 원래 행 번호를 유지한다. */
@@ -930,7 +962,8 @@ export function main({ root = projectRoot, runRegressionTests = true } = {}) {
   if (runRegressionTests) {
     const suite = spawnSync(process.execPath, ['--test', path.join(projectRoot, 'tests', 'validate-skills.test.mjs'),
       path.join(projectRoot, 'tests', 'build-plugin.test.mjs'), path.join(projectRoot, 'tests', 'repository-marketplace.test.mjs')],
-      { cwd: projectRoot, encoding: 'utf8', timeout: 60000 });
+      // Windows의 소유권/누락 회귀는 수천 파일을 생성한다. 관측한 약 186초를 수용하되 유한한 제한을 유지한다.
+      { cwd: projectRoot, encoding: 'utf8', timeout: 300000 });
     process.stdout.write(suite.stdout || '');
     if (suite.error || suite.status !== 0) {
       console.error(suite.error?.message || suite.stderr || '회귀 검사 실패'); failed = true;

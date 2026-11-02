@@ -3,3 +3,6 @@
 
 # Generated grill-us package only; preserve unrelated dist entries
 /dist/grill-us/
+
+# Generated independent skills; preserve unrelated dist entries
+/dist/grill-us-skills/
