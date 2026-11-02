@@ -28,6 +28,17 @@ function nativeRuntime(run, agent) {
   return runtime;
 }
 
+/** 프로젝트 스킬은 로드하되 시험 fixture의 다른 설정·실행 확장은 허용하지 않는다. */
+export function assertClaudeFixtureConfig(run, cwd) {
+  cwd = assertConsumer(run, cwd);
+  for (const file of ['CLAUDE.md', 'CLAUDE.local.md', '.claude/CLAUDE.md', '.claude/settings.json', '.claude/settings.local.json', '.mcp.json', '.claude/agents', '.claude/hooks', '.claude/commands']) {
+    const target = path.join(cwd, file);
+    noLinks(target);
+    if (fs.existsSync(target)) throw new Error('Unexpected non-skill Claude project config: ' + file);
+  }
+  return cwd;
+}
+
 function git(run, cwd, args) {
   assertConsumer(run, cwd);
   const config = ['-c', 'core.hooksPath=' + path.join(run.runtime, 'empty-hooks'), '-c', 'commit.gpgsign=false', '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid'];
@@ -129,6 +140,40 @@ function parseEvents(host, text) {
 const textContent = value => typeof value === 'string' ? value : Array.isArray(value) ? value.filter(item => item.type === 'text').map(item => item.text).join('\n') : '';
 const normalizedContent = value => value.replace(/\r\n/g, '\n').split('\n').map(line => line.replace(/^\s*\d+(?:→|\t|\|)/, '').trim()).join('\n').trim();
 
+/** 요청 path뿐 아니라 Glob pattern과 성공 결과의 경로도 검사한다. 모호한 결과는 통과시키지 않는다. */
+export function auditClaudeReadScope(events, cwd) {
+  const violations = [];
+  const results = new Map(events.flatMap(event => event.type === 'user' ? event.content || [] : []).filter(item => item.type === 'tool_result').map(item => [item.tool_use_id, item]));
+  function allowed(file, base = cwd) {
+    if (typeof file !== 'string' || !file || /[\0$%]|^~/.test(file)) return false;
+    const absolute = path.resolve(base, file);
+    return within(cwd, absolute) && (!fs.existsSync(absolute) || within(cwd, fs.realpathSync(absolute)));
+  }
+  for (const event of events) for (const tool of event.content || []) {
+    if (tool.type !== 'tool_use' || !['Read', 'Glob', 'Grep'].includes(tool.name)) continue;
+    const base = tool.input?.file_path || tool.input?.path || cwd;
+    if (!allowed(base)) { violations.push({ id: tool.id, reason: 'request path', path: base }); continue; }
+    if (tool.name !== 'Glob') continue;
+    const pattern = tool.input?.pattern;
+    if (typeof pattern !== 'string' || pattern.includes('..') || path.isAbsolute(pattern) || /[\0$%]|^~/.test(pattern)) {
+      violations.push({ id: tool.id, reason: 'nonrelative or ambiguous Glob pattern', pattern });
+      continue;
+    }
+    const result = results.get(tool.id);
+    if (!result || result.is_error === true) continue;
+    const text = textContent(result.content).trim();
+    let paths;
+    if (!text || /^No files found\.?$/i.test(text)) paths = [];
+    else {
+      try { const value = JSON.parse(text); paths = Array.isArray(value) ? value : value.filenames; } catch { paths = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean); }
+    }
+    if (!Array.isArray(paths) || paths.some(file => typeof file !== 'string' || !allowed(file, path.resolve(cwd, base)) || !fs.existsSync(path.resolve(cwd, base, file)))) {
+      violations.push({ id: tool.id, reason: 'outside or unrecognized Glob result' });
+    }
+  }
+  return violations;
+}
+
 /** Claude는 tool ID별 성공 결과와 실제 파일 내용을 연결한다. Codex shell은 후보이며 별도 trace 검토가 필수다. */
 export function assessReadEvidence(host, events, { cwd, installedRoot }) {
   if (host === 'codex') {
@@ -191,6 +236,7 @@ export async function nativeCase(run, host, kind, executable = host, attempt = '
   const standalone = kind === 'explain';
   const cwd = assertConsumer(run, standalone ? run.singleNative?.[agent] : run.native[agent]);
   const runtime = nativeRuntime(run, agent);
+  if (host === 'claude') assertClaudeFixtureConfig(run, cwd);
   const skill = { explain: 'prj-memory-explain', review: 'prj-memory-review', grill: 'prj-grill-me' }[kind];
   const installedRoot = path.join(cwd, host === 'codex' ? '.agents/skills' : '.claude/skills', skill);
   const directory = path.join(run.evidence, host + '-' + kind + '-' + attempt);
@@ -201,11 +247,12 @@ export async function nativeCase(run, host, kind, executable = host, attempt = '
     review: '계획 없이 average.js만 읽기 전용으로 검토해 주세요. 요구사항은 average([])가 0을 반환하는 것입니다. finding과 근거만 반환하세요.',
     grill: '프로젝트용 할 일 도구를 설계하려고 합니다. 여러 프로젝트 사이의 할 일 공유 범위는 미정입니다. 중요한 첫 질문 하나를 2~3개 선택지와 추천 이유로 제시하세요. 저는 아직 답하지 않았습니다.',
   }[kind];
-  const prompt = (host === 'codex' ? '$' : '/') + skill + ' ' + request + '\nThis is an owned synthetic installation smoke test. Read the COMPLETE actually installed ' + path.join(installedRoot, 'SKILL.md') + ' with file tools and only the applicable references INSIDE ' + installedRoot + '. Do not use developer sources, global plugin caches, other fixtures or credentials. The only permitted model read roots are ' + cwd + ' and this installed skill directory. No file/directory writes, tests/builds, Git mutations, installation, settings, delegation, network tools or browsing. The parent may separately observe CLI runtime metadata; that does not authorize model writes. Reply concise Korean, describe actual missing records/one finding/one question as applicable, and identify the installed SKILL path used.';
+  const requiredReference = path.join(installedRoot, 'references/bundled/memory-execute/references', kind === 'review' ? 'review.md' : 'conventions.md');
+  const prompt = (host === 'codex' ? '$' : '/') + skill + ' ' + request + '\nThis is an owned synthetic installation smoke test. Read the COMPLETE actually installed ' + path.join(installedRoot, 'SKILL.md') + ' with file tools. To verify the independently installed references, also read the applicable readonly/workspace or interview boundaries from ' + requiredReference + '. Read only applicable references INSIDE ' + installedRoot + '. Do not use developer sources, global plugin caches, other fixtures or credentials. The only permitted model read roots are ' + cwd + ' and this installed skill directory. No file/directory writes, tests/builds, Git mutations, installation, settings, delegation, network tools or browsing. The parent may separately observe CLI runtime metadata; that does not authorize model writes. Reply concise Korean, describe actual missing records/one finding/one question as applicable, and identify the installed SKILL path used.';
   const args = host === 'codex' ? ['exec', '--ignore-user-config', '--ignore-rules', '--ephemeral', '--json', '--color', 'never', '--sandbox', 'read-only', '--skip-git-repo-check', '--cd', cwd,
     '--disable', 'plugins', '--disable', 'apps', '--disable', 'hooks', '--disable', 'multi_agent', '-c', 'approval_policy="never"', '-c', 'mcp_servers={}', '-c', 'model_reasoning_effort="low"', '-c', 'windows.sandbox="elevated"', '-']
-    : ['-p', '--setting-sources', '', '--settings', JSON.stringify({ permissions: { defaultMode: 'dontAsk' }, disableAllHooks: true, autoMemoryEnabled: false, enabledPlugins: {} }),
-      '--no-session-persistence', '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}', '--permission-mode', 'dontAsk', '--permission-prompts', 'none', '--restricted', '--tools', 'Read,Glob,Grep,Skill', '--allowedTools', 'Read,Glob,Grep,Skill', '--max-budget-usd', '2', '--effort', 'low', '--output-format', 'stream-json', '--verbose', prompt];
+    : ['-p', '--setting-sources', 'project', '--settings', JSON.stringify({ permissions: { defaultMode: 'dontAsk' }, disableAllHooks: true, autoMemoryEnabled: false, enabledPlugins: {} }),
+      '--no-session-persistence', '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}', '--permission-mode', 'dontAsk', '--permission-prompts', 'none', '--tools', 'Read,Glob,Grep,Skill', '--allowedTools', 'Read,Glob,Grep,Skill', '--disallowedTools', 'Bash,PowerShell,Write,Edit,Agent,Task,WebFetch,WebSearch,mcp__*', '--max-budget-usd', '2', '--effort', 'low', '--output-format', 'stream-json', '--verbose', prompt];
   const before = snapshot(run);
   save(path.join(directory, 'before.json'), before);
   const result = await command(executable, args, { cwd, env: { ...process.env, GIT_OPTIONAL_LOCKS: '0', TEMP: runtime, TMP: runtime, TMPDIR: runtime }, timeout: 480000, input: host === 'codex' ? prompt : '' });
@@ -224,7 +271,8 @@ export async function nativeCase(run, host, kind, executable = host, attempt = '
     cwd, skill, installedRoot, actualReadObserved: readEvidence.actualReadObserved, commonReadObserved: readEvidence.commonReadObserved,
     manualReadReviewRequired: readEvidence.manualReadReviewRequired, discoveryMatched, responseNonempty: Boolean(response.trim()), model: init?.model || null,
     discoveredPublic: init?.slash_commands || null, tools: init?.tools || null, permissionDenials: resultEvent?.permission_denials || [], nativeError: resultEvent?.is_error || events.some(event => event.type === 'turn.failed') };
-  save(path.join(directory, 'invocation.json'), { host, kind, cwd, args, prompt, limits: 'Read-only model request; Codex shell read scope is instruction-limited; Claude restricted file roots. Existing authentication used without copying; CLI runtime/global metadata is not an OS-wide zero-write guarantee.' });
+  summary.readScopeViolations = host === 'claude' ? auditClaudeReadScope(events, cwd) : [];
+  save(path.join(directory, 'invocation.json'), { host, kind, cwd, args, prompt, limits: 'Explicit readonly tool allow/deny and no non-skill project config; file-read roots are instruction/trace-checked, not an OS-wide read sandbox. Existing authentication used without copying; CLI runtime/global metadata is not an OS-wide zero-write guarantee.' });
   save(path.join(directory, 'events.json'), events);
   save(path.join(directory, 'read-evidence.json'), readEvidence);
   if (after) save(path.join(directory, 'after.json'), after);
@@ -233,7 +281,7 @@ export async function nativeCase(run, host, kind, executable = host, attempt = '
   fs.writeFileSync(path.join(directory, 'stderr.log'), result.stderr);
   fs.writeFileSync(path.join(directory, 'stdout-sanitized.log'), result.stdout);
   if (result.exit !== 0 || result.timedOut || result.error || snapshotError || summary.nativeError || !summary.consumerPreserved || !summary.gitPreserved || !summary.sourcePreserved ||
-      (!readEvidence.manualReadReviewRequired && (!summary.actualReadObserved || !summary.commonReadObserved)) || !summary.responseNonempty || summary.permissionDenials.length || !discoveryMatched) {
+      (!readEvidence.manualReadReviewRequired && (!summary.actualReadObserved || !summary.commonReadObserved)) || !summary.responseNonempty || summary.permissionDenials.length || summary.readScopeViolations.length || !discoveryMatched) {
     throw new Error('Native case failed: ' + JSON.stringify(summary));
   }
   return { directory, ...summary };

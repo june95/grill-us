@@ -3,7 +3,37 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRun, assertOwned, consumer, cli, names, installed, listEntries, save, assertSourceUnchanged, removeRun, finishRun, tree, sha } from './helpers/skills-install.mjs';
-import { prepareNative, discoverCodex, nativeCase, assessReadEvidence, verifyNativeReadReview } from './helpers/native-skills-smoke.mjs';
+import { prepareNative, discoverCodex, nativeCase, assessReadEvidence, verifyNativeReadReview, assertClaudeFixtureConfig, auditClaudeReadScope } from './helpers/native-skills-smoke.mjs';
+
+test('Glob scope guard rejects parent and absolute patterns plus outside result paths', () => {
+  const run = createRun(), cwd = consumer(run, 'scope-current'), canary = consumer(run, 'scope-canary');
+  const trace = (pattern, content, base = cwd) => [
+    { type: 'assistant', content: [{ type: 'tool_use', id: 'glob', name: 'Glob', input: { pattern, path: base } }] },
+    { type: 'user', content: [{ type: 'tool_result', tool_use_id: 'glob', content, is_error: false }] },
+  ];
+  try {
+    assert.deepEqual(auditClaudeReadScope(trace('.memory/**', 'No files found'), cwd), []);
+    assert.deepEqual(auditClaudeReadScope(trace('**/sentinel.txt', 'sentinel.txt'), cwd), []);
+    assert(auditClaudeReadScope(trace('../scope-canary/**', path.join(canary, 'sentinel.txt')), cwd).length > 0);
+    assert(auditClaudeReadScope(trace(path.join(canary, '**'), path.join(canary, 'sentinel.txt')), cwd).length > 0);
+    assert(auditClaudeReadScope(trace('**/*', path.join(canary, 'sentinel.txt')), cwd).length > 0);
+    assert(auditClaudeReadScope(trace('**/*', 'unrecognized output'), cwd).length > 0);
+    assert.equal(fs.readFileSync(path.join(canary, 'sentinel.txt'), 'utf8'), 'owned integration consumer\n');
+  } finally { removeRun(run); }
+});
+
+test('Claude project-source guard allows installed skills and refuses executable project configuration', () => {
+  const run = createRun(), cwd = consumer(run, 'claude-config-guard');
+  try {
+    fs.mkdirSync(path.join(cwd, '.claude/skills'), { recursive: true });
+    assert.equal(assertClaudeFixtureConfig(run, cwd), cwd);
+    fs.writeFileSync(path.join(cwd, '.claude/settings.json'), '{"hooks":{}}');
+    assert.throws(() => assertClaudeFixtureConfig(run, cwd), /non-skill/);
+    fs.unlinkSync(path.join(cwd, '.claude/settings.json'));
+    fs.writeFileSync(path.join(cwd, 'CLAUDE.md'), 'unexpected instruction');
+    assert.throws(() => assertClaudeFixtureConfig(run, cwd), /non-skill/);
+  } finally { removeRun(run); }
+});
 
 test('fixture guard rejects altered source, package version and executable before any command', async () => {
   const run = createRun();

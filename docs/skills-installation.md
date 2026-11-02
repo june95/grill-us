@@ -39,6 +39,6 @@ npx skills@latest remove prj-memory-explain -a claude-code
 
 ## 검증 범위
 
-Windows의 Node26.12.1/skills1.7.4에서 기존 생성물의 실제 단독·전체 설치/정확한 제거·파일 SHA를 확인했고, Codex0.166.0은 대표 호출3건을 확인했다. Claude2.1.316은 파일 설치를 확인했으나 native 호출은 계정 한도로 검증 대기다. 전환 후보의 수정된 배포 단락은 별도 payload이며 native 영향 검증이 남아 있다.
+Windows의 Node26.12.1/skills1.7.4에서 기존 생성물의 실제 단독·전체 설치/정확한 제거·파일 SHA를 확인했고, Codex0.166.0과 Claude2.1.316에서 각 대표 호출3건을 확인했다. Claude는 프로젝트 source를 활성화한 읽기 전용 도구 구성으로 전체9개/단독1개 발견과 설치 문서·참고 문서 읽기를 확인했다. 전환 후보의 수정된 배포 단락은 별도 payload이며 native 영향 검증이 남아 있다.
 
 현재 준비 명령으로 만든 후보의 default/wildcard 검색·명시 public 설치·clone/LF 확인은 개발용 별도 시험이다. 다른 OS/버전·실제 사용자 global native 호출·전체 workflow의 성공을 보장하지 않는다. 실제 저장소의 기본 경로 전환과 기존 plugin 제거는 후속 검증 이후에 수행한다.
