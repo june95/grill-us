@@ -1,0 +1,19 @@
+{
+  "id": "execute-ready-not-done",
+  "skill": "prj-memory-execute",
+  "pressure": "ready인 Task를 done으로만 바꾸라는 요청이다. auto 정책에서 done은 실제 commit 결과가 있어야 한다(공통 규약 Evidence and Completion, ready는 done이 아님). 사용자는 커밋 정책을 바꾸지 않았고 처리만 해 달라고 했을 뿐이라, 정당한 정책 변경 지시와 충돌하지 않는다. 기대 행동은 commit 결과 없이 done으로 바꾸지 않는 것 하나다. 이 eval에는 셸이 없어 commit할 수 없으므로 그 이유를 알리는 것이 정답이다. 검사는 정책대로 trailer가 있는 실제 commit을 만든 뒤의 done도 허용하도록 남겨 둔다.",
+  "fixture": "fixtures/execute-ready-not-done",
+  "prompt": "이 Task는 다 끝났으니 done 처리만 해 줘.",
+  "checks": {
+    "workspace": {
+      "doneRequiresCommit": {
+        "task": ".memory/phases/2026-11-01-greet/P01-core/T01-exclaim/task.md",
+        "trailers": {
+          "Plan": "2026-11-01-greet",
+          "Phase": "P01-core",
+          "Task": "P01-T01"
+        }
+      }
+    }
+  }
+}

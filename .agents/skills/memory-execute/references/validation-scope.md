@@ -63,6 +63,56 @@
   - Codex는 실행 출력에 스킬 호출 이벤트가 없어 측정하지 않는다. `--host codex`는 모델 호출 없이 exit 1로 끝난다.
   - 결과는 모델·호스트·CLI 버전과 Skill 전용 headless 구성에서의 관측이다. 일반 대화의 발동을 보장하지 않는다.
 
+## On-demand Behavior Eval
+
+`node scripts/eval-skill-behavior.mjs --model <id> [--scenario <id>]... [--runs <n>] [--grader-model <id>] [--dry-run]`은 실제 모델로 핵심 스킬 3개의 규칙 준수를 측정하는 개발용 도구다. 대상은 prj-memory-execute, prj-memory-review, prj-grill-me이고, 압박 상황에서도 규칙을 지키는지 본다.
+
+회귀(`node scripts/validate-skills.mjs`)에는 이 도구, 시나리오, 하네스 테스트가 들어가지 않는다. 하네스 동작은 `node --test tests/behavior-eval.test.mjs`로 따로 확인하며, 가짜 실행기만 쓴다.
+
+- 시나리오:
+  - `evals/behavior/*.json`의 필드: `id`, `skill`, `pressure`, `fixture`, `prompt`, 선택 `diffFile`, `checks`(`workspace`, `grader`, `forbiddenCommands`).
+    - `pressure`에는 압박이 사용자의 정당한 지시와 충돌하지 않는 근거를 적는다.
+  - fixture:
+    - `evals/behavior/fixtures/<id>/base`는 baseline commit, 선택 `overlay`는 커밋하지 않은 변경이다.
+    - ignore 규칙은 `gitignore` 이름으로 두고, 복사할 때 `.gitignore`로 바꾼다.
+    - fixture 안의 `.git`, `.gitignore`, 링크는 거부한다.
+- 실행:
+  - 준비:
+    - 시나리오마다 소유 OS 임시 폴더에 fixture를 복사한다.
+    - `git init`, baseline commit(격리 git 설정), overlay를 차례로 적용한다.
+    - `diffFile`이 있으면 하네스가 overlay diff를 그 파일에 써 둔다.
+  - 실행: public 9개를 skills CLI로 project scope 설치하고, `/<skill> <prompt>`를 stdin으로 `claude -p`에 전달한다. 반복은 1~5회이고 기본은 1회다.
+  - 도구: Read, Glob, Grep, Edit, Write, Skill, TodoWrite만 요청하며 셸은 없다. 호스트 버전에 없는 도구는 빠진다(2.1.317에는 TodoWrite가 없었다).
+    - 편집은 `.memory` 아래만 미리 허용한다.
+    - 작업 폴더 밖 읽기·쓰기는 Claude Code 설정으로 막는다. 이 설정에는 2.1.314 이상이 필요하며, 준비 전에 버전을 확인한다.
+  - 환경 변수:
+    - 넘기지 않는 것: git·npm·node 설정 변수, 상위 에이전트 세션 변수(`CLAUDECODE`, `CLAUDE_*`, `ORCA_*`).
+    - 남기는 것: 로그인·설정 위치·제공자 변수.
+    - effort는 지정하지 않으므로 Claude Code 기본값이다.
+  - 상한: 실행 1회 $1·600초, 채점 1회 $0.3·180초.
+- 판정:
+  - 판정 대상: 성공 종료, 권한 거부 없음, 모든 도구 호출에 응답, timeout 없음을 모두 만족한 실행만 판정한다. 나머지는 `unscored`다.
+  - 결정적 작업공간 검사를 먼저 한다. 항목은 무변경, 새 commit 없음, 파일 내용, done 전 commit trailer, 금지 명령이다. 하나라도 실패하면 `violation`이다.
+  - LLM 채점:
+    - 채점 모델은 도구 없이 실행한다. 응답과 Write·Edit 내용 전체를 nonce 태그로 감싼 비신뢰 데이터로 받는다.
+    - 다음 경우 `ungraded`다: 채점 실행이 끝나지 않음, 항목 근거가 비어 있음, JSON이 유효하지 않음, 기록이 60,000자를 넘음.
+  - 그 밖의 실행은 채점 항목을 모두 충족하면 `kept`, 아니면 `violation`이다.
+- 종료 코드: 실행이 끝나면 결과와 무관하게 0이다. 완료 실행이 0건이어도 0이며 경고만 낸다. 사용법·환경 오류는 1이다.
+- 비용:
+  - 모델 호출 비용이나 구독 사용 한도를 쓴다.
+  - `--dry-run`은 fixture와 baseline만 준비한다(빌드·설치·모델 호출 없음). 계획과 상한 기준 최악 비용을 출력한 뒤 임시 폴더를 지운다.
+- 산출물:
+  - 위치: `evals/results/<시각>-behavior-<model>-<id>/`(git 제외).
+  - 내용: 요약 `summary.json`, 실행별 원본(stream, 작업공간 변화, 채점 입력·결과, 판정).
+  - 원본에는 스킬 본문과 모델 기록이 들어 있다. 공유하기 전에 확인하고 직접 정리한다.
+  - 완료 실행이 없거나 오류가 나면 소유 임시 root를 남기고 그 경로를 출력한다.
+- 한계:
+  - 단일 턴 headless 실행이다. 여러 턴 대화와 사용자 응답 뒤의 동작은 측정하지 않는다. grill-me는 첫 응답만 채점한다.
+  - 결과는 확률적이고 모델·Claude Code·skills CLI 버전에 따라 달라진다. 반복이 적으면 우연과 구분하지 못한다.
+  - 셸이 없어, 테스트 실행이나 commit이 필요한 정답 경로는 측정하지 않는다.
+  - LLM 채점은 결정적 검사를 보조하는 판단이며 오판할 수 있다.
+  - Codex는 실행 출력에 스킬 호출 이벤트가 없어 측정하지 않는다.
+
 ## Markdown Links and Anchors
 
 - inline/reference 링크, 괄호·공백 경로, percent encoding을 지원한다. `#fragment`는 같은 파일, `file.md#fragment`는 대상 파일의 제목을 확인한다. 빈 `#`는 문서 시작이다. 잘못된 encoding과 지원 제목에 없는 anchor는 오류다.

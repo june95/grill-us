@@ -209,6 +209,19 @@ node scripts/validate-skills.mjs
 
 회귀 검사만 실행하려면 `node --test tests/validate-skills.test.mjs tests/build-skills.test.mjs tests/repository-skills.test.mjs tests/skills-install.test.mjs tests/skill-routing.test.mjs`를 사용합니다. 전체 검사는 격리 npx 통합 시험을 포함해 네트워크와 skills CLI1.7.4 다운로드가 필요합니다. 시험한 환경은 Node26.12.1·Windows이며 전체 검사는 Node22.20 이상을 요구합니다. Native 모델 호출은 별도 시험입니다.
 
+실제 모델을 호출하는 개발용 측정은 회귀에 들어가지 않으므로 필요할 때 따로 실행합니다. 행동 eval(`node scripts/eval-skill-behavior.mjs --model <id>`)이 하는 일은 다음과 같습니다.
+
+- 대상: prj-memory-execute, prj-memory-review, prj-grill-me의 압박 시나리오 5개.
+- 방식: 임시 Git 저장소에서 단일 턴으로 실행합니다. 작업공간을 결정적으로 먼저 검사하고, 그다음 실행 기록을 비신뢰 데이터로 채점합니다.
+
+주의할 점:
+
+- 모델 호출 비용이나 구독 사용 한도를 쓰므로, 먼저 `--dry-run`으로 계획과 최악 비용을 확인하세요.
+- 결과는 확률적이어서 한 번 실행한 결과가 규칙 준수를 보장하지 않습니다.
+- 하네스 자체는 `node --test tests/behavior-eval.test.mjs`로 모델 호출 없이 확인합니다.
+
+동작·판정·한계는 [On-demand Behavior Eval](.agents/skills/memory-execute/references/validation-scope.md#on-demand-behavior-eval)에, 실제 발동 측정은 [On-demand Routing Measurement](.agents/skills/memory-execute/references/validation-scope.md#on-demand-routing-measurement)에 있습니다.
+
 결과 종류는 `frontmatter`, `public-frontmatter`, `links`, `messages`, `examples`, `html-ids`, `memory-examples`, `git`입니다. 이 명령은 지원 범위의 필수 scalar·ID·정적 구문·파일/제목 참조·예제 형식·격리 Git 동작을 검사합니다. 제외 진단은 부분 확인이며 미확인 대상을 성공으로 세지 않습니다. 전체 Markdown renderer, HTML 렌더링, 접근성 전반, 생성된 UI 동작, 실제 모델 workflow 실행, commit tree를 포함한 중단 복구 성공은 별도 검증이 필요합니다.
 
 ## 독립 스킬 생성과 검사
