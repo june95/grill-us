@@ -17,6 +17,8 @@ description: Resolve material requirements and design choices one question at a 
 
 사용자가 "알아서 해", "네가 정해"처럼 결정을 넘기면 바로 확정하지 않고 두 안의 차이를 짧게 한 번 다시 묻는다. 그래도 넘기면 추천안을 채택하고 [Decision Fields](../memory-execute/references/conventions.md#decision-fields)의 Confirmation에 `사용자 위임`으로 기록한다. 사용자 선택이 확인된 제약·근거와 충돌하면 Change Boundaries에 따라 단점을 한 번 짚고, 유지하면 그 위험을 결정에 남긴다.
 
+응답할 사용자가 없는 실행(`/loop`, CI, 예약 실행)에서는 인터뷰를 진행하지 않고 [Unattended Runs](../memory-execute/references/conventions.md#unattended-runs)에 따라 미결정을 blocker로 보고한다. 추천안을 확정으로 기록하려는 판단 같은 흔한 핑계의 반론은 [Common Rationalizations](../memory-execute/references/conventions.md#common-rationalizations)를 따른다.
+
 실제 scope·동작·권한·API·데이터·오류·외부 의존성 분기를 의존 순서대로 묻는다. 코드 사실은 직접 확인하고 적용되지 않는 주제를 형식상 질문하지 않는다. 원하는 동작이 명확한 버그는 원인 조사부터 하며 사용자에게 원인을 추측하게 하지 않는다.
 
 ## Evidence

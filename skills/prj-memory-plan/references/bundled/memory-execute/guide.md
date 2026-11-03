@@ -19,7 +19,7 @@ T01부터 T03까지 순서대로 진행해줘
 현재 Task 구현과 검증만 하고 커밋은 하지 마
 ~~~
 
-별도 CLI가 아닌 에이전트 요청이다. --stage 또는 분석만/구현만/리뷰만/리뷰 지적 처리만/테스트만/가이드 갱신만/리팩토링만/커밋 점검만/커밋만은 해당 stage-mode다. 명시 단계가 우선이며 독립 분석/테스트 Task 전체 실행 요청은 task-mode다. 실제 의도가 모호할 때만 질문한다. 가이드의 설계 선반영/구현 후 동기화 모드도 Task와 요청으로 확인한다.
+별도 CLI가 아닌 에이전트 요청이다. --stage 또는 분석만/구현만/리뷰만/리뷰 지적 처리만/테스트만/가이드 갱신만/리팩토링만/커밋 점검만/커밋만은 해당 stage-mode다. 명시 단계가 우선이며 독립 분석/테스트 Task 전체 실행 요청은 task-mode다. 실제 의도가 모호할 때만 질문한다. 응답할 사용자가 없는 실행이면 [Unattended Runs](references/conventions.md#unattended-runs)에 따라 질문 대신 blocker로 보고한다. 가이드의 설계 선반영/구현 후 동기화 모드도 Task와 요청으로 확인한다.
 
 ## Resolve Task
 
@@ -42,7 +42,7 @@ T01부터 T03까지 순서대로 진행해줘
 | refactor | [review.md](references/review.md#refactor) | 현재 변경의 동작 보존 |
 | commit-check / commit | [commit-check.md](references/commit-check.md) | 최종 품질·명시 후보·실제 결과 확인 |
 
-적용/상태는 [Workflow](references/conventions.md#workflow), 증거 최신성은 [Evidence and Completion](references/conventions.md#evidence-and-completion)을 따른다. 필수 실패·blocked·stale를 skipped로 덮지 않고, 실행하지 않은 빈 보고서는 만들지 않는다. 유효한 같은 결과는 재사용하되 관련 환경 영향도 확인한다.
+적용/상태는 [Workflow](references/conventions.md#workflow), 증거 최신성은 [Evidence and Completion](references/conventions.md#evidence-and-completion)을 따른다. 필수 실패·blocked·stale를 skipped로 덮지 않고, 실행하지 않은 빈 보고서는 만들지 않는다. 흔한 생략·완료 오판 핑계의 반론은 [Common Rationalizations](references/conventions.md#common-rationalizations)에 있다. 유효한 같은 결과는 재사용하되 관련 환경 영향도 확인한다.
 
 ## Task Mode
 
@@ -51,7 +51,7 @@ T01부터 T03까지 순서대로 진행해줘
    적용 review와 재리뷰는 기본 위임하며 사용자 자체 리뷰 지시가 우선이다. 실행 담당만 결과·상태를 기록하고 위임 불가 시 사유 알림 후 자체 리뷰로 계속한다. 실제 finding/Needs Changes는 대체 사유가 아니다([Review Delegation](references/review.md#review-delegation)).
    리뷰어에게 memory-review와 공통 기준·명시 대상/Revision·diff/snapshot을 제공한다. 반환한 범위·버전을 대조해 기존 review 단계에 반영하며 리뷰를 중복 추가하지 않는다. 직접 memory-review 호출의 무쓰기 결과 반환과 이 단계의 기록 책임을 구분한다.
 3. 승인 범위 결함은 수정 단계로 돌아가 해결하고 영향받은 증거를 갱신한다. 조사 전용의 대상 실패는 [Investigation Outcomes](references/conventions.md#investigation-outcomes)로 보존하며 자동 수정/후속 등록하지 않는다.
-4. 범위 안 조정은 기록하고, 중요한 새 동작/계약 선택은 [Change Boundaries](references/conventions.md#change-boundaries)를 따른다. 환경·설계 blocker는 원인·재개 행동을 남기고 멈춘다.
+4. 범위 안 조정은 기록하고, 중요한 새 동작/계약 선택은 [Change Boundaries](references/conventions.md#change-boundaries)를 따른다. 환경·설계 blocker는 원인·재개 행동을 남기고 멈춘다. 사용자가 없는 실행에서 확인이 필요하면 [Unattended Runs](references/conventions.md#unattended-runs)를 따른다.
 5. [Quality Gate](references/commit-check.md#quality-gate)로 AC·근거·최종 품질을 판정한다. ready는 done이 아니다. Task 범위 변경과 사용자 정책에 따라 [Staging](references/commit-check.md#staging), [Commit Intent](references/commit-check.md#commit-intent) 또는 [No Commit](references/commit-check.md#no-commit)을 처리한다.
 6. 성공 commit/명시 none/Task 변경 없음 정책을 실제로 확인한 뒤 Task done → Phase/Plan 집계 → current를 갱신한다. 실패하면 현재 Task에 머무른다.
 7. 한 Task에서 끝내며 연속 요청만 그 범위로 진행한다. 다음 Task는 실제 시작 전 pending, 마지막 Task 후 Active Task/Stage는 없음이다. 다른 pending Plan을 임의로 시작하지 않는다.

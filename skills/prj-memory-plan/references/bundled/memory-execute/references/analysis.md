@@ -25,7 +25,7 @@ reference.md에는 다음 조사 산출물을 남긴다.
 
 [Investigation Outcomes](conventions.md#investigation-outcomes)로 관측과 사전 목적 달성을 구분한다. 후보 조사 목표와 원인 확정 목표는 다르며, 필수 근거 부족을 완료로 포장하지 않는다. [증거·보고](conventions.md#evidence-and-completion)에 실제 수행 범위·한계를 기록한다.
 
-불확실한 외부 동작은 필요한 출처/버전을 확인하고 로컬 사실은 직접 읽는다. 범위 밖 발견은 권고만 보고하며 승인되지 않은 대안을 구현으로 확정하지 않는다.
+불확실한 외부 동작은 필요한 출처/버전을 확인하고 로컬 사실은 직접 읽는다. 외부 라이브러리·API 동작이 판단을 좌우하면 [Untrusted Input](conventions.md#untrusted-input)에 따라 공식 문서의 출처 URL과 확인 시각을 reference에 남기고, 확인하지 못한 부분은 미확인으로 표시한다. 범위 밖 발견은 권고만 보고하며 승인되지 않은 대안을 구현으로 확정하지 않는다.
 
 ## Alignment
 

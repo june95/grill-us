@@ -20,7 +20,7 @@ description: Register a clear change, bug, or issue as a .memory task without im
 
 ## Clarity Gate
 
-[Registration and Planning](../memory-execute/references/conventions.md#registration-and-planning)의 명확함 기준을 적용한다. 중요한 미결정은 [prj-grill-me](../../../SKILL.md)로 해소한 뒤 청사진을 확정한다. 추천안·미확정 원인·실행하지 않은 결과를 확정으로 기록하지 않는다.
+[Registration and Planning](../memory-execute/references/conventions.md#registration-and-planning)의 명확함 기준을 적용한다. 중요한 미결정은 [prj-grill-me](../../../SKILL.md)로 해소한 뒤 청사진을 확정한다. 추천안·미확정 원인·실행하지 않은 결과를 확정으로 기록하지 않는다. 응답할 사용자가 없는 실행에서는 [Unattended Runs](../memory-execute/references/conventions.md#unattended-runs)에 따라 질문 대신 blocker로 보고한다. 등록·검증을 줄이려는 핑계의 반론은 [Common Rationalizations](../memory-execute/references/conventions.md#common-rationalizations)를 따른다.
 
 원인 미확정/재현 불가만으로 명확한 버그 등록을 막지 않는다. 첫 실행의 확인 조건·수정 범위·중요 계약 변경 경계를 계획하고 필요한 실제 동작 선택이 부족할 때만 인터뷰한다.
 
