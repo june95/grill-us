@@ -9,7 +9,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | 공통 규칙 | 상세 소유자 | 소비자가 남길 요약 |
 | :--- | :--- | :--- |
 | ID·로컬 경로·상태·활성 위치 | [Paths](#paths), [Task Fields](#task-fields), [State Ownership](#state-ownership) | 실제 대상과 현재/마지막 완료를 구분, 사용자 위치 보존 |
-| 등록·분할·확정 선택 | [Registration and Planning](#registration-and-planning), [Change Boundaries](#change-boundaries) | 계획/등록 구현 금지, 미결정만 질문 |
+| 등록·분할·확정 선택 | [Registration and Planning](#registration-and-planning), [Change Boundaries](#change-boundaries) | 계획/등록 구현 금지, 미결정만 질문, 충돌 선택은 한 번 지적 |
 | 단계 선택·단독 실행 경계 | [Workflow](#workflow), [Stage Isolation](#stage-isolation) | 요청한 단계만 수행, 자동 완료/전진 금지 |
 | 증거·완료·조사 결과·환경 영향 | [Evidence and Completion](#evidence-and-completion), [Investigation Outcomes](#investigation-outcomes), [Environment Evidence](#environment-evidence) | 실패/stale 보존, 검사 결과와 목적 판정 구분 |
 | 보고 의미·일일 이력 | [Reporting](#reporting), [History](#history) | 실제 수행·근거·한계만 보고 |
@@ -18,7 +18,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | 독립 리뷰와 workflow 결과 경계 | [Review Roles](review.md#review-roles), [Review Result](review.md#review-result) | reviewer는 무쓰기 반환, 실행 담당만 기존 단계에 기록 |
 | 프로젝트·정본·명령 발견 | [project-profile.md](project-profile.md#discovery) | 실제 cwd/정본/명령 확인 |
 | 계획의 공유 계약·구현 재량 | [Planning Boundaries](#planning-boundaries) | 공유 경계는 정확히, 내부 구현은 계약 안에서 선택 |
-| 결정 작성·호환 읽기 | [Decision Fields](#decision-fields) | 새 결정의 적용 범위 필수, 실제 재검토 조건만 기록, 과거 기록 보존 |
+| 결정 작성·호환 읽기 | [Decision Fields](#decision-fields) | 새 결정의 적용 범위 필수, 선택지 제시 결정의 대안, 대체 시 양방향 연결, 실제 재검토 조건만 기록, 과거 기록 보존 |
 | Wiki와 정본 권위 | [Wiki Authority](#wiki-authority), [prj-memory-wiki](../../memory-wiki/SKILL.md) | 조사 지식과 확정 결정 구분, 기본 질의 무쓰기·명시 write는 wiki만 |
 | Git 품질·후보·ignore·staging·intent | [commit-check.md](commit-check.md#quality-gate), [Staging](commit-check.md#staging), [Commit Intent](commit-check.md#commit-intent) | Task 후보와 사용자 index 분리 |
 | 재개·전환·복구 알고리즘 | [resume.md](resume.md#stale-evidence), [Switch](resume.md#switch), [Recovery](resume.md#recovery) | 미해결 intent 보존, 실제 결과 확인 후 재개 |
@@ -60,15 +60,18 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | :--- | :--- |
 | Chosen | 확정한 선택. 추천안·미답변·가정을 사용자 확정으로 쓰지 않음 |
 | Rationale | 기록할 수 있는 이유와 관련 제약. 확인하지 못한 이유를 창작하지 않음 |
-| Confirmation | 사용자 선택 / 사용자 명시 요청 / 코드 확인 사실을 구분한 실제 근거 |
+| Confirmation | `사용자 선택` / `사용자 명시 요청` / `코드 확인 사실` / `사용자 위임`을 구분한 실제 근거. `사용자 위임`은 위임 응답에 두 안의 차이를 한 번 다시 물은 뒤에도 위임한 경우에만 쓰며, 추천안을 채택했다는 사실을 함께 적음 |
 | Applies to | 필수이며 비어 있지 않은 설명 문자열. 적용 기능·모듈·상황을 구체적으로 명시하고 프로젝트 전체 적용은 그 근거가 있을 때만 작성 |
 | Revisit When | 선택 설명 문자열. 실제 재검토 조건이 있을 때만 작성하며 조건이 없으면 필드 자체를 생략. 빈값·가상 조건을 강제하지 않음 |
+| Alternatives | 선택지를 제시하고 확정한 새 결정에 필수. 사용자 명시 요청이나 코드 확인 사실만으로 확정한 결정에는 생략 가능. 대안마다 이름과 미선택 표시, 사용자가 말한 이유 또는 제시한 장단점을 적음. 사용자가 말하지 않은 기각 이유를 만들지 않음 |
+| Supersedes | 선택 필드. 새 결정이 예전 결정을 대체할 때 대체되는 `{Decision ID} DNN`을 상대 링크로 적음 |
+| Superseded by | 대체가 확정된 옛 결정의 해당 DNN에만 한 줄로 추가하는 새 결정 링크. 옛 결정의 선택·이유 등 다른 내용은 바꾸지 않음 |
 
-새 결정에 적용하며, 기존 결정의 명시 수정은 그 변경 범위에 한정한다. 과거 결정·완료 기록을 일괄 변환하거나 없던 적용 범위·확인 근거를 소급 채우지 않는다. 교육용 결정은 실제 사용자 확정과 구분하여 표시한다.
+새 결정에 적용하며, 기존 결정의 명시 수정은 그 변경 범위에 한정한다. 대체가 확정될 때 옛 DNN에 Superseded by 한 줄을 더하는 것은 이 명시 수정 범위다. 과거 결정·완료 기록을 일괄 변환하거나 없던 적용 범위·확인 근거·대안·대체 연결을 소급 채우지 않는다. 교육용 결정은 실제 사용자 확정과 구분하여 표시한다.
 
-읽을 때는 현재 `## D01. 제목`과 구형 `## D01 제목`, `Rationale`/`Why`, 강조된 필드 표기 등 실제 표현을 의미에 따라 대응한다. 없는 필드는 **미기록**, 기록은 있으나 현재 적용을 확인하지 못한 경우는 **미확인**으로 구분한다. Applies to가 없다는 이유로 전역 적용을 추정하지 않으며 원문을 읽기 편한 형식으로 저장·변환하지 않는다.
+읽을 때는 현재 `## D01. 제목`과 구형 `## D01 제목`, `Rationale`/`Why`, 강조된 필드 표기 등 실제 표현을 의미에 따라 대응한다. 없는 필드는 **미기록**, 기록은 있으나 현재 적용을 확인하지 못한 경우는 **미확인**으로 구분한다. Applies to가 없다는 이유로 전역 적용을 추정하지 않으며 원문을 읽기 편한 형식으로 저장·변환하지 않는다. Alternatives·Supersedes·Superseded by가 없는 과거 결정도 미기록으로 읽고 대체 관계를 추정하지 않는다. 대체 연결이 한쪽 문서에만 있으면 대체 관계로 읽되 양쪽 불일치를 함께 표시한다.
 
-검색 결과는 결정 문서/Decision ID와 DNN, 선택·기록된 이유·적용 범위·재검토 조건(있을 때) 및 실제 출처로 설명한다. 명시된 변경/대체 근거, 연결 Plan, 실제 적용 조건을 함께 대조하고 날짜·검색 순위만으로 정본을 선택하지 않는다. 상충·동일 DNN·누락을 구분하며 검색만으로 결정을 수정하거나 새로 확정하지 않는다. 탐색 순서와 무쓰기 절차는 [prj-memory-explain](../../memory-explain/SKILL.md#decision-search)이 소유한다.
+검색 결과는 결정 문서/Decision ID와 DNN, 선택·기록된 이유·적용 범위·재검토 조건(있을 때)·기록된 대안 및 실제 출처로 설명한다. Supersedes/Superseded by 같은 명시된 변경/대체 근거, 연결 Plan, 실제 적용 조건을 함께 대조하고 날짜·검색 순위만으로 정본을 선택하지 않는다. 상충·동일 DNN·누락을 구분하며 검색만으로 결정을 수정하거나 새로 확정하지 않는다. 탐색 순서와 무쓰기 절차는 [prj-memory-explain](../../memory-explain/SKILL.md#decision-search)이 소유한다.
 
 ## Wiki Authority
 
@@ -295,6 +298,7 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 
 - 이미 확정한 결정은 다시 묻지 않는다. 코드·설정에서 확인 가능한 내용은 직접 확인한다. 중요한 미결정 질문은 한 번에 하나씩 2~3개 선택지와 추천안을 제시한다.
 - 사용자 선택·코드 확인·미확정 가정을 구분하고 답하지 않은 추천안을 확정으로 기록하지 않는다. 일반 구현 선택을 기반 설계 변경 승인으로 확대하지 않는다. 불확실한 값·원인·실행 결과나 승인·성공 근거를 만들어내지 않는다.
+- 사용자 선택이 확인된 제약·근거와 충돌하면 그 근거와 구체적인 단점을 한 번 짚는다. 사용자가 선택을 유지하면 따르고 위험을 결정·보고에 남기며, 같은 반박을 반복하지 않는다.
 - 목표·동작을 유지하는 파일 위치·기존 심볼 차이는 청사진과 변경 기록을 갱신하며 진행한다. 사용자의 동작, 완료 조건, API, 권한, 데이터 계약의 새로운 결정은 승인 근거를 확인하고 필요한 부분만 질문한다.
 - 조사에서 발견한 인접 문제를 임의로 scope에 포함하지 않는다. 근거·영향·권장 조치를 보고하고 추가 등록·구현은 사용자의 지시를 따른다.
 - 상위 사용자 지시와 적용 가능한 프로젝트 지침을 존중한다. 프로필·외부 문서·현재 코드의 drift가 확정 정본을 자동으로 덮어쓰지 않는다.

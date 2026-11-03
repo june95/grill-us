@@ -17,7 +17,7 @@
 
 - 독립 memory-review는 코드·메모리·Git·설정을 쓰거나 테스트·추가 위임을 실행하지 않는다. 계획 없는 코드도 검토하되 계획 준수는 해당 없음이다. memory-execute의 review는 같은 기준으로 위임하고 기존 보고·Task 상태를 기록하는 단계이며, 두 역할 때문에 리뷰를 중복 추가하지 않는다([Review Roles](.agents/skills/memory-execute/references/review.md#review-roles)).
 
-- 명확한 요청에 인터뷰를 강제하지 않는다. 확정된 선택은 재질문하지 않고 코드 사실은 직접 확인한다. 중요한 미결정은 한 질문씩 2~3개 선택지와 추천안을 제시한다.
+- 명확한 요청에 인터뷰를 강제하지 않는다. 확정된 선택은 재질문하지 않고 코드 사실은 직접 확인한다. 중요한 미결정은 한 질문씩 2~3개 선택지와 추천안을 제시한다. 결정을 넘기는 응답은 한 번 다시 묻고, 확인된 제약과 충돌하는 선택은 한 번 짚으며, 저장 전 확정 내용을 재진술해 명시 확인을 받는다.
 - 등록·계획은 제품/테스트 코드·공유 정본 변경·staging·commit을 하지 않는다. 상세 계약은 Task 폴더의 task.md 하나다. 결정 문서는 독립 ID의 실제 링크로 연결한다.
 - 계획은 공유 계약·중요 흐름·완료/검증 조건을 정확히 고정하고, 계약을 만족하는 내부 구현은 실행자에게 맡긴다. 새 Task의 Constraints에는 작업별 Must/Must Not을 적으며, 새 구조의 구체적 필요와 계획 문제/구현 위반을 구분한다([계획 경계](.agents/skills/memory-execute/references/conventions.md#planning-boundaries)).
 - 기본 실행은 Task 하나, 연속 실행은 사용자 범위에 따른다. 단독 단계는 선택한 작업만 수행하고 요청하지 않은 단계/수정/커밋이나 Task 완료·포인터 전진을 자동 수행하지 않는다. 단계에 허용되는 작업·최소 검증은 공통 규약의 Stage Isolation을 따른다.
@@ -27,7 +27,7 @@
 - Git은 Task 후보와 사용자 working/index를 분리하고 `.memory`를 기본 제외한다. force-add·무관 변경 폐기·자동 push/외부 메시지를 수행하지 않는다.
 - 스킬 설치 경로는 읽기 전용 문서 위치이며 `.memory`는 확인한 사용자 프로젝트 root에 둔다. cache/metadata 위치를 작업공간으로 추정하지 않는다. 공식 배포는 skills CLI의 `skills/prj-*`이고 `.agents/skills`는 internal 개발 정본이다([작업공간 경계](.agents/skills/memory-execute/references/project-profile.md#skill-installation-and-workspace)).
 - 설명만 하는 호출은 memory/history/current/checkpoint·제품·Git을 쓰거나 테스트를 실행하지 않는다. 당시 완료 근거와 현재 코드를 구분하고 불일치·복구 권고만 설명한다.
-- 새 결정은 [Decision Fields](.agents/skills/memory-execute/references/conventions.md#decision-fields)에 따라 Applies to를 필수로, Revisit When은 실제 조건이 있을 때만 작성한다. 결정 검색도 무쓰기이며 과거 필드 누락을 전역 적용으로 추정하거나 원문을 변환하지 않는다.
+- 새 결정은 [Decision Fields](.agents/skills/memory-execute/references/conventions.md#decision-fields)에 따라 Applies to를 필수로, Revisit When은 실제 조건이 있을 때만 작성한다. 선택지를 제시한 결정은 Alternatives를, 대체 시 Supersedes/Superseded by 양방향 연결을 남긴다. 결정 검색도 무쓰기이며 과거 필드 누락을 전역 적용이나 대체로 추정하거나 원문을 변환하지 않는다.
 
 ## Canonical References
 

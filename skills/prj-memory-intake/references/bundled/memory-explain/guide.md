@@ -32,8 +32,8 @@ Wiki 자료에 대한 명시 질의는 [prj-memory-wiki](../memory-wiki/guide.md
 1. 명시 결정 경로/Decision ID 또는 Plan/Task에 실제로 연결된 결정을 먼저 읽는다. `D01`만으로 문서를 식별하지 않으며 같은 DNN은 문서/Decision ID와 함께 구분한다. 오래된 파일에 ID metadata가 없으면 실제 파일 경로를 출처로 쓰고 누락을 알린다.
 2. 자료가 부족하면 [작업공간 경계](../memory-execute/references/project-profile.md#skill-installation-and-workspace)로 확인한 사용자 프로젝트의 `.memory/decisions` 안에서만 추가 후보를 찾는다. 설치/cache나 다른 프로젝트를 검색하지 않는다. 이미 확인한 root는 재사용하고 혼동될 때만 확인한다.
 3. `rg`가 있으면 해당 디렉터리에 한정한 파일 목록과 literal 검색을 사용한다. ignored/hidden인 로컬 memory도 포함하도록 `rg --files --hidden --no-ignore -- .memory/decisions`, `rg -n -F --hidden --no-ignore -e '검색어' -- .memory/decisions`처럼 사용하며 실제 입력은 shell 인자로 안전하게 전달한다. 목록에서 파일명/ID를 찾고 본문에서 주제·적용 모듈·관련 표현을 좁혀 읽는다. `rg`가 없으면 호스트의 파일 목록·읽기·검색 도구로 같은 범위를 확인하며 설치하거나 별도 parser를 만들지 않는다.
-4. 일치한 줄만으로 판정하지 않고 후보 결정의 제목·선택·이유·적용 조건과 관련 변경/대체 근거·Plan 연결을 읽는다. [Decision Fields](../memory-execute/references/conventions.md#decision-fields)의 현재/구형 제목·필드 호환 읽기를 적용한다. 적용 범위가 없으면 미기록으로 표시하고 전역 적용을 추정하지 않는다.
-5. 후보별로 실제 문서/Decision ID와 DNN, 선택, 기록된 이유, 적용 범위, 재검토 조건(있을 때), 출처 링크를 채팅에 설명한다. 날짜·검색 점수만으로 정본을 고르지 않는다. 명시된 대체 관계가 있으면 그 근거와 적용 조건을 함께 제시하고 상충 결정은 병렬로 구분한다. 대상 선택이 실제로 모호할 때만 후보와 질문 하나를 제시한다.
+4. 일치한 줄만으로 판정하지 않고 후보 결정의 제목·선택·이유·적용 조건과 Alternatives, Supersedes/Superseded by 같은 관련 변경/대체 근거·Plan 연결을 읽는다. [Decision Fields](../memory-execute/references/conventions.md#decision-fields)의 현재/구형 제목·필드 호환 읽기를 적용한다. 적용 범위가 없으면 미기록으로 표시하고 전역 적용을 추정하지 않는다.
+5. 후보별로 실제 문서/Decision ID와 DNN, 선택, 기록된 이유, 적용 범위, 재검토 조건(있을 때), 출처 링크를 채팅에 설명한다. 날짜·검색 점수만으로 정본을 고르지 않는다. 명시된 대체 관계가 있으면 그 근거와 적용 조건을 함께 제시하고 상충 결정은 병렬로 구분한다. Supersedes/Superseded by로 연결된 결정은 현재 결정과 대체된 결정을 함께 설명하며, 연결이 한쪽 문서에만 있으면 불일치로 표시한다. 기록된 Alternatives가 있으면 선택 이유와 함께 미선택 대안과 그 근거를 설명하고, 필드가 없는 과거 결정은 미기록으로 말한다. 대상 선택이 실제로 모호할 때만 후보와 질문 하나를 제시한다.
 6. 결과가 없으면 확인한 범위·검색어와 일치 후보 없음을 말한다. 파일/디렉터리 부재·읽기 실패·이유 미기록은 검색 결과 없음과 구분한다. 미확인 범위를 전체 결정 부재로 확대하지 않는다. 검색 결과나 보고서·history/current/checkpoint/결정을 저장하지 않고 테스트·위임·복구·Task 등록도 실행하지 않는다.
 
 ## Evidence
@@ -42,7 +42,7 @@ Wiki 자료에 대한 명시 질의는 [prj-memory-wiki](../memory-wiki/guide.md
 | :--- | :--- |
 | Plan / Phase | 전체 목표·분할·순서·의존 요약, 실제 Task와의 집계 차이 |
 | task.md | 상세 계약·AC·Implementation·실제 상태 |
-| decision / Decision Summary / Change Log | 문서/Decision ID·DNN별 선택·기록된 이유·확인·적용 범위·조건부 재검토·변경/대체 근거 |
+| decision / Decision Summary / Change Log | 문서/Decision ID·DNN별 선택·기록된 이유·확인·적용 범위·조건부 재검토·기록된 대안·변경/대체 근거(Supersedes/Superseded by 포함) |
 | 실행 보고 | 당시 수행·검증 범위/환경·snapshot·한계 |
 | 코드 / Git | 필요한 현재 구현 또는 특정 시점 변경, 실제 tree와 의도 구분 |
 
