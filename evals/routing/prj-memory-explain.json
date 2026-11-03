@@ -1,0 +1,27 @@
+{
+  "skill": "prj-memory-explain",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Explain why we made decision D05 and where it applies.",
+        "top_k": 1
+      },
+      {
+        "prompt": "Find the recorded rationale for choosing the database."
+      },
+      {
+        "prompt": "Compare the plan with what was actually completed in this phase."
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Interview me to settle a new decision about the cache design.",
+        "owner": "prj-grill-me"
+      },
+      {
+        "prompt": "Review the latest commit for regressions.",
+        "owner": "prj-memory-review"
+      }
+    ]
+  }
+}

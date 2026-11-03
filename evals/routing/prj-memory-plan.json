@@ -1,0 +1,27 @@
+{
+  "skill": "prj-memory-plan",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Create a plan with phases and tasks from the decisions we confirmed.",
+        "top_k": 1
+      },
+      {
+        "prompt": "Break this clear request into independently executable task blueprints."
+      },
+      {
+        "prompt": "Extend the existing plan with a new phase for the reporting work."
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Execute the next task in the plan and commit the result.",
+        "owner": "prj-memory-execute"
+      },
+      {
+        "prompt": "Explain why we chose this plan and how it compares with what was finished.",
+        "owner": "prj-memory-explain"
+      }
+    ]
+  }
+}

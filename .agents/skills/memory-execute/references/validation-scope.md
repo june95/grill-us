@@ -4,9 +4,9 @@
 
 ## Command and Targets
 
-저장소 root에서 `node scripts/validate-skills.mjs`를 실행한다. 전체 검사는 Node.js 22.20.0 이상과 Git·네트워크가 필요하다. `validate-skills`, `build-skills`, `repository-skills`, `skills-install` 네 suite를 실행하며 격리 npx 환경에 skills CLI1.7.4를 내려받아 실제 검색·설치·제거를 확인한다. CI 설치는 요구하지 않는다. Native 모델 호출은 이 명령에 포함하지 않고 별도로 검증한다.
+저장소 root에서 `node scripts/validate-skills.mjs`를 실행한다. 전체 검사는 Node.js 22.20.0 이상과 Git·네트워크가 필요하다. `validate-skills`, `build-skills`, `repository-skills`, `skills-install`, `skill-routing` 다섯 suite를 실행하며 격리 npx 환경에 skills CLI1.7.4를 내려받아 실제 검색·설치·제거를 확인한다. CI 설치는 요구하지 않는다. Native 모델 호출은 이 명령에 포함하지 않고 별도로 검증한다.
 
-정적 검증기 단위 회귀만은 `node --test tests/validate-skills.test.mjs`, 네 suite만은 `node --test tests/validate-skills.test.mjs tests/build-skills.test.mjs tests/repository-skills.test.mjs tests/skills-install.test.mjs`다. 공개 CLI에 옵션은 없고 export된 `main({root, runRegressionTests})`의 root 인자는 저장소 소유 테스트 fixture용이다. 설치 대상 사용자 프로젝트에 이 개발 검증 명령이나 도구 설치를 요구하지 않는다.
+정적 검증기 단위 회귀만은 `node --test tests/validate-skills.test.mjs`, 다섯 suite만은 `node --test tests/validate-skills.test.mjs tests/build-skills.test.mjs tests/repository-skills.test.mjs tests/skills-install.test.mjs tests/skill-routing.test.mjs`다. 공개 CLI에 옵션은 없고 export된 `main({root, runRegressionTests})`의 root 인자는 저장소 소유 테스트 fixture용이다. 설치 대상 사용자 프로젝트에 이 개발 검증 명령이나 도구 설치를 요구하지 않는다.
 
 탐색 대상은 root AGENTS.md/README.md, examples·docs·packaging·.agents/skills·skills의 Markdown이다. `.memory`, `.codeburn`, node_modules, .git은 탐색하지 않는다. symlink를 따라 저장소 밖을 읽지 않으며 임시 Git·설치 실험은 검증기 소유 OS 임시 경로에서만 수행한다. 검사 자체는 원본 문서·사용자 index·설정을 수정하지 않는다. 배포 freshness와 소유권·변조·빈 디렉터리·링크 보호, source/public 일치와 LF/consumer checkout도 회귀로 확인한다.
 
@@ -24,6 +24,20 @@
 | git | 격리 저장소 ignore·trailer 동작, commit-check secret 검사 명령의 단일성·파일명만 출력·textconv 미실행 |
 
 지원 범위의 오류는 exit 1, 오류가 없으면 exit 0이다. 제외 진단이 있는 항목은 부분 확인이며 checked로 성공을 세지 않는다. 검사 성공은 실제 모델 실행·제품 테스트·브라우저 렌더링 성공을 뜻하지 않는다.
+
+## Skill Routing
+
+`tests/skill-routing.test.mjs`는 공개 스킬의 발동 경계를 모델 호출 없이 결정적으로 검사한다. 대상은 생성된 `skills/prj-*/SKILL.md`의 name·description과 `evals/routing/<public-name>.json` case 파일이다.
+
+- case 형식: 최상위에는 `skill`(파일명과 같은 공개 이름)과 `trigger`만 둔다. `trigger.positive`는 영어 문장 3개 이상과 선택 `top_k`(1~3, 기본 3)를 둔다. `trigger.negative`는 2개 이상이며, 자기 자신이 아닌 공개 스킬 `owner`가 필수다. 문장은 ASCII 영어만 허용한다.
+- 순위: 영어 소문자·숫자 토큰만 쓰고, 불용어를 빼고, 짧은 접미사를 정리한 뒤 TF-IDF cosine으로 9개 스킬의 점수를 매긴다.
+  - positive는 자기 스킬이 `top_k` 안에 있고 점수가 0보다 커야 한다.
+  - negative는 자기 스킬이 1위가 아니어야 하고, owner 점수가 0보다 크며 자기보다 높아야 한다.
+  - 1위 비율은 보고만 하며 실패 기준이 아니다.
+- 충돌: 9개 description의 모든 쌍 유사도가 0.75 이상이면 실패, 0.5 이상이면 경고한다. 충돌은 이름 없이 description만 비교하고, 모든 description에 공통인 단어도 가중치를 갖는 smoothed idf(`ln((1+N)/(1+df))+1`)를 써서 공유 본문이 사라지지 않게 한다. 각 description에는 `Use when` 또는 `Use for` 트리거 문구가 있어야 한다.
+- 검사 자체 검증: suite 안에서 충돌 쌍, 밀린 순위, owner 없는 negative, 형식 오류 fixture가 각각 실패하는지 확인한다.
+- 실패 처리: 검사가 실패하면 description을 `.agents/skills` 원본에서 고친다. 기준값이나 case 문장을 바꿔 통과시키지 않는다. 측정 근거로 기각한 description 변경은 `evals/routing/rejected-description-changes.md`에 추가한다.
+- 한계: 영어 단어 겹침 근사라 의미와 문맥은 판단하지 못한다. 한국어 요청과 실제 모델의 발동은 이 검사로 알 수 없으며, 별도 on-demand 측정에서 다룬다. `evals/`는 공개 패키지에 포함하지 않는다.
 
 ## Markdown Links and Anchors
 

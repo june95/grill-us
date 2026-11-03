@@ -88,9 +88,12 @@ function requiredScalar(raw) {
   return plain;
 }
 
-/** 스킬 필수 필드·폴더 식별자와 중복 이름을 문서 위치에 대응한다. */
+/**
+ * 스킬 필수 필드·폴더 식별자와 중복 이름을 문서 위치에 대응한다.
+ * 다른 회귀(발동 검사 등)가 같은 해석 규칙의 값을 쓰도록 읽은 name·description을 skills로 함께 돌려준다.
+ */
 export function checkSkillFrontmatter(root, files, { skillRoot = '.agents/skills' } = {}) {
-  const out = result();
+  const out = Object.assign(result(), { skills: [] });
   const names = new Map();
   const directory = path.resolve(root, skillRoot);
   if (!within(root, directory)) throw new Error('스킬 검사 root는 저장소 내부여야 함');
@@ -149,6 +152,7 @@ export function checkSkillFrontmatter(root, files, { skillRoot = '.agents/skills
       if (names.has(name.value)) diagnostic(out, 'frontmatter', file, name.line, `스킬 name 중복: ${name.value}; 최초 ${path.relative(root, names.get(name.value))}`);
       else names.set(name.value, file);
     }
+    out.skills.push({ file, name: fields.get('name')?.value ?? null, description: fields.get('description')?.value ?? null });
   }
   return out;
 }
@@ -1055,7 +1059,7 @@ export function main({ root = projectRoot, runRegressionTests = true } = {}) {
   root = path.resolve(root);
   let failed = false;
   if (runRegressionTests) {
-    const suite = spawnSync(process.execPath, ['--test', ...['validate-skills', 'build-skills', 'repository-skills', 'skills-install']
+    const suite = spawnSync(process.execPath, ['--test', ...['validate-skills', 'build-skills', 'repository-skills', 'skills-install', 'skill-routing']
       .map(name => path.join(projectRoot, 'tests', name + '.test.mjs'))],
       // 독립 문서/checkout 소유권과 실제 npx 통합 검사를 포함한다. native 모델 호출은 별도 수동 gate다.
       { cwd: projectRoot, encoding: 'utf8', timeout: 900000, maxBuffer: 8 * 1024 * 1024 });

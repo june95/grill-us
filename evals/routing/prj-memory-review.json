@@ -1,0 +1,26 @@
+{
+  "skill": "prj-memory-review",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Review the changes in this commit range and list any findings."
+      },
+      {
+        "prompt": "Do a code review of these files without modifying anything."
+      },
+      {
+        "prompt": "Check this diff for bugs and give me evidence-based findings."
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Run the review stage of the active task and update its workflow status.",
+        "owner": "prj-memory-execute"
+      },
+      {
+        "prompt": "Explain the findings recorded for the last completed task.",
+        "owner": "prj-memory-explain"
+      }
+    ]
+  }
+}

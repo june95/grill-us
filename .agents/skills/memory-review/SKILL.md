@@ -1,6 +1,6 @@
 ---
 name: memory-review
-description: Review an explicit Task, Phase, file list, diff, or commit range and return evidence-based findings without writing files or state. Support code review without a plan; do not create tasks, run tests, fix code, or delegate. Use memory-execute for workflow review reports and state updates.
+description: Review an explicit Task, Phase, file list, diff, or commit range and return evidence-based findings without writing files or state. Use for independent code review with or without a plan; use memory-execute for workflow review stages.
 metadata:
   internal: true
 ---

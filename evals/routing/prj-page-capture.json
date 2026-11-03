@@ -1,0 +1,27 @@
+{
+  "skill": "prj-page-capture",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Capture the checkout page after clicking the pay button and save it as evidence.",
+        "top_k": 1
+      },
+      {
+        "prompt": "Take a screenshot of the settings page in the running app."
+      },
+      {
+        "prompt": "Save a PNG of the dashboard UI for the test report."
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Build an HTML dashboard that visualizes this sales data.",
+        "owner": "prj-visualize"
+      },
+      {
+        "prompt": "Run the test stage for this task and record the results.",
+        "owner": "prj-memory-execute"
+      }
+    ]
+  }
+}

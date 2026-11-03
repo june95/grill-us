@@ -1,0 +1,27 @@
+{
+  "skill": "prj-memory-intake",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Register this login bug as a new task so we can fix it later.",
+        "top_k": 1
+      },
+      {
+        "prompt": "Log this issue as a memory task but do not implement anything yet."
+      },
+      {
+        "prompt": "Add this small change request to the task list without starting work on it."
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Resume the current task and run its next workflow stage.",
+        "owner": "prj-memory-execute"
+      },
+      {
+        "prompt": "Ask me questions one at a time to decide how errors should be handled.",
+        "owner": "prj-grill-me"
+      }
+    ]
+  }
+}

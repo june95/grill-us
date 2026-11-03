@@ -1,6 +1,6 @@
 ---
 name: page-capture
-description: Capture an explicitly requested UI state with existing host browser tools, save PNG and sanitized JSON evidence, and report actual conditions and limits. No browser/runtime installation or authentication automation.
+description: Capture an explicitly requested UI state with existing host browser tools, save PNG and sanitized JSON evidence, and report actual conditions and limits. Use for screenshots of app pages or UI states needed as evidence. No browser/runtime installation or authentication automation.
 metadata:
   internal: true
 ---

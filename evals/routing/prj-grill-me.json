@@ -1,0 +1,27 @@
+{
+  "skill": "prj-grill-me",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Grill me on the design of the new caching layer before we plan it.",
+        "top_k": 1
+      },
+      {
+        "prompt": "Interview me one question at a time until the open design choices are settled."
+      },
+      {
+        "prompt": "We still have unresolved requirements for the export feature; help me decide them before planning."
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Register this crash report as a new task without implementing anything.",
+        "owner": "prj-memory-intake"
+      },
+      {
+        "prompt": "Turn the confirmed decisions into a plan with phases and executable tasks.",
+        "owner": "prj-memory-plan"
+      }
+    ]
+  }
+}

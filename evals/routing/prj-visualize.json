@@ -1,0 +1,27 @@
+{
+  "skill": "prj-visualize",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Visualize this release process as a flowchart.",
+        "top_k": 1
+      },
+      {
+        "prompt": "Make a slide deck about our quarterly roadmap."
+      },
+      {
+        "prompt": "Create an infographic that compares these three options."
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Take a screenshot of the current dashboard page.",
+        "owner": "prj-page-capture"
+      },
+      {
+        "prompt": "Explain the plan and progress recorded for this project.",
+        "owner": "prj-memory-explain"
+      }
+    ]
+  }
+}

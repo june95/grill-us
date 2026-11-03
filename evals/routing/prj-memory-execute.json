@@ -1,0 +1,27 @@
+{
+  "skill": "prj-memory-execute",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Execute the next task in the plan and commit the changes.",
+        "top_k": 1
+      },
+      {
+        "prompt": "Continue the current task from where it stopped."
+      },
+      {
+        "prompt": "Run only the test stage for task P01-T02."
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Review this diff and report findings without changing any files.",
+        "owner": "prj-memory-review"
+      },
+      {
+        "prompt": "Register a new bug as a task, but do not start implementing it.",
+        "owner": "prj-memory-intake"
+      }
+    ]
+  }
+}

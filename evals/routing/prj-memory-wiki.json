@@ -1,0 +1,27 @@
+{
+  "skill": "prj-memory-wiki",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Ingest these Markdown notes into the project wiki.",
+        "top_k": 1
+      },
+      {
+        "prompt": "Answer this question from the wiki sources without changing anything."
+      },
+      {
+        "prompt": "Refresh the wiki from the updated design documents."
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Explain the recorded decision about authentication.",
+        "owner": "prj-memory-explain"
+      },
+      {
+        "prompt": "Create a slide deck that summarizes these notes.",
+        "owner": "prj-visualize"
+      }
+    ]
+  }
+}

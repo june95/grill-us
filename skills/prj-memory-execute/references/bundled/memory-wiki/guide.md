@@ -1,6 +1,6 @@
 ---
 name: prj-memory-wiki
-description: Collect explicitly selected local Markdown/text sources into a source-backed Wiki, answer questions without writes by default, and refresh sources or save answers only when requested. No automatic Decision, Plan, or Task changes.
+description: Collect explicitly selected local Markdown/text sources into a source-backed Wiki, answer questions without writes by default, and refresh sources or save answers only when requested. Use for building, querying, or refreshing a local document wiki. No automatic Decision, Plan, or Task changes.
 ---
 
 # Memory Wiki
