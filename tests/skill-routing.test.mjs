@@ -376,7 +376,7 @@ if (args.length === 1 && args[0] === '--version') { process.stdout.write('0.0.0 
 const input = fs.readFileSync(0, 'utf8');
 const mode = JSON.parse(fs.readFileSync(path.join(__dirname, 'rules.json'), 'utf8'))[input] || 'none';
 const emit = event => process.stdout.write(JSON.stringify(event) + '\n');
-emit({ type: 'system', subtype: 'init', model: 'fake-model', tools: ['Skill'], slash_commands: ['prj-grill-me', 'outside-skill'], argv: args, stdin: input });
+emit({ type: 'system', subtype: 'init', model: 'fake-model', tools: ['Skill'], slash_commands: ['prj-grill-me', 'outside-skill'], argv: args, stdin: input, envNames: Object.keys(process.env) });
 if (mode === 'garbage') { process.stdout.write('not json\n'); process.stderr.write('fake failure\n'); process.exit(1); }
 if (mode !== 'none') {
   const [kind, skill] = mode.split(':');
@@ -483,6 +483,39 @@ test('measurement keeps raw output outside the results, stores reduced runs, and
   // 준비(빌드·설치) 실패는 환경 오류 exit 1이다.
   assert.equal(await main(argv, { ...deps, prepare: async () => { throw new Error('install failed'); } }), 1);
   assert.match(errors.at(-1), /환경 오류: install failed/);
+});
+
+test('measurement children do not inherit parent agent session variables', async t => {
+  const { scratch, fake, rules } = fakeHost(t);
+  const [positive] = loadItems(['prj-grill-me']).filter(item => item.kind === 'positive');
+  rules({ [positive.prompt]: 'skill:prj-grill-me' });
+  const prepare = async () => {
+    const cwd = fs.mkdtempSync(path.join(scratch, 'project-'));
+    return { cwd, runtime: cwd, environment: { skillsCliVersion: 'fake', installed: names, external: [] }, finish: () => ({ retained: false, root: cwd }) };
+  };
+  // 하네스를 Claude Code·Orca 세션 안에서 실행하면 이런 변수가 있다. 이름의 대소문자가 달라도 넘기지 않아야 한다.
+  const parent = { CLAUDECODE: '1', CLAUDE_EFFORT: 'max', CLAUDE_CODE_EFFORT_LEVEL: 'max', CLAUDE_CODE_PLUGIN_DIRS: path.join(scratch, 'parent-plugins'), CLAUDE_CODE_SESSION_ID: 'parent',
+    Claude_Code_Entrypoint: 'cli', ORCA_AGENT_PANE: 'pane' };
+  // 로그인·설정 위치·제공자 변수는 남긴다.
+  const login = { CLAUDE_CONFIG_DIR: path.join(scratch, 'claude-config'), CLAUDE_CODE_OAUTH_TOKEN: 'fake-login', CLAUDE_CODE_USE_BEDROCK: '1', CLAUDE_CODE_USE_VERTEX: '1',
+    CLAUDE_CODE_USE_FOUNDRY: '1', CLAUDE_CODE_OAUTH_REFRESH_TOKEN: 'fake-refresh', CLAUDE_CODE_OAUTH_SCOPES: 'fake-scopes', CLAUDE_CODE_CLIENT_CERT: path.join(scratch, 'cert.pem'),
+    CLAUDE_CODE_CLIENT_KEY: path.join(scratch, 'key.pem'), CLAUDE_CODE_CLIENT_KEY_PASSPHRASE: 'fake-passphrase' };
+  const saved = { ...process.env };
+  try {
+    Object.assign(process.env, parent, login);
+    const output = [], errors = [];
+    const deps = { executable: process.execPath, prefixArgs: [fake], prepare, resultsDirectory: path.join(scratch, 'results'), rawParent: scratch, out: text => output.push(text), err: text => errors.push(text) };
+    assert.equal(await main(['--model', 'test-model', '--runs', '1', '--skill', 'prj-grill-me'], deps), 0, errors.join('\n'));
+    const { rawDirectory } = JSON.parse(output.at(-1));
+    for (const file of fs.readdirSync(rawDirectory).filter(name => name.endsWith('.stdout.jsonl'))) {
+      const seen = JSON.parse(fs.readFileSync(path.join(rawDirectory, file), 'utf8').split('\n')[0]).envNames.map(name => name.toUpperCase());
+      for (const name of Object.keys(parent)) assert.ok(!seen.includes(name.toUpperCase()), file + ': ' + name);
+      for (const name of [...Object.keys(login), 'PATH', 'GIT_OPTIONAL_LOCKS', 'TEMP']) assert.ok(seen.includes(name), file + ': ' + name);
+    }
+  } finally {
+    for (const key of Object.keys(process.env)) if (!(key in saved)) delete process.env[key];
+    Object.assign(process.env, saved);
+  }
 });
 
 test('result folders are created exclusively and never through links', t => {

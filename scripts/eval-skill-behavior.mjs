@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { buildSkills } from './build-skills.mjs';
 import { createResultDirectory, resultName, resultsRoot } from './measure-skill-routing.mjs';
 import { repository, names, createRun, assertOwned, cli, installed, finishRun, command, clean, save, noLinks, within, installerEnv, sha } from '../tests/helpers/skills-install.mjs';
-import { parseEvents, skillRouting, assertClaudeFixtureConfig } from '../tests/helpers/native-skills-smoke.mjs';
+import { parseEvents, skillRouting, assertClaudeFixtureConfig, withoutParentSession } from '../tests/helpers/native-skills-smoke.mjs';
 
 // 핵심 스킬 3개의 압박 시나리오를 실제 모델로 실행하는 on-demand 행동 eval이다.
 // 회귀 검사(validate-skills)는 이 파일과 시나리오를 실행하지 않는다.
@@ -397,17 +397,13 @@ export function parseGrade(text, count) {
   return { valid: true, items: [...data.items].sort((a, b) => a.id - b.id).map(item => ({ id: item.id, met: item.met, evidence: item.evidence.trim().slice(0, 500) })) };
 }
 
-// 넘기지 않는 변수:
-// - git·npm·node의 대상·설정·실행을 바꾸는 변수.
-// - 하네스를 실행한 상위 에이전트 세션의 변수(CLAUDECODE, CLAUDE_*, ORCA_*). effort·plugin·세션 연결이 측정 조건에 섞이지 않게 한다.
-const droppedEnv = /^(?:GIT_|NPM_|NODE_OPTIONS$|NODE_PATH$|CLAUDECODE$|CLAUDE_|ORCA_)/i;
-// 다만 로그인·설정 위치·제공자 선택에 쓰는 Claude 변수는 남긴다.
-const keptClaudeEnv = /^(?:CLAUDE_CONFIG_DIR|CLAUDE_CODE_OAUTH_TOKEN|CLAUDE_CODE_USE_BEDROCK|CLAUDE_CODE_USE_VERTEX)$/i;
+// git·npm·node의 대상·설정·실행을 바꾸는 변수. 상위 에이전트 세션 변수는 공용 규칙(withoutParentSession)으로 먼저 뺀다.
+const droppedEnv = /^(?:GIT_|NPM_|NODE_OPTIONS$|NODE_PATH$)/i;
 
-/** 모델·채점 실행 환경. 로그인에 필요한 사용자 환경은 두고, droppedEnv는 지우며 git·npm 설정과 임시 폴더는 격리 값으로 바꾼다. */
+/** 모델·채점 실행 환경. 로그인에 필요한 사용자 환경은 두고, 상위 세션 변수와 droppedEnv는 지우며 git·npm 설정과 임시 폴더는 격리 값으로 바꾼다. */
 export function evalEnv(ctx, runtime) {
   const env = {};
-  for (const [key, value] of Object.entries(process.env)) if (!droppedEnv.test(key) || keptClaudeEnv.test(key)) env[key] = value;
+  for (const [key, value] of Object.entries(withoutParentSession(process.env))) if (!droppedEnv.test(key)) env[key] = value;
   return Object.assign(env, { GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: ctx.gitConfigGlobal, GIT_OPTIONAL_LOCKS: '0', GIT_TERMINAL_PROMPT: '0', GIT_EDITOR: 'false',
     npm_config_userconfig: ctx.npmConfig, npm_config_globalconfig: ctx.npmConfig, TEMP: runtime, TMP: runtime, TMPDIR: runtime });
 }

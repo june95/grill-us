@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { buildSkills } from './build-skills.mjs';
 import { repository, names, createRun, consumer, cli, installed, finishRun, command, clean, save, noLinks } from '../tests/helpers/skills-install.mjs';
-import { parseEvents, skillRouting, assertClaudeFixtureConfig } from '../tests/helpers/native-skills-smoke.mjs';
+import { parseEvents, skillRouting, assertClaudeFixtureConfig, agentChildEnv } from '../tests/helpers/native-skills-smoke.mjs';
 
 // 공개 스킬의 실제 발동을 모델로 측정하는 on-demand 도구다. 회귀 검사(validate-skills)는 이 파일을 실행하지 않는다.
 const scriptPath = fileURLToPath(import.meta.url);
@@ -17,7 +17,8 @@ const runTimeoutMs = 300000;
 const usage = 'node scripts/measure-skill-routing.mjs --model <id> [--runs <n>] [--host claude|codex] [--skill <public-name>]... [--with <source> --with-skill <name>]... [--dry-run]';
 const limits = [
   '도구를 Skill로만 제한한 headless 실행이라 실제 대화의 도구 구성과 다를 수 있다. 결과는 이 구성에서의 발동률이다.',
-  '--setting-sources project와 enabledPlugins {}로 사용자 설정·plugin·MCP를 막았다. 보이는 명령 목록은 결과에 기록한다.',
+  '--setting-sources project와 enabledPlugins {}로 사용자 설정·plugin·MCP를 막는다. 보이는 명령 목록은 결과에 기록한다.',
+  '하네스를 실행한 상위 에이전트 세션의 변수(CLAUDECODE·CLAUDE_*·ORCA_*)는 넘기지 않는다. 그래서 effort·plugin 경로·세션 연결을 물려받지 않고, effort는 지정하지 않은 Claude Code 기본값이다. 로그인용 CLAUDE_CONFIG_DIR·CLAUDE_CODE_OAUTH_TOKEN 등은 남긴다.',
   '발동은 확률적이며 모델·Claude Code·skills CLI 버전에 따라 달라진다.',
   'Codex는 실행 출력에 스킬 호출 이벤트가 없어 측정하지 않았다.'
 ];
@@ -263,7 +264,7 @@ export async function measure(options, { executable = 'claude', prefixArgs = [],
   try {
     raw = createRawDirectory(rawParent);
     log('원본 보존 경로: ' + raw);
-    const env = { ...process.env, GIT_OPTIONAL_LOCKS: '0', TEMP: project.runtime, TMP: project.runtime, TMPDIR: project.runtime };
+    const env = agentChildEnv(project.runtime);
     const records = [], reduced = [];
     const visible = new Set(), models = new Set();
     for (const item of items) {

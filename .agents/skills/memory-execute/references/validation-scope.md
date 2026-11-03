@@ -49,7 +49,12 @@
 - 실행:
   - 소유 OS 임시 프로젝트에 public 9개(요청 시 외부 스킬 추가)를 project scope로 설치한다.
   - 문장마다 `claude -p`를 지정 횟수만큼 실행한다. 기본은 3회이며, Skill 도구만 허용하고 문장은 stdin으로 전달한다.
-  - 사용자 설정·plugin·MCP·hooks는 막는다. 호스트 기본 명령과 번들 스킬은 보인다.
+  - 사용자 설정(`--setting-sources project`)·plugin 설정(`enabledPlugins: {}`)·MCP·hooks를 막는다. 호스트 기본 명령과 번들 스킬은 보인다.
+  - 상위 에이전트 세션의 변수(`CLAUDECODE`, `CLAUDE_*`, `ORCA_*`, 대소문자 무관)는 자식에 넘기지 않는다. 여기에는 다음이 들어간다:
+    - inline plugin 경로 `CLAUDE_CODE_PLUGIN_DIRS`. 빈 `enabledPlugins`로는 꺼지지 않는다.
+    - effort 입력 `CLAUDE_CODE_EFFORT_LEVEL`. `--effort`보다 우선한다.
+  - 공식 문서의 로그인·설정 위치·제공자·클라이언트 인증 변수 10개는 남긴다: `CLAUDE_CONFIG_DIR`, `CLAUDE_CODE_OAUTH_TOKEN`, `CLAUDE_CODE_OAUTH_REFRESH_TOKEN`, `CLAUDE_CODE_OAUTH_SCOPES`, `CLAUDE_CODE_USE_BEDROCK`, `CLAUDE_CODE_USE_VERTEX`, `CLAUDE_CODE_USE_FOUNDRY`, `CLAUDE_CODE_CLIENT_CERT`, `CLAUDE_CODE_CLIENT_KEY`, `CLAUDE_CODE_CLIENT_KEY_PASSPHRASE`.
+  - 행동 eval과 native 확인도 같은 규칙(`tests/helpers/native-skills-smoke.mjs`)을 쓴다. effort는 지정하지 않으므로 Claude Code 기본값이다.
 - 판정:
   - stream-json의 Skill 호출 이름을 센다.
   - 성공 종료, 권한 거부 없음, 모든 도구 호출 응답을 모두 만족한 실행만 점수에 넣는다. 미완료는 따로 센다.
@@ -86,8 +91,8 @@
     - 편집은 `.memory` 아래만 미리 허용한다.
     - 작업 폴더 밖 읽기·쓰기는 Claude Code 설정으로 막는다. 이 설정에는 2.1.314 이상이 필요하며, 준비 전에 버전을 확인한다.
   - 환경 변수:
-    - 넘기지 않는 것: git·npm·node 설정 변수, 상위 에이전트 세션 변수(`CLAUDECODE`, `CLAUDE_*`, `ORCA_*`).
-    - 남기는 것: 로그인·설정 위치·제공자 변수.
+    - 넘기지 않는 것: git·npm·node 설정 변수, 상위 에이전트 세션 변수(`CLAUDECODE`, `CLAUDE_*`, `ORCA_*`). 상위 세션 변수 규칙은 [On-demand Routing Measurement](#on-demand-routing-measurement)와 같다.
+    - 남기는 것: 그 규칙의 로그인·설정 위치·제공자·클라이언트 인증 변수 10개.
     - effort는 지정하지 않으므로 Claude Code 기본값이다.
   - 상한: 실행 1회 $1·600초, 채점 1회 $0.3·180초.
 - 판정:

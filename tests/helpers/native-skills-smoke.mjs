@@ -3,6 +3,24 @@ import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { assertOwned, assertConsumer, assertSourceUnchanged, installerEnv, command, clean, names, noLinks, save, sha, tree, within } from './skills-install.mjs';
 
+// 하네스를 실행한 상위 에이전트 세션의 변수(대소문자 무관). 자식 claude·codex에 넘기면 상위 세션의 plugin 경로(CLAUDE_CODE_PLUGIN_DIRS)·
+// 세션 표시·effort 입력(CLAUDE_CODE_EFFORT_LEVEL, --effort보다 우선)이 측정 조건에 섞인다. 행동 eval·발동 측정·native 확인이 모두 이 규칙을 쓴다.
+const parentSessionEnv = /^(?:CLAUDECODE$|CLAUDE_|ORCA_)/i;
+// 다만 공식 문서의 로그인·설정 위치·제공자·클라이언트 인증 변수는 남긴다.
+const keptClaudeEnv = /^(?:CLAUDE_CONFIG_DIR|CLAUDE_CODE_OAUTH_TOKEN|CLAUDE_CODE_OAUTH_REFRESH_TOKEN|CLAUDE_CODE_OAUTH_SCOPES|CLAUDE_CODE_USE_BEDROCK|CLAUDE_CODE_USE_VERTEX|CLAUDE_CODE_USE_FOUNDRY|CLAUDE_CODE_CLIENT_CERT|CLAUDE_CODE_CLIENT_KEY|CLAUDE_CODE_CLIENT_KEY_PASSPHRASE)$/i;
+
+/** source에서 상위 에이전트 세션 변수를 뺀 새 객체. source는 바꾸지 않는다. */
+export function withoutParentSession(source = process.env) {
+  const env = {};
+  for (const [key, value] of Object.entries(source)) if (!parentSessionEnv.test(key) || keptClaudeEnv.test(key)) env[key] = value;
+  return env;
+}
+
+/** native 확인·발동 측정의 자식 에이전트 CLI 환경. 상위 세션 변수는 빼고, git 선택 잠금과 임시 폴더는 격리 값으로 둔다. */
+export function agentChildEnv(runtime, source = process.env) {
+  return { ...withoutParentSession(source), GIT_OPTIONAL_LOCKS: '0', TEMP: runtime, TMP: runtime, TMPDIR: runtime };
+}
+
 export function loadRun(file) {
   const run = JSON.parse(fs.readFileSync(file, 'utf8'));
   assertOwned(run);
@@ -85,7 +103,7 @@ export async function discoverCodex(run, executable = 'codex', cwd = run.native.
   const runtime = nativeRuntime(run, 'codex');
   if (expectedNames.some(name => !names.includes(name)) || !/^[a-z-]+$/.test(tag)) throw new Error('Invalid discovery scope');
   const args = ['app-server', '--listen', 'stdio://', '--disable', 'plugins', '--disable', 'apps', '--disable', 'hooks', '--disable', 'multi_agent', '-c', 'mcp_servers={}'];
-  const child = spawn(executable, args, { cwd, env: { ...process.env, GIT_OPTIONAL_LOCKS: '0', TEMP: runtime, TMP: runtime, TMPDIR: runtime }, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
+  const child = spawn(executable, args, { cwd, env: agentChildEnv(runtime), windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
   let buffer = '', stderr = '', result, error;
   const kill = () => { if (child.pid) { if (process.platform === 'win32') spawnSync('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' }); else child.kill(); } };
   const timer = setTimeout(() => { error = 'Codex discovery timed out'; kill(); }, 60000);
@@ -279,7 +297,7 @@ export async function nativeCase(run, host, kind, executable = host, attempt = '
       '--no-session-persistence', '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}', '--permission-mode', 'dontAsk', '--permission-prompts', 'none', '--tools', 'Read,Glob,Grep,Skill', '--allowedTools', 'Read,Glob,Grep,Skill', '--disallowedTools', 'Bash,PowerShell,Write,Edit,Agent,Task,WebFetch,WebSearch,mcp__*', '--max-budget-usd', '2', '--effort', 'low', '--output-format', 'stream-json', '--verbose', prompt];
   const before = snapshot(run);
   save(path.join(directory, 'before.json'), before);
-  const result = await command(executable, args, { cwd, env: { ...process.env, GIT_OPTIONAL_LOCKS: '0', TEMP: runtime, TMP: runtime, TMPDIR: runtime }, timeout: 480000, input: host === 'codex' ? prompt : '' });
+  const result = await command(executable, args, { cwd, env: agentChildEnv(runtime), timeout: 480000, input: host === 'codex' ? prompt : '' });
   const events = parseEvents(host, result.stdout);
   let after, snapshotError;
   try { after = snapshot(run); } catch (error) { snapshotError = clean(error.message); }

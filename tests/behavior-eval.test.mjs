@@ -250,13 +250,14 @@ test('model environment, command history and long transcripts are handled safely
     Object.assign(process.env, { GIT_DIR: 'C:/elsewhere/.git', GIT_WORK_TREE: 'C:/elsewhere', GIT_CONFIG_COUNT: '1', GIT_CONFIG_KEY_0: 'core.fsmonitor', GIT_CONFIG_VALUE_0: 'calc',
       npm_config_script_shell: 'calc', NODE_OPTIONS: '--require x',
       CLAUDECODE: '1', CLAUDE_EFFORT: 'max', CLAUDE_CODE_PLUGIN_DIRS: 'C:/parent-plugins', CLAUDE_CODE_SESSION_ID: 'parent', Claude_Code_Entrypoint: 'cli', ORCA_AGENT_PANE: 'pane',
-      CLAUDE_CONFIG_DIR: 'C:/claude-config', CLAUDE_CODE_OAUTH_TOKEN: 'fake-login', CLAUDE_CODE_USE_BEDROCK: '1' });
+      CLAUDE_CONFIG_DIR: 'C:/claude-config', CLAUDE_CODE_OAUTH_TOKEN: 'fake-login', CLAUDE_CODE_USE_BEDROCK: '1', CLAUDE_CODE_USE_FOUNDRY: '1', CLAUDE_CODE_CLIENT_CERT: 'C:/cert.pem' });
     const env = evalEnv({ gitConfigGlobal: 'G:/empty.gitconfig', npmConfig: 'G:/empty.npmrc' }, 'R:/runtime');
     const keys = Object.keys(env).map(key => key.toUpperCase());
     for (const key of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_CONFIG_COUNT', 'GIT_CONFIG_KEY_0', 'GIT_CONFIG_VALUE_0', 'NPM_CONFIG_SCRIPT_SHELL', 'NODE_OPTIONS']) assert.ok(!keys.includes(key), key);
     // 상위 에이전트 세션의 effort·plugin·세션 변수는 넘기지 않는다(대소문자 무관).
     for (const key of ['CLAUDECODE', 'CLAUDE_EFFORT', 'CLAUDE_CODE_PLUGIN_DIRS', 'CLAUDE_CODE_SESSION_ID', 'CLAUDE_CODE_ENTRYPOINT', 'ORCA_AGENT_PANE']) assert.ok(!keys.includes(key), key);
-    assert.deepEqual([env.CLAUDE_CONFIG_DIR, env.CLAUDE_CODE_OAUTH_TOKEN, env.CLAUDE_CODE_USE_BEDROCK], ['C:/claude-config', 'fake-login', '1'], '로그인·설정 위치·제공자 변수는 남긴다');
+    assert.deepEqual([env.CLAUDE_CONFIG_DIR, env.CLAUDE_CODE_OAUTH_TOKEN, env.CLAUDE_CODE_USE_BEDROCK, env.CLAUDE_CODE_USE_FOUNDRY, env.CLAUDE_CODE_CLIENT_CERT],
+      ['C:/claude-config', 'fake-login', '1', '1', 'C:/cert.pem'], '로그인·설정 위치·제공자 변수는 남긴다');
     assert.deepEqual([env.GIT_CONFIG_NOSYSTEM, env.GIT_CONFIG_GLOBAL, env.npm_config_userconfig, env.npm_config_globalconfig, env.TEMP], ['1', 'G:/empty.gitconfig', 'G:/empty.npmrc', 'G:/empty.npmrc', 'R:/runtime']);
     assert.ok(keys.includes('PATH'), '로그인·실행에 필요한 일반 환경은 남긴다');
   } finally {

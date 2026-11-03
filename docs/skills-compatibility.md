@@ -42,7 +42,7 @@ full validator124/124, 오류0으로 통과했다. source/public frontmatter10/9
 | 호스트·모델 | Claude Code 2.1.317 headless(`claude -p`), claude-sonnet-5-5 |
 | 설치 | skills CLI 1.7.4로 소유 임시 프로젝트에 public 9개만 project scope 설치, 외부 팩 없음 |
 | 문장 | `evals/routing/*.json`의 `measure` 한국어 문장 29개(positive 18, negative 11), 문장당 3회, 총 87회 |
-| 실행 구성 | Skill 도구만 허용, 문장은 stdin 전달, 사용자 설정·plugin·MCP·hooks 차단. 호스트 기본 명령과 번들 스킬은 보임 |
+| 실행 구성 | Skill 도구만 허용, 문장은 stdin 전달, 사용자 설정·plugin 설정·MCP·hooks 차단. 호스트 기본 명령과 번들 스킬은 보임. 당시에는 상위 세션의 환경 변수를 그대로 넘겼다(아래 "측정 당시 조건") |
 | 결과 | 87회 모두 완료. positive 53/54 발동(문장별 최저 2/3), negative 자기 스킬 오발동 0/33 |
 | 비용 | Claude Code가 보고한 API 요금 환산 $2.73 |
 
@@ -52,6 +52,14 @@ full validator124/124, 오류0으로 통과했다. source/public frontmatter10/9
   - 작업 재개 요청 1회에는 번들 `update-config`가 함께 켜졌다.
   - 공존 안내는 [설치 안내](skills-installation.md)의 "다른 스킬과 함께 쓸 때" 절에 있다.
 - 대상 내용 없이 요청만 받은 일부 negative(diff 리뷰, 회의록 인포그래픽)는 owner 스킬도 켜지지 않았다.
+- 측정 당시 조건(2026-11-04 확인, 결과는 바꾸지 않음):
+  - 측정은 Claude Code 세션 안에서 실행했고, 측정 도구는 그 세션의 환경 변수를 자식 `claude`에 그대로 넘겼다.
+  - 그래서 `CLAUDE_CODE_PLUGIN_DIRS`로 지정된 inline plugin(`orca-agent-view`)이 자식에도 로드됐을 가능성이 높다. 이 plugin은 빈 `enabledPlugins`로는 꺼지지 않는다.
+  - 당시 원본 init은 지워져 확인할 수 없다. 같은 방식으로 실행한 행동 eval 첫 실행에서는 로드가 관측됐다.
+  - hooks는 꺼져 있었고, 이 plugin은 스킬·명령을 더하지 않았다.
+  - effort는 기본값이었을 가능성이 높다. 공식 문서상 effort 입력은 `CLAUDE_CODE_EFFORT_LEVEL`이고, 같은 세션 환경에서 이 변수는 설정되어 있지 않았다. `CLAUDE_EFFORT`는 하위 프로세스에 현재 값을 알리는 출력 변수다.
+  - 재측정은 하지 않았다(사용자 결정).
+  - 지금 측정 도구는 상위 에이전트 세션의 변수(`CLAUDECODE`, `CLAUDE_*`, `ORCA_*`)를 넘기지 않는다. 로그인·제공자 변수는 남긴다.
 - 한계:
   - 발동은 확률적이다. 모델, Claude Code, skills CLI 버전에 따라 달라진다.
   - Skill 도구만 허용한 headless 구성이라 일반 대화와 다를 수 있다.
@@ -63,6 +71,6 @@ full validator124/124, 오류0으로 통과했다. source/public frontmatter10/9
 
 - 최초 Claude 호출은 넓은 Glob 결과가100/110개로 잘려 strict scope parser가 실패로 판정했다. 원 결과를 보존하고 좁은 조회를 명시한 별도6건을 통과시켰다. 실패를 parser 완화로 통과시키지 않았다.
 - Codex 기본 PowerShell 읽기는 한글 mojibake가 생겨 UTF8로 다시 읽었다. Get-FileHash 부재는 읽기 전용 .NET SHA로 보완했다. 부모가 실제 명령/UTF8 출력과 설치 문서를 대조했으며 모델의 경로 언급만으로 읽기 성공을 인정하지 않았다.
-- Claude는 project source와 Read/Glob/Grep/Skill allowlist, 쓰기/쉘/위임/network deny, hooks/auto memory/MCP 제한으로 시험했다. restricted 모드는 파일 기반 스킬을 숨겨 사용하지 않았다. 상속된 orca-agent-view 등 런타임 확장은 관측돼 모든 plugin 비활성화를 주장하지 않는다.
+- Claude는 project source와 Read/Glob/Grep/Skill allowlist, 쓰기/쉘/위임/network deny, hooks/auto memory/MCP 제한으로 시험했다. restricted 모드는 파일 기반 스킬을 숨겨 사용하지 않았다. 상속된 orca-agent-view 등 런타임 확장은 관측돼 모든 plugin 비활성화를 주장하지 않는다. 이 관측은 상위 세션의 환경 변수를 그대로 넘기던 때의 조건이다. 2026-11-04부터 native 확인은 상위 에이전트 세션의 변수(`CLAUDECODE`, `CLAUDE_*`, `ORCA_*`)를 넘기지 않는다. 로그인·제공자 변수는 남기며, 다시 실행해 확인하지는 않았다.
 - 기존 로그인은 native CLI가 사용했으며 인증 파일을 복제하지 않았다. native CLI는 자체 runtime/개인 metadata를 기록할 수 있다. fixture/Git/payload 보존은 시스템 전체의 무쓰기나 개인 상태 전체 보존을 뜻하지 않는다.
 - 다른 OS/CLI 버전, global native 호출, 모든9개 workflow의 실제 수행·UI/PNG·전체 commit recovery, 공개 주소 설치·remote update·무인 갱신은 미검증이다. 최신 CLI의 동작 변경은 별도 확인한다. 시험1.7.4의 check는 update alias이므로 읽기 전용 검사로 권장하지 않는다.
