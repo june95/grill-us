@@ -1,12 +1,12 @@
 # 독립 스킬 배포 기술 계약
 
-현재 공식 설치는 [기존 플러그인 안내](../packaging/README.md)를 따른다. 이 문서는 승인된 skills CLI 전환을 준비하는 생성기의 계약이다. 실제 CLI·Codex·Claude 설치와 저장소 기본 경로 전환은 별도 검증이며, 생성 성공을 공개 설치 성공으로 표현하지 않는다.
+공식 설치는 [skills CLI 안내](skills-installation.md)를 따른다. 이 문서는 승인된 배포 계약이다. 최종 전환 구현/검증은 T04에서 수행하며 생성 성공을 공개 GitHub 설치 성공으로 표현하지 않는다.
 
 ## 원본과 public 이름
 
 편집 정본은 `.agents/skills`와 `packaging/grill-us.json`의 명시 `skillNames`·`sourceFiles`다. 기존 source ID는 내부 주소로 유지하며 public 이름은 `prj-` + source ID다. 공식 9개는 `prj-grill-me`, `prj-memory-intake`, `prj-memory-plan`, `prj-memory-execute`, `prj-memory-review`, `prj-memory-explain`, `prj-memory-wiki`, `prj-page-capture`, `prj-visualize`다.
 
-각 public 폴더의 `SKILL.md` name은 폴더명과 같고 description의 의미와 출처·license 고지를 보존한다. 생성물에는 개발용 `metadata.internal` 표시를 남기지 않는다. CodeBurn·런타임·개발용 검증기·사용자 기록은 설치 payload에 포함하지 않는다.
+각 public 폴더의 `SKILL.md` name은 폴더명과 같고 description의 의미와 출처·license 고지를 보존한다. 생성물에는 개발용 `metadata.internal` 표시를 남기지 않는다. 개발 source 9개와 CodeBurn에는 `metadata.internal: true`를 지정한다. 기본 검색/전체 선택은 `skills/`의 public 9개만 노출한다. 명시 internal 선택이나 `INSTALL_INTERNAL_SKILLS` opt-in은 공식 설치 범위 밖이며 internal은 비밀 보호 수단이 아니다. CodeBurn·런타임·개발용 검증기·사용자 기록은 공식 설치 payload에 포함하지 않는다.
 
 ## 독립 문서 계약
 
@@ -24,7 +24,7 @@
 | `node scripts/build-skills.mjs --publish` | 같은 생성 규칙으로 tracked `skills/` 생성 |
 | `node scripts/build-skills.mjs --check-published` | 현재 source와 `skills/`의 목록·내용·참조를 읽기만 대조 |
 
-전환 준비 단계에서는 실제 저장소의 publish를 실행하지 않는다. 소유 fixture에서 두 출력의 일치와 검사를 확인한 후 실제 설치 검증·기본 경로 전환으로 진행한다. 현재 플러그인의 catalog·생성물은 그때까지 보존한다.
+source 정책과 같은 소유 fixture에서 실제 설치·필요한 native 영향 검증을 먼저 통과한 뒤 실제 `skills/`를 publish한다. 기존 catalog/plugin과 전용 생성·검사는 그 이후 정리한다. 소유권·불변성·LF/checkout 검사는 새 배포 suite가 이어받는다.
 
 ## 오류와 교체
 
@@ -42,8 +42,8 @@
 
 `node scripts/prepare-skills-cutover.mjs`는 새 소유 OS temp root에 전환 후보를 생성하고 JSON으로 경로를 반환한다. 실제 source·metadata·catalog·기존 plugin은 변경하지 않는다. `--check <candidate-root>`는 원 입력/도구 SHA·후보 목록/내용·public freshness와 참조를 읽기만 확인한다. 정상0, missing/stale/변조·알 수 없는 항목/빈 디렉터리·경로 링크는1이며 자동 복구하지 않는다.
 
-후보에는 명시40개 source 문서와 metadata, 내부 CodeBurn SKILL만 복사한다. 후보 source10개는 internal=true이며 public9개는 숨김 표시를 제거한다. 미래 배포 단락은 후보의 project-profile에만 적용한다. 후보의 `skills/`는 기존 생성기로 만들고 legacy catalog/plugin·CodeBurn runtime·사용자 기록은 포함하지 않는다. `.git` metadata는 clone 검증을 위해 후보 내용 비교에서 제외한다.
+후보에는 명시40개 source 문서와 metadata, 내부 CodeBurn SKILL만 복사한다. 후보 source10개는 internal=true이며 public9개는 숨김 표시를 제거한다. 후보의 project-profile은 최종 배포 계약으로 정렬한다. 후보의 `skills/`는 기존 생성기로 만들고 legacy catalog/plugin·CodeBurn runtime·사용자 기록은 포함하지 않는다. `.git` metadata는 clone 검증을 위해 후보 내용 비교에서 제외한다.
 
 입력은 실제 개발 저장소 또는 표식 있는 OS temp test source만 허용한다. 기존 생성기의 `readSkillInputs(repository)` 검증과 allowlist를 재사용한다. 반환은 `documents: Map<string,string>` 및 `sourceSnapshot: Record<relativePath,SHA256>`이며 원본을 수정하지 않는다. 준비 명령은 임의 출력/적용/삭제 옵션을 제공하지 않는다.
 
-미래 사용자 안내는 [설치 안내 초안](skills-installation.md)에 둔다. 준비 후보의 README와 LF 정책은 후보에만 생성하며 실제 저장소에 그대로 적용하지 않는다. 현재 공개 GitHub 명령·기본 경로 전환, 실제 source/internal 변경, 기존 catalog·plugin 제거는 Claude 검증과 변경 영향 native 검증 후의 최종 작업이다.
+사용자 안내는 [설치 안내](skills-installation.md)에 둔다. 준비 명령은 실제 저장소를 적용/삭제하지 않고 최종 전환 이후에도 독립 후보 검증에 사용한다. 기존 plugin의 당시 호환성 보고는 보존한다. 공개 push·원격 재설치·개인 설치 전환은 별도 사용자 작업이다.

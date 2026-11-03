@@ -53,6 +53,9 @@ export function collectDocuments(root) {
   }
   walk(path.join(root, 'examples'));
   walk(path.join(root, '.agents', 'skills'));
+  walk(path.join(root, 'docs'));
+  walk(path.join(root, 'packaging'));
+  walk(path.join(root, 'skills'));
   return files.sort();
 }
 
@@ -956,14 +959,14 @@ export function checkGitCases() {
 
 export function main({ root = projectRoot, runRegressionTests = true } = {}) {
   const [major, minor] = process.versions.node.split('.').map(Number);
-  if (major < 22 || (major === 22 && minor < 13)) { console.error('Node.js 22.13.0 이상 필요'); return 1; }
+  if (major < 22 || (major === 22 && minor < 20)) { console.error('Node.js 22.20.0 이상 필요 (skills CLI 통합 검사 포함)'); return 1; }
   root = path.resolve(root);
   let failed = false;
   if (runRegressionTests) {
-    const suite = spawnSync(process.execPath, ['--test', path.join(projectRoot, 'tests', 'validate-skills.test.mjs'),
-      path.join(projectRoot, 'tests', 'build-plugin.test.mjs'), path.join(projectRoot, 'tests', 'repository-marketplace.test.mjs')],
-      // Windows의 소유권/누락 회귀는 수천 파일을 생성한다. 관측한 약 186초를 수용하되 유한한 제한을 유지한다.
-      { cwd: projectRoot, encoding: 'utf8', timeout: 300000 });
+    const suite = spawnSync(process.execPath, ['--test', ...['validate-skills', 'build-skills', 'repository-skills', 'skills-install']
+      .map(name => path.join(projectRoot, 'tests', name + '.test.mjs'))],
+      // 독립 문서/checkout 소유권과 실제 npx 통합 검사를 포함한다. native 모델 호출은 별도 수동 gate다.
+      { cwd: projectRoot, encoding: 'utf8', timeout: 900000, maxBuffer: 8 * 1024 * 1024 });
     process.stdout.write(suite.stdout || '');
     if (suite.error || suite.status !== 0) {
       console.error(suite.error?.message || suite.stderr || '회귀 검사 실패'); failed = true;
@@ -972,7 +975,9 @@ export function main({ root = projectRoot, runRegressionTests = true } = {}) {
   try {
     const files = collectDocuments(root);
     const checks = {
-      frontmatter: checkSkillFrontmatter(root, files), links: checkLinks(root, files), messages: checkTaskMessages(root, files),
+      frontmatter: checkSkillFrontmatter(root, files),
+      'public-frontmatter': checkSkillFrontmatter(root, files, { skillRoot: 'skills' }),
+      links: checkLinks(root, files), messages: checkTaskMessages(root, files),
       examples: checkExamples(files), 'html-ids': checkHtmlIds(files),
       'memory-examples': checkMemoryExamples(root, files), git: checkGitCases()
     };

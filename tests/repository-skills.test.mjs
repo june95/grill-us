@@ -7,6 +7,7 @@ import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { prepareSkillsCutover, checkSkillsCutover } from '../scripts/prepare-skills-cutover.mjs';
+import { checkPublishedSkills } from '../scripts/build-skills.mjs';
 import { checkLinks } from '../scripts/validate-skills.mjs';
 import { createRun, consumer, cli, finishRun, listEntries, tree, names, noLinks } from './helpers/skills-install.mjs';
 
@@ -18,7 +19,9 @@ const read = file => fs.readFileSync(file, 'utf8');
 function protectSnapshot() {
   const metadata = JSON.parse(read(path.join(repo, 'packaging/grill-us.json')));
   const files = ['packaging/grill-us.json', 'packaging/README.md', '.agents/plugins/marketplace.json', '.claude-plugin/marketplace.json', '.agents/skills/codeburn/SKILL.md', ...metadata.sourceFiles.map(file => '.agents/skills/' + file)];
-  return Object.fromEntries(files.map(file => [file, hash(path.join(repo, file))]));
+  const published = path.join(repo, 'skills/build.json');
+  if (fs.existsSync(published)) files.push('skills/build.json', 'skills/.grill-us-skills-build.json', ...JSON.parse(read(published)).files.map(file => 'skills/' + file.path));
+  return Object.fromEntries(files.map(file => [file, fs.existsSync(path.join(repo, file)) ? hash(path.join(repo, file)) : null]));
 }
 
 /** 이 suite가 만든 nonce와 절대 root를 검사한 뒤 알려진 fixture만 제거한다. */
@@ -76,7 +79,7 @@ candidateTest('prepared candidate preserves current delivery and exposes only se
   assert(read(publicFile).includes('license: MIT'));
   assert(read(publicFile).includes('author: careerhackeralex'));
   assert(read(path.join(result.root, '.agents/skills/memory-execute/references/project-profile.md')).includes('skills CLI로 제공한다'));
-  assert(read(path.join(result.root, 'README.md')).includes('전환 준비'));
+  assert.equal(read(path.join(result.root, 'README.md')), read(path.join(repo, 'docs/skills-installation.md')));
   assert.deepEqual(checkLinks(result.root, [path.join(result.root, 'README.md')]).diagnostics.filter(item => item.severity === 'error'), []);
   assert.equal(checkSkillsCutover(result.root).status, 'verified-preparation-only');
 });
@@ -172,32 +175,53 @@ candidateTest('Git consumers retain exact candidate/public bytes under either au
   }
 });
 
-candidateTest('real installer default/wildcard catalog and explicit public selection use candidate bytes', async ({ ownCandidate, t }) => {
+candidateTest('real installer default/wildcard and explicit selection use candidate and final repository public bytes', async ({ ownCandidate, t }) => {
   const candidate = ownCandidate(prepareSkillsCutover()), run = createRun();
   let succeeded = false;
   t.after(() => {
     const retention = finishRun(run, { succeeded });
     if (retention.retained) console.log('CUTOVER_INSTALLER_RETAINED ' + JSON.stringify(retention));
   });
-  for (const args of [[], ['--skill', '*']]) {
-    const result = await cli(run, ['add', candidate.root, '--list', ...args]);
+  for (const source of [candidate.root, repo]) {
+   for (const args of [[], ['--skill', '*']]) {
+    const result = await cli(run, ['add', source, '--list', ...args]);
     const discovered = [...result.stdout.matchAll(/^\s*(?:│\s*)?(prj-[a-z-]+)\s*$/gm)].map(match => match[1]).sort();
     assert.deepEqual(discovered, [...names].sort());
     assert(!/^\s*│\s*(?:memory-|codeburn|grill-me|visualize|page-capture)/m.test(result.stdout));
-  }
-  for (const agent of ['codex', 'claude-code']) {
-    const cwd = consumer(run, agent + '-prepared');
-    await cli(run, ['add', candidate.root, '--skill', 'prj-memory-explain', '-a', agent, '--copy', '-y', '--json'], cwd);
+   }
+   for (const agent of ['codex', 'claude-code']) {
+    const label = source === repo ? 'repository' : 'prepared';
+    const full = consumer(run, agent + '-' + label + '-full');
+    await cli(run, ['add', source, ...(agent === 'codex' ? [] : ['--skill', '*']), '-a', agent, '--copy', '-y', '--json'], full);
+    const all = listEntries(await cli(run, ['list', '-a', agent, '--json'], full));
+    assert.deepEqual(all.map(entry => entry.name).sort(), [...names].sort());
+    for (const entry of all) assert.deepEqual(tree(entry.path), tree(path.join(candidate.root, 'skills', entry.name)));
+    await cli(run, ['remove', ...names, '-a', agent, '-y'], full);
+    assert.deepEqual(listEntries(await cli(run, ['list', '-a', agent, '--json'], full)), []);
+    const cwd = consumer(run, agent + '-' + label + '-single');
+    await cli(run, ['add', source, '--skill', 'prj-memory-explain', '-a', agent, '--copy', '-y', '--json'], cwd);
     const entries = listEntries(await cli(run, ['list', '-a', agent, '--json'], cwd));
     assert.deepEqual(entries.map(entry => entry.name), ['prj-memory-explain']);
     assert(entries[0].path.startsWith(cwd + path.sep));
     assert.deepEqual(tree(entries[0].path), tree(path.join(candidate.root, 'skills/prj-memory-explain')));
     await cli(run, ['remove', 'prj-memory-explain', '-a', agent, '-y'], cwd);
     assert.deepEqual(listEntries(await cli(run, ['list', '-a', agent, '--json'], cwd)), []);
+   }
   }
   succeeded = true;
   assert.equal(checkSkillsCutover(candidate.root).status, 'verified-preparation-only');
 }, { timeout: 600000 });
+
+candidateTest('final public snapshot is fresh and read-only while legacy delivery is retired', ({ ownCandidate }) => {
+  for (const file of ['.agents/plugins/marketplace.json', '.claude-plugin/marketplace.json', 'plugins/grill-us', 'scripts/build-plugin.mjs', 'tests/build-plugin.test.mjs', 'tests/repository-marketplace.test.mjs']) {
+    assert.equal(fs.existsSync(path.join(repo, file)), false, file);
+  }
+  const before = protectSnapshot();
+  checkPublishedSkills({ repoRoot: repo });
+  assert.deepEqual(protectSnapshot(), before);
+  const candidate = ownCandidate(prepareSkillsCutover());
+  assert.deepEqual(tree(path.join(candidate.root, 'skills')), tree(path.join(repo, 'skills')));
+});
 
 test('preparation import is quiet and invalid CLI arguments do not apply or delete anything', () => {
   const file = path.join(repo, 'scripts/prepare-skills-cutover.mjs');

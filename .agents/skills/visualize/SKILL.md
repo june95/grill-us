@@ -10,6 +10,7 @@ description: >
   or any request to present information in a visual HTML format.
 license: MIT
 metadata:
+  internal: true
   author: careerhackeralex
   version: 0.3.0
   category: document-creation

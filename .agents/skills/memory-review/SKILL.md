@@ -1,6 +1,8 @@
 ---
 name: memory-review
 description: Review an explicit Task, Phase, file list, diff, or commit range and return evidence-based findings without writing files or state. Support code review without a plan; do not create tasks, run tests, fix code, or delegate. Use memory-execute for workflow review reports and state updates.
+metadata:
+  internal: true
 ---
 
 # Memory Review
@@ -29,16 +31,16 @@ description: Review an explicit Task, Phase, file list, diff, or commit range an
 
 직접 호출과 위임 worker 모두 제품·`.memory`·보고/history/current/checkpoint·Git·개인 설정을 쓰지 않는다. 테스트/빌드/설치·코드 수정·staging/commit/push·복구·새 Task 등록·자동 활성화·후속 실행·추가 리뷰어 위임을 하지 않는다. 기존 자료가 없거나 결함을 발견해도 이 경계를 유지하고 필요한 조치만 반환한다. 읽기 도구의 실제 권한 제한 수준을 밝히며 지시문만으로 OS 쓰기 차단이나 모든 부작용 방지를 주장하지 않는다.
 
-`memory-execute`가 위임하면 전달된 scope·Task Revision·diff/snapshot을 기준으로 같은 검토를 한 번 수행해 실행 담당에게 반환한다. 실행 담당만 공통 [Review Delegation](../memory-execute/references/review.md#review-delegation)에 따라 결과를 대조해 기존 review.md/Task metadata를 기록한다. worker가 다시 위임하거나 기록하지 않는다. `memory-execute --stage review`는 별도 실행 요청이며 기존 보고·상태 기록은 허용하지만 자동 수정·커밋·완료·포인터 전진은 하지 않는다.
+`prj-memory-execute`가 위임하면 전달된 scope·Task Revision·diff/snapshot을 기준으로 같은 검토를 한 번 수행해 실행 담당에게 반환한다. 실행 담당만 공통 [Review Delegation](../memory-execute/references/review.md#review-delegation)에 따라 결과를 대조해 기존 review.md/Task metadata를 기록한다. worker가 다시 위임하거나 기록하지 않는다. `prj-memory-execute --stage review`는 별도 실행 요청이며 기존 보고·상태 기록은 허용하지만 자동 수정·커밋·완료·포인터 전진은 하지 않는다.
 
 ## Examples
 
 ~~~text
-memory-review 이 Task의 현재 구현을 검토해줘: {task.md 경로}
-memory-review 이 Phase의 T01~T03을 검토해줘: {phase.md 경로}
-memory-review 현재 저장소의 staged diff만 검토해줘
-memory-review {base commit}부터 {head commit}까지 변경을 검토해줘
-memory-review 이 파일과 필요한 호출부를 검토해줘: {파일 목록}
+prj-memory-review 이 Task의 현재 구현을 검토해줘: {task.md 경로}
+prj-memory-review 이 Phase의 T01~T03을 검토해줘: {phase.md 경로}
+prj-memory-review 현재 저장소의 staged diff만 검토해줘
+prj-memory-review {base commit}부터 {head commit}까지 변경을 검토해줘
+prj-memory-review 이 파일과 필요한 호출부를 검토해줘: {파일 목록}
 ~~~
 
 [시나리오](references/scenarios.md)는 관련 경계 확인에만 사용한다. 일반 코드에도 쓸 수 있는 무쓰기 진입점의 절차를 이 파일에 두며, 공통 검토 기준은 review.md를 재사용한다.

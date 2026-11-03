@@ -1,5 +1,7 @@
 # grill-us plugin 호환성 확인
 
+현재 공식 설치와 검증은 [skills CLI 설치 안내](skills-installation.md) 및 [skills 호환성](skills-compatibility.md)을 따른다. 아래는 이전 plugin 배포의 당시 기록이며 새 방식의 성공 근거로 바꾸지 않는다.
+
 현재 개발 snapshot은 memory-wiki를 포함한 **0.4.0/9개 스킬**, 명시40개 원본 문서·46개 package 파일입니다. Markdown-only 구성과 특정 호스트의 실제 UI 캡처 성공, 과거 **0.2.0/7개**·**0.1.0/6개** 설치 결과를 구분합니다. 시험 버전은 최소 지원 버전이 아니며 CodeBurn·개발 검증기·브라우저 실행 코드는 배포하지 않습니다.
 
 ## 0.4.0 memory-wiki 검증 범위

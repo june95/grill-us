@@ -1,6 +1,8 @@
 ---
 name: grill-me
 description: Resolve material requirements and design choices one question at a time, then preserve confirmed decisions in .memory. Use for explicit design interviews or unresolved choices from intake or planning.
+metadata:
+  internal: true
 ---
 
 # Grill Me
@@ -42,7 +44,7 @@ description: Resolve material requirements and design choices one question at a 
 - Applies to: {이 결정이 적용되는 기능·모듈·상황과 필요한 조건}
 ~~~
 
-미해결 중요한 결정은 Confirmed로 저장하지 않는다. 제품/공유 정본·staging·commit·active 전환은 하지 않으며 다음은 [memory-plan](../memory-plan/SKILL.md) 또는 기존 등록 맥락의 [memory-intake](../memory-intake/SKILL.md)로 안내한다.
+미해결 중요한 결정은 Confirmed로 저장하지 않는다. 제품/공유 정본·staging·commit·active 전환은 하지 않으며 다음은 [prj-memory-plan](../memory-plan/SKILL.md) 또는 기존 등록 맥락의 [prj-memory-intake](../memory-intake/SKILL.md)로 안내한다.
 
 ## Learning Notes
 

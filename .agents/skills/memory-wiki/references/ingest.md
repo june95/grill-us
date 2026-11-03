@@ -1,6 +1,6 @@
 # Ingest and Refresh
 
-[memory-wiki](../SKILL.md)의 명시 write 모드 절차다. 파일/필드 형식은 [templates.md](templates.md), 질의/답변 저장은 [query.md](query.md)가 소유한다.
+[prj-memory-wiki](../SKILL.md)의 명시 write 모드 절차다. 파일/필드 형식은 [templates.md](templates.md), 질의/답변 저장은 [query.md](query.md)가 소유한다.
 
 ## Select Sources and Output
 

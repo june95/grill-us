@@ -1,6 +1,6 @@
 # Capture Contract
 
-[page-capture](../SKILL.md)의 산출·실패·권한 경계를 소유한다. 호스트별 API와 파일 도구는 현재 제공된 문서로 확인하며 이 문서는 특정 browser adapter나 실행 코드를 번들하지 않는다.
+[prj-page-capture](../SKILL.md)의 산출·실패·권한 경계를 소유한다. 호스트별 API와 파일 도구는 현재 제공된 문서로 확인하며 이 문서는 특정 browser adapter나 실행 코드를 번들하지 않는다.
 
 ## Capability
 

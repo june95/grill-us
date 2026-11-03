@@ -140,7 +140,7 @@ test('current calls change without changing source paths, external URLs, dated p
 
 test('internal discovery marker is removed while author and other nested metadata survive', t => {
   const root = fixture(t), file = sourceAt(root, 'grill-me/SKILL.md');
-  write(file, read(file).replace('\n---\n', '\nmetadata:\n    "internal": true\n    author: preserved\n    extra:\n      internal: nested-value\n---\n'));
+  write(file, read(file).replace('\nmetadata:\n  internal: true', '').replace('\n---\n', '\nmetadata:\n    "internal": true\n    author: preserved\n    extra:\n      internal: nested-value\n---\n'));
   const output = buildSkills({ repoRoot: root }).outputRoot;
   const text = read(path.join(output, 'prj-grill-me/SKILL.md'));
   assert(!text.includes('"internal": true'));

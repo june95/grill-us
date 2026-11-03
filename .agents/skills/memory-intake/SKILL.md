@@ -1,6 +1,8 @@
 ---
 name: memory-intake
 description: Register a clear change, bug, or issue as a .memory task without implementation. Use for task intake and 이슈 등록; route material unresolved design choices to grill-me.
+metadata:
+  internal: true
 ---
 
 # Memory Intake
@@ -20,7 +22,7 @@ description: Register a clear change, bug, or issue as a .memory task without im
 
 ## Clarity Gate
 
-[Registration and Planning](../memory-execute/references/conventions.md#registration-and-planning)의 명확함 기준을 적용한다. 중요한 미결정은 [grill-me](../grill-me/SKILL.md)로 해소한 뒤 청사진을 확정한다. 추천안·미확정 원인·실행하지 않은 결과를 확정으로 기록하지 않는다.
+[Registration and Planning](../memory-execute/references/conventions.md#registration-and-planning)의 명확함 기준을 적용한다. 중요한 미결정은 [prj-grill-me](../grill-me/SKILL.md)로 해소한 뒤 청사진을 확정한다. 추천안·미확정 원인·실행하지 않은 결과를 확정으로 기록하지 않는다.
 
 원인 미확정/재현 불가만으로 명확한 버그 등록을 막지 않는다. 첫 실행의 확인 조건·수정 범위·중요 계약 변경 경계를 계획하고 필요한 실제 동작 선택이 부족할 때만 인터뷰한다.
 
@@ -30,7 +32,7 @@ description: Register a clear change, bug, or issue as a .memory task without im
 
 ## Registration
 
-1. [memory-plan](../memory-plan/SKILL.md#task-contract)의 계약으로 Plan/Phase/folder/task.md를 작성한다. 기존 Phase 최대 T 다음 번호와 [Paths](../memory-execute/references/conventions.md#paths)의 실제 ID/링크를 사용한다.
+1. [prj-memory-plan](../memory-plan/SKILL.md#task-contract)의 계약으로 Plan/Phase/folder/task.md를 작성한다. 기존 Phase 최대 T 다음 번호와 [Paths](../memory-execute/references/conventions.md#paths)의 실제 ID/링크를 사용한다.
 2. 조사 근거가 충분하면 Task와 결정 링크로 재사용하며 reference.md는 상세 기록이 필요한 경우만 만든다. 독립 분석/테스트도 사전 조사 목표·산출물을 명시한 Task로 등록 가능하다.
 3. 버그 Task는 조사 근거와 수정 전/후 검증 조건을 계획하고, nonbug/과거 done에는 빈 버그 표를 소급 추가하지 않는다. 명령·조건부 단계·커밋 정책을 stub 없이 작성하되 실제 코드는 실행 단계에 둔다.
 4. [Planning Boundaries](../memory-execute/references/conventions.md#planning-boundaries)의 공유 계약/내부 재량 경계와 작업별 Constraints를 적용한다. 새 파일/추상화는 기존 소유 위치에서 처리할 수 없는 이유를 적고 과거 완료 기록에 새 형식을 소급 강제하지 않는다.
@@ -45,6 +47,6 @@ description: Register a clear change, bug, or issue as a .memory task without im
 
 ## Report
 
-[Reporting](../memory-execute/references/conventions.md#reporting)으로 배치·분할·workflow·근거·활성화 여부·다음 행동을 설명한다. 버그는 실제 재현/원인 수준·한계·첫 검증을 짧게 보고하고 [memory-execute](../memory-execute/SKILL.md)를 안내한다.
+[Reporting](../memory-execute/references/conventions.md#reporting)으로 배치·분할·workflow·근거·활성화 여부·다음 행동을 설명한다. 버그는 실제 재현/원인 수준·한계·첫 검증을 짧게 보고하고 [prj-memory-execute](../memory-execute/SKILL.md)를 안내한다.
 
 [History](../memory-execute/references/conventions.md#history)에 등록 결과를 기록한다. planner가 같은 생성 결과를 기록했다면 별도 배치/활성화 판단이 있을 때만 추가하고 범위 밖 작업을 자동 등록하지 않는다.

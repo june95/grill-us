@@ -1,6 +1,8 @@
 ---
 name: memory-explain
 description: Find and explain recorded decisions, designs, plans, progress, and completed work from .memory and relevant code or Git evidence. Use for decision lookup by ID, topic or scope, rationale, plan-versus-result comparisons, and explanatory handover requests. Read only; do not change records, code, or Git state.
+metadata:
+  internal: true
 ---
 
 # Memory Explain
@@ -9,7 +11,7 @@ description: Find and explain recorded decisions, designs, plans, progress, and 
 
 ## Inputs
 
-선택적 대상(Plan/Phase/Task/decision 경로·ID·주제), 관점(전체/이유/차이/전후/관계/검증), 깊이(짧게/일반/비개발자/개발자 상세)를 받는다. 자연어·/memory-explain·지원 도구의 $memory-explain은 요청 표기이며 CLI가 아니다. 인수인계 설명은 포함하지만 실제 에이전트 위임·전송은 별도 요청이다.
+선택적 대상(Plan/Phase/Task/decision 경로·ID·주제), 관점(전체/이유/차이/전후/관계/검증), 깊이(짧게/일반/비개발자/개발자 상세)를 받는다. 자연어·/prj-memory-explain·지원 도구의 $prj-memory-explain은 요청 표기이며 CLI가 아니다. 인수인계 설명은 포함하지만 실제 에이전트 위임·전송은 별도 요청이다.
 
 결정 검색은 Decision ID, 문서와 DNN, 주제·키워드, 연결 Plan/Task, 적용 모듈·상황으로 요청할 수 있다. 별도 검색 스킬·CLI·색인 DB를 요구하지 않는다.
 
@@ -23,7 +25,7 @@ description: Find and explain recorded decisions, designs, plans, progress, and 
 
 ## Wiki Questions
 
-Wiki 자료에 대한 명시 질의는 [memory-wiki](../memory-wiki/SKILL.md)의 query와 [읽기 전용 절차](../memory-wiki/references/query.md#read-only-query)로 연결한다. 기본 설명·결정 검색을 Wiki 전체 수집으로 확대하지 않는다. Wiki가 없으면 생성하지 않고 확인한 범위의 자료 부재를 설명한다.
+Wiki 자료에 대한 명시 질의는 [prj-memory-wiki](../memory-wiki/SKILL.md)의 query와 [읽기 전용 절차](../memory-wiki/references/query.md#read-only-query)로 연결한다. 기본 설명·결정 검색을 Wiki 전체 수집으로 확대하지 않는다. Wiki가 없으면 생성하지 않고 확인한 범위의 자료 부재를 설명한다.
 
 관련 topic/원문 사본을 읽어 답변·출처·상충/범위/현재성·업무 권위 미확인을 설명한다. Wiki는 결정이나 정본을 자동 대체하지 않는다. 설명 호출에서 answers/index/log·current·Task·Decision을 쓰거나 수집/refresh/답변 저장을 수행하지 않는다. 명시 write 요청은 memory-wiki의 별도 해당 모드로 구분하며 이 설명의 무쓰기 경계를 유지한다.
 
@@ -79,18 +81,18 @@ Wiki 자료에 대한 명시 질의는 [memory-wiki](../memory-wiki/SKILL.md)의
 
 결정 검색도 같은 경계를 따른다. 후보를 설명하기 위해 원문을 새 형식으로 변환하거나 적용 범위·재검토 조건을 추정해 채우지 않는다. 검색 결과가 불확실하다는 이유로 자동 인터뷰·새 결정 저장을 시작하지 않는다.
 
-기본 출력은 채팅이다. 명시 HTML 요청만 [visualize](../visualize/SKILL.md)를 별도로 적용한다. 기본 산출물은 저장소 밖에 두고 저장소 안 경로가 명시되면 그 파일 생성 범위만 구분한다. 시각화 요청도 memory/과거 보고/history 변경이나 staging/commit 권한을 부여하지 않는다.
+기본 출력은 채팅이다. 명시 HTML 요청만 [prj-visualize](../visualize/SKILL.md)를 별도로 적용한다. 기본 산출물은 저장소 밖에 두고 저장소 안 경로가 명시되면 그 파일 생성 범위만 구분한다. 시각화 요청도 memory/과거 보고/history 변경이나 staging/commit 권한을 부여하지 않는다.
 
 ## Examples
 
 ~~~text
-$memory-explain 현재 계획을 짧게 설명해줘
-$memory-explain 마지막 완료 작업은 무엇이 바뀌었어?
-memory-explain 설계를 선택한 이유와 계획 대비 결과를 알려줘
-memory-explain 비개발자 요약 또는 개발자 인수인계용 흐름·검증 한계를 설명해줘
-memory-explain 의존 관계를 visualize로 HTML 도식으로 만들어줘
-memory-explain 상품 모듈의 SKU별 재고 결정을 찾아 이유와 적용 범위를 알려줘
-memory-explain 2026-08-22-product-api 문서의 D02와 연결된 Plan을 설명해줘
+$prj-memory-explain 현재 계획을 짧게 설명해줘
+$prj-memory-explain 마지막 완료 작업은 무엇이 바뀌었어?
+prj-memory-explain 설계를 선택한 이유와 계획 대비 결과를 알려줘
+prj-memory-explain 비개발자 요약 또는 개발자 인수인계용 흐름·검증 한계를 설명해줘
+prj-memory-explain 의존 관계를 prj-visualize로 HTML 도식으로 만들어줘
+prj-memory-explain 상품 모듈의 SKU별 재고 결정을 찾아 이유와 적용 범위를 알려줘
+prj-memory-explain 2026-08-22-product-api 문서의 D02와 연결된 Plan을 설명해줘
 ~~~
 
 [시나리오](references/scenarios.md)는 관련 경계를 확인할 때만 읽으며 매 호출 전체를 로드하지 않는다.

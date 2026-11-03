@@ -1,8 +1,8 @@
-# skills CLI 설치 안내 — 전환 준비
+# skills CLI 설치 안내
 
-현재 공식 설치는 [기존 플러그인 안내](https://github.com/june95/grill-us/blob/main/packaging/README.md)를 따른다. 아래 GitHub 명령은 최종 전환 후 사용할 안내 초안이다. 준비 후보 검증은 공개 주소 반영이나 Claude native 검증 완료를 의미하지 않는다.
+승인된 공식 설치 경로는 skills CLI와 public `prj-*` 9개다. 이 변경은 아직 공개 push 전이며 아래 GitHub 주소가 새 snapshot을 제공하는지는 공개 반영 후 별도 확인해야 한다. 로컬 후보 검증을 공개 주소 설치 성공으로 해석하지 않는다.
 
-## 최종 전환 후 설치
+## 설치
 
 Node.js와 npx가 필요하다. 시험한 skills CLI 1.7.4는 Node.js 22.20 이상을 요구한다. 별도 저장소 빌드는 필요하지 않다.
 
@@ -31,14 +31,28 @@ npx skills@latest remove prj-memory-explain -a codex
 npx skills@latest remove prj-memory-explain -a claude-code
 ```
 
-전역 항목에는 같은 범위의 `-g`를 사용한다. 제거할 이름과 에이전트·scope를 먼저 확인한다. 업데이트는 CLI가 제공하는 `update` 명령을 사용하지만, 이번 로컬 준비 후보 시험은 공개 주소의 원격 업데이트나 무인 갱신 성공을 검증한 것이 아니다. 현재 버전의 help와 실제 결과를 확인한다.
+전역 목록·제거에는 같은 범위의 `-g`를 사용한다. 제거할 이름과 에이전트·scope를 먼저 확인한다. 설치는 기본 링크 모드와 `--copy`를 선택할 수 있다. Codex 프로젝트 설치는 `.agents/skills`, Claude Code는 `.claude/skills`의 실제 경로와 이름을 확인한다.
+
+~~~sh
+npx skills@latest update prj-memory-explain --project
+npx skills@latest update prj-memory-explain --global
+~~~
+
+시험한1.7.4의 실제 help/코드는 이름 선택과 project/global update를 제공한다. `check`도 같은 update 함수로 연결되므로 **읽기 전용 업데이트 검사로 안내하지 않는다.** 최신 CLI는 `--help`와 실제 결과를 확인한다. 로컬 source의 설치 시험은 공개 GitHub source의 원격 업데이트나 무인 갱신을 검증하지 않는다. 업데이트 명령은 선택한 scope의 다른 에이전트 연결에도 영향을 줄 수 있으므로 설치 source와 목록을 먼저 확인한다.
 
 ## 기존 plugin 사용자
 
-최종 전환 후 새 public 이름과 실제 읽는 경로를 확인하고 필요할 때 정확한 기존 `grill-us@grill-us` 설치 항목을 직접 제거한다. 기존 프로젝트 `.memory`를 이동하거나 재생성할 필요는 없다. 새 설치를 기존 plugin 설치 성공으로 대신 판단하지 않는다.
+새 public 이름과 실제 읽는 경로를 확인하고 필요할 때 정확한 기존 `grill-us@grill-us` 설치 항목을 직접 제거한다. 기존 프로젝트 `.memory`를 이동하거나 재생성할 필요는 없다. 새 설치를 기존 plugin 설치 성공으로 대신 판단하지 않는다.
+
+~~~sh
+codex plugin remove grill-us@grill-us
+claude plugin uninstall grill-us@grill-us --scope user
+~~~
+
+위 identity와 scope로 설치했던 사용자만 직접 실행한다. 다른 scope/사본은 먼저 설치 목록과 경로를 확인한다. marketplace 전체 제거·cache 강제 삭제·기존 세션 종료는 요구하지 않는다. 옛 이름은 `$grill-us:memory-explain` / `/grill-us:memory-explain`, 새 이름은 `$prj-memory-explain` / `/prj-memory-explain`이다. 마지막 안내용 plugin 릴리스를 추가하지 않는다.
 
 ## 검증 범위
 
-Windows의 Node26.12.1/skills1.7.4에서 기존 생성물의 실제 단독·전체 설치/정확한 제거·파일 SHA를 확인했고, Codex0.166.0과 Claude2.1.316에서 각 대표 호출3건을 확인했다. Claude는 프로젝트 source를 활성화한 읽기 전용 도구 구성으로 전체9개/단독1개 발견과 설치 문서·참고 문서 읽기를 확인했다. 전환 후보의 수정된 배포 단락은 별도 payload이며 native 영향 검증이 남아 있다.
+Windows의 Node26.12.1/skills1.7.4에서 최종 후보의 기본·전체 검색9개와 두 에이전트의 전체/단독 설치 bytes를 대조했다. Codex0.166.0·Claude2.1.316의 설명·리뷰·인터뷰 각3건에서 설치된 전체 SKILL, 자체 참고 문서와 변경된 설치/작업공간 절을 읽고 fixture·Git·payload 변경이 없음을 확인했다. 실제 저장소의 최종 회귀 결과는 [호환성 안내](https://github.com/june95/grill-us/blob/main/docs/skills-compatibility.md)에 구분한다.
 
-현재 준비 명령으로 만든 후보의 default/wildcard 검색·명시 public 설치·clone/LF 확인은 개발용 별도 시험이다. 다른 OS/버전·실제 사용자 global native 호출·전체 workflow의 성공을 보장하지 않는다. 실제 저장소의 기본 경로 전환과 기존 plugin 제거는 후속 검증 이후에 수행한다.
+공식 public9개는 `skills/` 생성물이며 개발 source9개와 CodeBurn의 internal 표시는 기본 검색에서 숨기는 정책이다. 명시 internal 요청/opt-in은 공식 설치 범위 밖이며 비밀 보호 수단이 아니다. 다른 OS/CLI 버전·global native 호출·전체 workflow·공개 주소 설치/업데이트는 별도 검증이다. 기존 plugin의 당시 결과를 새 방식 성공으로 확대하지 않는다.

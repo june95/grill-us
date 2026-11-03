@@ -1,6 +1,8 @@
 ---
 name: codeburn
 description: Analyze local AI coding token usage, costs, sessions, and savings with the bundled CodeBurn CLI. Use when the user asks about token usage, per-question or per-session usage, AI coding costs, CodeBurn reports, or usage optimization.
+metadata:
+  internal: true
 ---
 
 # CodeBurn

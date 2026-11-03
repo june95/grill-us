@@ -53,9 +53,9 @@ git --no-optional-locks status --porcelain=v1 -z --untracked-files=all
 3. 실제 cwd가 설치 cache/package 내부이거나 대상 프로젝트가 혼동되면 쓰기 전에 한 질문으로 작업공간을 확정한다. 대상이 분명하면 같은 위치를 반복해서 묻지 않는다.
 4. 스킬 지침과 내부 참조는 설치된 package에서 읽고, 제품·공유 정본·검증 명령·Git 정책은 사용자 프로젝트에서 발견한다. 사용 프로젝트에 이 저장소의 개발용 scripts/tests나 README/AGENTS 구조를 요구하지 않는다.
 
-공식 배포는 공통 원본에서 생성한 plugin 경로로 제공한다. 저장소 `.agents/skills`는 개발 정본이며 수동으로 복제한 도구별 프로젝트 스킬 폴더를 별도 공식 배포 방식으로 관리하지 않는다. 개발 원본 직접 로딩과 설치 plugin을 같은 시험 세션에서 혼용하지 않는다. 기존 설치본은 자동 삭제·변환·덮어쓰지 않는다.
+공식 배포는 공통 원본에서 생성한 prj- 스킬을 skills CLI로 제공한다. `.agents/skills`는 개발 정본이고 source ID는 내부 주소다. 개발 source와 CodeBurn은 기본 설치 후보에서 제외하며 공개 항목9개는 `skills/`에 생성한다. internal opt-in은 비밀 보호 수단이 아니다. 기존 설치본은 자동 삭제·변환·덮어쓰지 않는다.
 
-이 저장소의 배포 관리에서는 ignored `dist/grill-us`를 로컬 빌드로, tracked `plugins/grill-us`를 Git 배포 snapshot으로 구분한다. 양쪽은 `.agents/skills`·packaging 정본에서 생성하며 snapshot을 새 편집 정본으로 취급하지 않는다. 배포 입력/생성물은 LF로 유지하고 `node scripts/build-plugin.mjs --publish` 및 `--check-published`로 갱신/무쓰기 최신성을 확인한다. 이 명령·Git 추적 예외는 이 배포 저장소에 한정하며 설치 대상 사용자 프로젝트에 요구하지 않는다.
+배포 유지보수 명령은 `node scripts/build-skills.mjs`, `--publish`, `--check-published`다. 로컬 생성물은 ignored `dist/grill-us-skills`, Git 배포 snapshot은 `skills/`이며 생성물을 수동 편집하지 않는다. 사용자는 `npx skills@latest add june95/grill-us`로 public 이름을 선택하며 별도 Node 빌드를 하지 않는다. 실제 source·설치 위치를 확인하고 native 미검증 범위를 성공으로 확대하지 않는다.
 
 ## Optional Profile
 

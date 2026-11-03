@@ -1,6 +1,8 @@
 ---
 name: memory-execute
 description: Execute or resume a .memory task using its selected workflow stages, or run only a requested review, test, or commit check. Use for memory-execute and current 보고 이어서 requests.
+metadata:
+  internal: true
 ---
 
 # Memory Execute
@@ -10,10 +12,10 @@ Task 폴더의 task.md를 계약으로 선택한 단계만 실행한다. 기본 
 ## Inputs
 
 ~~~text
-/memory-execute
-/memory-execute --stage review
-/memory-execute --stage test --task .memory/phases/<plan>/<phase>/<task>/task.md
-/memory-execute --stage commit-check
+/prj-memory-execute
+/prj-memory-execute --stage review
+/prj-memory-execute --stage test --task .memory/phases/<plan>/<phase>/<task>/task.md
+/prj-memory-execute --stage commit-check
 현재 보고 이어서 해줘
 T01부터 T03까지 순서대로 진행해줘
 현재 Task 구현과 검증만 하고 커밋은 하지 마
@@ -35,7 +37,7 @@ T01부터 T03까지 순서대로 진행해줘
 | reference | [analysis.md](references/analysis.md) | 근거 조사, 제품/공유 정본 수정 없음 |
 | design-guide-update | [guides.md](references/guides.md#design-mode) | 승인된 계약을 의존 구현 전에 |
 | implementation | [implementation.md](references/implementation.md) | Task scope 구현·최소 검증 |
-| review | [memory-review](../memory-review/SKILL.md), [Compliance](references/review.md#compliance), [Review Delegation](references/review.md#review-delegation) | 같은 기준으로 읽기 전용 위임, 실행 담당이 기존 review.md/Task 상태 기록 |
+| review | [prj-memory-review](../memory-review/SKILL.md), [Compliance](references/review.md#compliance), [Review Delegation](references/review.md#review-delegation) | 같은 기준으로 읽기 전용 위임, 실행 담당이 기존 review.md/Task 상태 기록 |
 | review-action | [review.md](references/review.md#triage) | 실제 finding만 분류·처리 |
 | test | [testing.md](references/testing.md) | 필요한 검증, 단독 요청의 제품 자동 수정 없음 |
 | guide-update | [guides.md](references/guides.md#implementation-mode) | 검증된 공유 안내 영향만 |

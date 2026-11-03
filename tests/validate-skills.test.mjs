@@ -37,9 +37,12 @@ test('collection excludes memory/runtime and rejects missing required documents'
     '.codeburn/runtime.md': '[bad](missing)',
     '.agents/skills/a/SKILL.md': '# A',
     '.agents/skills/a/node_modules/foreign.md': '[bad](missing)',
-    'examples/a.md': '# Example'
+    'examples/a.md': '# Example',
+    'docs/install.md': '# Install',
+    'packaging/README.md': '# Packaging',
+    'skills/prj-a/SKILL.md': '# Public'
   });
-  assert.equal(collectDocuments(root).length, 4);
+  assert.equal(collectDocuments(root).length, 7);
   fs.unlinkSync(path.join(root, 'AGENTS.md'));
   assert.throws(() => collectDocuments(root), /필수 문서/);
 });

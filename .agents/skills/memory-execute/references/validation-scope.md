@@ -1,18 +1,21 @@
 # Local Skill Validation Scope
 
-이 문서는 저장소 개발·배포 검증기의 지원·제외 범위 정본이다. 검사기는 설치할 플러그인에 포함하지 않으며 사용자 프로젝트의 README/AGENTS 구조나 `.memory`를 검사하는 도구가 아니다. 스킬 사용자가 별도 검사기를 설치할 필요는 없다.
+이 문서는 저장소 개발·배포 검증기의 지원·제외 범위 정본이다. 검사기는 공식 설치 payload에 포함하지 않으며 사용자 프로젝트의 README/AGENTS 구조나 `.memory`를 검사하는 도구가 아니다. 스킬 사용자가 별도 검사기를 설치할 필요는 없다.
 
 ## Command and Targets
 
-저장소 root에서 `node scripts/validate-skills.mjs`를 실행한다. Node.js 22.13.0 이상과 Git이 필요하며 추가 패키지나 CI는 요구하지 않는다. 회귀 검사만은 `node --test tests/validate-skills.test.mjs`다. 공개 CLI에 옵션은 없고 export된 `main({root, runRegressionTests})`의 root 인자는 저장소 소유 테스트 fixture용이다.
+저장소 root에서 `node scripts/validate-skills.mjs`를 실행한다. 전체 검사는 Node.js 22.20.0 이상과 Git·네트워크가 필요하다. `validate-skills`, `build-skills`, `repository-skills`, `skills-install` 네 suite를 실행하며 격리 npx 환경에 skills CLI1.7.4를 내려받아 실제 검색·설치·제거를 확인한다. CI 설치는 요구하지 않는다. Native 모델 호출은 이 명령에 포함하지 않고 별도로 검증한다.
 
-탐색 대상은 root AGENTS.md/README.md, examples, .agents/skills의 Markdown이다. `.memory`, `.codeburn`, node_modules, .git은 탐색하지 않는다. symlink를 따라 저장소 밖을 읽지 않으며 임시 Git 실험은 검증기 소유 OS 임시 경로에서만 수행한다. 어떤 원본 문서·사용자 index·설정을 수정하지 않는다.
+정적 검증기 단위 회귀만은 `node --test tests/validate-skills.test.mjs`, 네 suite만은 `node --test tests/validate-skills.test.mjs tests/build-skills.test.mjs tests/repository-skills.test.mjs tests/skills-install.test.mjs`다. 공개 CLI에 옵션은 없고 export된 `main({root, runRegressionTests})`의 root 인자는 저장소 소유 테스트 fixture용이다. 설치 대상 사용자 프로젝트에 이 개발 검증 명령이나 도구 설치를 요구하지 않는다.
+
+탐색 대상은 root AGENTS.md/README.md, examples·docs·packaging·.agents/skills·skills의 Markdown이다. `.memory`, `.codeburn`, node_modules, .git은 탐색하지 않는다. symlink를 따라 저장소 밖을 읽지 않으며 임시 Git·설치 실험은 검증기 소유 OS 임시 경로에서만 수행한다. 검사 자체는 원본 문서·사용자 index·설정을 수정하지 않는다. 배포 freshness와 소유권·변조·빈 디렉터리·링크 보호, source/public 일치와 LF/consumer checkout도 회귀로 확인한다.
 
 ## Result Categories
 
 | 종류 | 확인 범위 |
 | :--- | :--- |
 | frontmatter | SKILL.md 필수 문자열·이름과 폴더 대응·중복 |
+| public-frontmatter | skills/의 public SKILL.md 이름·폴더 대응·중복 |
 | links | 지원 로컬 파일 및 Markdown 제목 anchor, source file/line 진단 |
 | messages | 예제/템플릿의 Plan·Phase·Task 식별과 terminal trailer |
 | examples | 완성형 JavaScript/HTML inline script 구문, 실행하지 않고 파싱 |

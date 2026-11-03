@@ -4,7 +4,7 @@
 
 ## Review Roles
 
-검토 기준·severity·verdict는 이 문서가 소유한다. [memory-review](../../memory-review/SKILL.md)는 Task/Phase 또는 명시 파일·diff·commit을 읽고 결과만 반환하는 진입점이다. 새 파일은 workflow 기록 책임 없이 일반 코드도 검토하는 요청 절차를 담으며, 공통 검토 기준을 복제하지 않는다.
+검토 기준·severity·verdict는 이 문서가 소유한다. [prj-memory-review](../../memory-review/SKILL.md)는 Task/Phase 또는 명시 파일·diff·commit을 읽고 결과만 반환하는 진입점이다. 새 파일은 workflow 기록 책임 없이 일반 코드도 검토하는 요청 절차를 담으며, 공통 검토 기준을 복제하지 않는다.
 
 | 호출 역할 | 검토와 기록 책임 |
 | :--- | :--- |
@@ -50,7 +50,7 @@
 
 실행 담당은 대상 Task의 승인 scope·Goal/AC·Revision, 명시 대상 경로와 현재 SHA256 snapshot, 관련 diff·선행 evidence·필요한 정본 링크만 전달한다. 리뷰어 지시문에는 다음 경계를 명시한다.
 
-[memory-review](../../memory-review/SKILL.md)와 이 공통 기준을 함께 제공한다. 반환한 실제 범위·Revision/commit/diff·snapshot을 현재 요청과 대조하고 기존 review 단계의 결과로 기록한다. fallback Self에서도 같은 검토/결과 기준을 쓰되 실행 담당의 기록 책임을 유지한다.
+[prj-memory-review](../../memory-review/SKILL.md)와 이 공통 기준을 함께 제공한다. 반환한 실제 범위·Revision/commit/diff·snapshot을 현재 요청과 대조하고 기존 review 단계의 결과로 기록한다. fallback Self에서도 같은 검토/결과 기준을 쓰되 실행 담당의 기록 책임을 유지한다.
 
 - 제품·`.memory`·Git·설정 쓰기, staging/commit·외부 전송·추가 위임 금지. 읽기 조회만 허용하며 테스트 실행과 파일 생성·설정 변경 등 부수 효과가 있는 명령을 실행하지 않는다. 기록·검증 실행은 실행 담당에게 반환한다.
 - 검토는 [Compliance](#compliance)/[Severity](#severity)를 따라 승인 scope와 AC에 한정한다. 결과를 채팅/도구 반환으로만 제공하며 `review.md`, current, checkpoint, history를 직접 작성하지 않는다.

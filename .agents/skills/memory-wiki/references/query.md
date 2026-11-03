@@ -1,6 +1,6 @@
 # Query and Save Answer
 
-[memory-wiki](../SKILL.md)의 기본 query와 명시 save-answer를 구분한다. 조회/저장 모두 Wiki 자료가 업무 정본이나 사용자 승인이라는 가정을 하지 않는다.
+[prj-memory-wiki](../SKILL.md)의 기본 query와 명시 save-answer를 구분한다. 조회/저장 모두 Wiki 자료가 업무 정본이나 사용자 승인이라는 가정을 하지 않는다.
 
 ## Read-only Query
 

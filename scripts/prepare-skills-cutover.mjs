@@ -75,6 +75,8 @@ function internalSource(text) {
 
 /** 미래 배포 단락만 후보에 반영한다. workspace/기록·과거 사실과 원본은 유지한다. */
 function futureProfile(text) {
+  // 전환 완료 source는 그대로 사용해 동일한 후보 검사를 계속 제공한다.
+  if (text.includes('\n공식 배포는 공통 원본에서 생성한 prj- 스킬을 skills CLI로 제공한다.')) return text;
   const start = text.indexOf('\n공식 배포는 공통 원본에서 생성한 plugin 경로로 제공한다.');
   const end = text.indexOf('\n## Optional Profile', start);
   if (start < 0 || end < 0) throw new Error('현재 배포 단락을 식별할 수 없음');

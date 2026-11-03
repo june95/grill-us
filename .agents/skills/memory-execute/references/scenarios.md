@@ -115,7 +115,7 @@ E01~E08은 환경 변화에 대한 문서 판단 경계다. 실제 runtime 변�
 
 ## Standalone Review Integration
 
-독립 [memory-review](../../memory-review/SKILL.md)의 [사례](../../memory-review/references/scenarios.md)로 Task/Phase·일반파일/diff/commit·drift·알려진결함을 대조한다. 직접/worker 호출은 결과만 반환하고 execution 담당이 기존 review 단계의 보고·상태를 기록한다. 새스킬 추가로 중복 review·Phase완료gate를 만들지 않으며 기존 위임불가 알림후Self·finding보존·단독단계경계를 유지한다.
+독립 [prj-memory-review](../../memory-review/SKILL.md)의 [사례](../../memory-review/references/scenarios.md)로 Task/Phase·일반파일/diff/commit·drift·알려진결함을 대조한다. 직접/worker 호출은 결과만 반환하고 execution 담당이 기존 review 단계의 보고·상태를 기록한다. 새스킬 추가로 중복 review·Phase완료gate를 만들지 않으며 기존 위임불가 알림후Self·finding보존·단독단계경계를 유지한다.
 
 ## Plugin Package Cases
 

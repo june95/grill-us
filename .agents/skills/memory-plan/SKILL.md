@@ -1,6 +1,8 @@
 ---
 name: memory-plan
 description: Create or extend a .memory Plan with Phase and independently executable task-folder blueprints from confirmed decisions or a clear request. Use for memory planning without implementation.
+metadata:
+  internal: true
 ---
 
 # Memory Plan
@@ -10,7 +12,7 @@ description: Create or extend a .memory Plan with Phase and independently execut
 ## Inputs
 
 - decision 또는 조사한 Source·scope·AC를 받고 필요한 실제 파일/정본/명령을 [Discovery](../memory-execute/references/project-profile.md#discovery)로 확인한다. [Bounded Exploration](../memory-execute/references/project-profile.md#bounded-exploration)의 제한 경로 탐색/후보 검증으로 기존 근거를 재사용하며 계획을 위해 repo 전체를 다시 조사하거나 새 도구를 설치하지 않는다.
-- 중요한 미결정만 [grill-me](../grill-me/SKILL.md)에 연결한다. 명확한 요청에 decisions 파일을 형식상 강제하거나 확정 선택을 다시 묻지 않는다.
+- 중요한 미결정만 [prj-grill-me](../grill-me/SKILL.md)에 연결한다. 명확한 요청에 decisions 파일을 형식상 강제하거나 확정 선택을 다시 묻지 않는다.
 - 기존 근거를 재사용하되 확인되지 않은 가정·승인·성공을 채우지 않는다.
 
 ## Golden Rule
@@ -68,4 +70,4 @@ AI가 [Workflow](../memory-execute/references/conventions.md#workflow)의 필수
 
 ## Report
 
-[Reporting](../memory-execute/references/conventions.md#reporting)과 [History](../memory-execute/references/conventions.md#history)를 따른다. Plan/Phase/Task·적용 파일·분할/의존 이유·회귀 경계·활성 위치를 설명하고 다음은 [memory-execute](../memory-execute/SKILL.md)로 안내한다. 실제 구현·테스트·커밋은 계획 성공으로 대신하지 않는다.
+[Reporting](../memory-execute/references/conventions.md#reporting)과 [History](../memory-execute/references/conventions.md#history)를 따른다. Plan/Phase/Task·적용 파일·분할/의존 이유·회귀 경계·활성 위치를 설명하고 다음은 [prj-memory-execute](../memory-execute/SKILL.md)로 안내한다. 실제 구현·테스트·커밋은 계획 성공으로 대신하지 않는다.

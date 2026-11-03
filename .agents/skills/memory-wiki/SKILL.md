@@ -1,6 +1,8 @@
 ---
 name: memory-wiki
 description: Collect explicitly selected local Markdown/text sources into a source-backed Wiki, answer questions without writes by default, and refresh sources or save answers only when requested. No automatic Decision, Plan, or Task changes.
+metadata:
+  internal: true
 ---
 
 # Memory Wiki
@@ -9,7 +11,7 @@ description: Collect explicitly selected local Markdown/text sources into a sour
 
 ## Inputs and Modes
 
-자연어 또는 `/memory-wiki`, 지원 호스트의 `$memory-wiki` 표기를 받는다. 새 CLI를 제공하지 않는다.
+자연어 또는 `/prj-memory-wiki`, 지원 호스트의 `$prj-memory-wiki` 표기를 받는다. 새 CLI를 제공하지 않는다.
 
 | Mode | 요청과 허용된 쓰기 |
 | :--- | :--- |
@@ -59,10 +61,10 @@ manifest는 Source ID, Original Path, Copied Path, Imported At, SHA256을 갖고
 답변에는 핵심 내용과 실제 출처 링크, 상충/적용 범위/현재성·권위 미확인을 남긴다. write는 추가/재사용한 source version, 실제 변경 파일, 완료/미완료·skip 사유, 실제 확인한 hash·한계와 다음 행동을 설명한다. query의 기본 산출은 채팅이며 “저장했다”거나 파일 경로를 가상으로 만들지 않는다. 자연스러운 한국어와 읽기 쉬운 문장으로 기록한다.
 
 ```text
-memory-wiki docs/policy.md와 docs/proposal.txt를 수집해줘
-memory-wiki Wiki 근거로 배송 정책의 확정 내용과 미결정을 알려줘
-memory-wiki docs/policy.md를 갱신하되 이전 원문은 보존해줘
-memory-wiki 방금 답변을 Wiki에 저장해줘
+prj-memory-wiki docs/policy.md와 docs/proposal.txt를 수집해줘
+prj-memory-wiki Wiki 근거로 배송 정책의 확정 내용과 미결정을 알려줘
+prj-memory-wiki docs/policy.md를 갱신하되 이전 원문은 보존해줘
+prj-memory-wiki 방금 답변을 Wiki에 저장해줘
 ```
 
 [scenarios.md](references/scenarios.md)는 관련 예외/검증에만 읽는다.
