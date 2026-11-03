@@ -14,10 +14,10 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | 증거·완료·조사 결과·환경 영향 | [Evidence and Completion](#evidence-and-completion), [Investigation Outcomes](#investigation-outcomes), [Environment Evidence](#environment-evidence) | 실패/stale 보존, 검사 결과와 목적 판정 구분 |
 | 보고 의미·일일 이력 | [Reporting](#reporting), [History](#history) | 실제 수행·근거·한계만 보고 |
 | 문서 형식 | [templates.md](templates.md#stage-report) | 적용 필드만 실제 자료로 채움 |
-| 리뷰 위임·자체 리뷰·finding 처리 | [Review Delegation](review.md#review-delegation) | 적용 review만 기본 위임, 불가 알림·자체 리뷰, finding 보존 |
+| 리뷰 적용·고위험 판정·위임·자체 리뷰·finding 처리 | [Review Applicability](review.md#review-applicability), [Review Delegation](review.md#review-delegation) | 기준으로 적용·고위험 판정, 고위험은 보안 리뷰어 병렬, 적용 review만 기본 위임, 불가 알림·자체 리뷰, finding 보존 |
 | 독립 리뷰와 workflow 결과 경계 | [Review Roles](review.md#review-roles), [Review Result](review.md#review-result) | reviewer는 무쓰기 반환, 실행 담당만 기존 단계에 기록 |
 | 프로젝트·정본·명령 발견 | [project-profile.md](project-profile.md#discovery) | 실제 cwd/정본/명령 확인 |
-| 계획의 공유 계약·구현 재량 | [Planning Boundaries](#planning-boundaries) | 공유 경계는 정확히, 내부 구현은 계약 안에서 선택 |
+| 계획의 공유 계약·구현 재량·Task 제약 | [Planning Boundaries](#planning-boundaries) | 공유 경계는 정확히, 내부 구현은 계약 안에서 선택, Must / Must Not과 해당할 때만 Ask First |
 | 결정 작성·호환 읽기 | [Decision Fields](#decision-fields) | 새 결정의 적용 범위 필수, 선택지 제시 결정의 대안, 대체 시 양방향 연결, 실제 재검토 조건만 기록, 과거 기록 보존 |
 | Wiki와 정본 권위 | [Wiki Authority](#wiki-authority), [prj-memory-wiki](../../../../SKILL.md) | 조사 지식과 확정 결정 구분, 기본 질의 무쓰기·명시 write는 wiki만 |
 | 단계 생략·완료 오판 핑계와 반론 | [Common Rationalizations](#common-rationalizations) | 표는 이곳에만 두고 링크만, 반론은 기존 규칙의 의미 |
@@ -130,7 +130,7 @@ Revision은 계약의 버전이다. 단순 문구 정리, stage 상태·보고 �
 
 private helper의 이름·시그니처·함수 분할·변수 타입·동등한 내부 알고리즘은 공유 계약에 필수인 경우를 제외하고 실행자가 선택한다. Related Files에는 실제 파일·심볼/문서 섹션, 역할과 new/modify/read-only를 적되 함수 내부 코드를 계획서에 미리 재현하지 않는다. 계약을 만족하는 내부 선택을 새로운 설계 결정이나 계획 위반으로 취급하지 않는다.
 
-새 Task는 `Constraints` 아래 `Must`와 `Must Not`에 그 작업의 책임·재사용·구체적인 금지 사항을 짧은 목록으로 작성한다. 적용할 제약이 없으면 `없음 — 이유`처럼 근거를 적고 빈 항목이나 전역 규칙의 반복으로 채우지 않는다. 새 파일·추상화는 기존 파일/심볼이 그 책임을 맡기 어려운 구체적인 이유를 남긴다. 가상의 미래 요구나 한 번 쓰는 wrapper 분리만으로 새 구조를 정당화하지 않는다. 실제 중복·복잡성을 줄이는 local helper는 허용한다.
+새 Task는 `Constraints` 아래 `Must`와 `Must Not`에 그 작업의 책임·재사용·구체적인 금지 사항을 짧은 목록으로 작성한다. 적용할 제약이 없으면 `없음 — 이유`처럼 근거를 적고 빈 항목이나 전역 규칙의 반복으로 채우지 않는다. 실행 중 사용자 승인이 있어야 하는 행동(예: 스키마 변경, 새 의존성 추가, CI 설정 변경, 비용이 드는 모델 호출)이 있으면 선택 항목 `Ask First`에 같은 짧은 목록으로 적는다. 해당하는 행동이 없으면 `Ask First` 섹션을 생략하며 `없음`으로 채우지 않는다. Ask First 항목은 계획으로 미리 허용된 행동이 아니며, 실행 담당은 어느 단계에서든 그 행동 전에 승인을 받는다([implementation](implementation.md#scope)). 새 파일·추상화는 기존 파일/심볼이 그 책임을 맡기 어려운 구체적인 이유를 남긴다. 가상의 미래 요구나 한 번 쓰는 wrapper 분리만으로 새 구조를 정당화하지 않는다. 실제 중복·복잡성을 줄이는 local helper는 허용한다.
 
 검토는 승인된 계약 준수와 계획 자체의 불필요한 복잡성을 구분한다. 계획이 과설계를 요구한다면 계획 문제로 보고하며, 이를 이유로 실행자가 구조를 임의 변경하지 않는다. 중요한 계약 변경은 [Change Boundaries](#change-boundaries)를 따른다. 새 작성과 명시 수정 범위에 적용하며 과거 완료 Task·사용자 기록을 일괄 변환하지 않는다.
 
@@ -182,7 +182,7 @@ reference → design-guide-update → implementation → review → review-actio
 | reference | 이미 충분한 결정·조사 근거가 있으면 생략 가능 | reference.md |
 | design-guide-update | 승인된 정본 계약 변경이면 의존 구현 전에 수행 | design-guide-update.md |
 | implementation | 코드·설정·문서 변경; 순수 조사에서는 생략 가능 | implementation.md |
-| review | scope·위험·완료 조건에 맞게 지정 | review.md |
+| review | [Review Applicability](review.md#review-applicability) 기준으로 적용·생략과 고위험 여부를 판단 | review.md |
 | review-action | actionable finding이 있으면 수행 | review-action.md |
 | test | 완료 조건을 입증할 검증 수준에 맞게 지정 | test.md |
 | guide-update | 검증된 사용법·공유 계약의 영향이 있을 때 | guide-update.md |

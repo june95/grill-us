@@ -30,7 +30,7 @@ description: Create or extend a .memory Plan with Phase and independently execut
 | :--- | :--- |
 | Metadata / Status | Plan/Phase/Task ID, Source·Type, Revision·정책, 초기 pending |
 | Goal / Scope | 단일 관찰 결과·이유·포함/제외 |
-| Constraints | 작업별 Must / Must Not: 책임·재사용·필요한 금지 사항; 적용 없음이면 짧은 이유 |
+| Constraints | 작업별 Must / Must Not: 책임·재사용·필요한 금지 사항; 적용 없음이면 짧은 이유. 실행 중 사용자 승인이 필요한 행동이 있을 때만 Ask First |
 | Decision Summary / Alignment | 확정 선택·코드 사실, 실제 정본·승인/보존 경계 |
 | Bug Investigation | 버그 Task만 기존 [조사 근거](../memory-execute/references/conventions.md#bug-investigation) 재사용 |
 | Dependencies | 선행 ID·실제 링크·필요 결과 |
@@ -53,7 +53,7 @@ AI가 [Workflow](../memory-execute/references/conventions.md#workflow)의 필수
 
 생략으로 AC를 입증할 수 없으면 필요한 검증을 유지한다. 아직 실행할 버전/hash/결과를 미리 채우지 않고 [Environment Evidence](../memory-execute/references/conventions.md#environment-evidence)의 관련 확인 범위만 계획한다. 공유 변경에는 commit-check가 필요하며, 커밋 유무와 무관하게 전체 완료의 공통 품질·정책 판정을 남긴다.
 
-적용 review는 [Review Delegation](../memory-execute/references/review.md#review-delegation)의 기본 읽기 전용 위임과 불가 알림 후 자체 리뷰를 계획한다. 사용자 자체 리뷰 지시가 우선이며 이 규칙만으로 skipped review를 필수로 바꾸지 않는다. 실행 담당 한 명만 상태·보고를 쓰며 실제 시도·판정은 실행 전에 성공으로 채우지 않는다.
+review 적용·생략과 고위험 여부는 [Review Applicability](../memory-execute/references/review.md#review-applicability)의 기준으로 판단하고, 해당한 기준·고위험 영역이나 생략 이유를 review 행의 Reason / Trigger에 적는다. 고위험 Task에는 같은 행에 기본 리뷰어와 보안 전담 리뷰어의 병렬 위임을 계획한다. 적용 review는 [Review Delegation](../memory-execute/references/review.md#review-delegation)의 기본 읽기 전용 위임과 불가 알림 후 자체 리뷰를 계획한다. 사용자 자체 리뷰 지시가 우선이며 이 규칙만으로 skipped review를 필수로 바꾸지 않는다. 실행 담당 한 명만 상태·보고를 쓰며 실제 시도·판정은 실행 전에 성공으로 채우지 않는다.
 
 ## Artifacts
 

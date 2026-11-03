@@ -71,6 +71,9 @@ Implementation에는 적용 작업을 적는다. 분석 전용이면 조사 절�
 ### Must Not
 - {이 작업에서 금지할 동작·불필요한 구조; 없으면 없음과 이유}
 
+### Ask First
+- {선택: 실행 중 사용자 승인이 필요한 행동; 해당 없으면 이 섹션을 생략}
+
 ## Guide Alignment
 
 - Project Guide Alignment: Compliant
@@ -163,7 +166,7 @@ Implementation에는 적용 작업을 적는다. 분석 전용이면 조사 절�
 - YYYY-MM-DD: {확정 변경과 이유; scope 안 조정과 사용자 결정 구분}
 ```
 
-단계 상태는 공통 Workflow로 정하고 미평가 `{판단}`을 실행 청사진에 남기지 않는다. 작은 작업도 적용 계약을 실행 가능한 상세로 채운다. [계획 경계](conventions.md#planning-boundaries)에 따라 공유 계약은 정확히 적고, 동등한 내부 구현은 실행자에게 맡긴다. Constraints는 해당 작업의 제약만 적으며 과거 완료 기록에 소급하여 강제하지 않는다.
+단계 상태는 공통 Workflow로 정하고 미평가 `{판단}`을 실행 청사진에 남기지 않는다. 작은 작업도 적용 계약을 실행 가능한 상세로 채운다. [계획 경계](conventions.md#planning-boundaries)에 따라 공유 계약은 정확히 적고, 동등한 내부 구현은 실행자에게 맡긴다. Constraints는 해당 작업의 제약만 적고 Ask First는 해당할 때만 두며, 과거 완료 기록에 소급하여 강제하지 않는다.
 
 실제 메시지는 [Commit Intent](commit-check.md#commit-intent)의 마지막 metadata trailer 형식/파싱을 적용한다. 커밋 없는 Task에는 이유만 기록하고 가상 메시지/빈 커밋을 만들지 않는다. 공통 완료 의미는 [Evidence and Completion](conventions.md#evidence-and-completion)을 따르며 과거 문서를 새 형식으로 재작성하지 않는다.
 

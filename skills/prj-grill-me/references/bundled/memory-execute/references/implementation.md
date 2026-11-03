@@ -11,7 +11,8 @@ Task scope·AC·Dependencies와 현재 근거를 확인한다. Compliant 또는 
 1. 실행 단계는 running으로 기록하고 지정 파일·호출부·근접 suite와 관례만 확인한다.
 2. I01/I02에 대응하는 최소 변경을 수행한다. 계획 밖 기능·의존성·광범위 정리를 추가하지 않는다.
 3. 범위 안 파일/심볼 조정과 중요한 계약 선택은 [Change Boundaries](conventions.md#change-boundaries), Revision/증거 영향은 [Task Fields](conventions.md#task-fields)를 적용한다.
-4. 단독 implementation은 변경·최소 검증·보고까지만 수행한다. 별도 review/test·커밋·완료·전진은 [Stage Isolation](conventions.md#stage-isolation)의 경계를 유지한다.
+4. Task Constraints의 Ask First 행동은 하기 전에 사용자 승인을 받는다. 승인은 그 행동과 범위에만 적용하며, Task 실행 요청이나 다른 행동의 승인을 대신 쓰지 않는다. 승인이 없으면 그 행동과 그에 의존하는 작업을 하지 않고 blocker와 필요한 결정을 기록한다. 응답할 사용자가 없는 실행은 [Unattended Runs](conventions.md#unattended-runs)를 따른다. 다른 단계에서 같은 행동이 필요해져도 같다.
+5. 단독 implementation은 변경·최소 검증·보고까지만 수행한다. 별도 review/test·커밋·완료·전진은 [Stage Isolation](conventions.md#stage-isolation)의 경계를 유지한다.
 
 [Planning Boundaries](conventions.md#planning-boundaries)에 따라 공유 API·DTO·저장/모듈 경계·중요 처리 순서/오류/상태·AC·검증과 Task Constraints를 지킨다. 계약에 필수로 고정하지 않은 private helper 이름·분할·동등한 알고리즘은 실행자가 선택한다. 새 파일/추상화는 기존 소유 위치에 둘 수 없는 이유를 남기며, 계획 자체의 과설계는 계획 문제로 보고하고 승인 구조를 자동 재설계하지 않는다.
 
