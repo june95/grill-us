@@ -23,5 +23,25 @@
         "owner": "prj-memory-explain"
       }
     ]
+  },
+  "measure": {
+    "positive": [
+      {
+        "prompt": "이 분기 로드맵을 슬라이드 덱으로 만들어 줘."
+      },
+      {
+        "prompt": "배포 절차를 플로차트로 시각화해 줘."
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "지금 열려 있는 대시보드 화면을 캡처해 줘.",
+        "owner": "prj-page-capture"
+      },
+      {
+        "prompt": "이 함수 이름을 더 읽기 좋게 바꿔 줘.",
+        "owner": "none"
+      }
+    ]
   }
 }

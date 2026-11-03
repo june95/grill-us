@@ -23,5 +23,21 @@
         "owner": "prj-grill-me"
       }
     ]
+  },
+  "measure": {
+    "positive": [
+      {
+        "prompt": "회원가입에서 이메일 중복 검사가 안 되는 버그를 작업으로 등록해 줘. 구현은 나중에 할게."
+      },
+      {
+        "prompt": "다크 모드 지원 요청이 들어왔어. 할 일로 등록만 해 둬."
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "등록해 둔 다음 작업 이어서 진행해 줘.",
+        "owner": "prj-memory-execute"
+      }
+    ]
   }
 }

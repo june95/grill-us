@@ -23,5 +23,21 @@
         "owner": "prj-memory-review"
       }
     ]
+  },
+  "measure": {
+    "positive": [
+      {
+        "prompt": "D05 결정이 왜 나왔고 어디에 적용되는지 설명해 줘."
+      },
+      {
+        "prompt": "지금까지 진행 상황이랑 계획 대비 실제 결과를 비교해서 알려줘."
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "새로운 캐시 정책을 결정해야 해. 질문하면서 정해 줘.",
+        "owner": "prj-grill-me"
+      }
+    ]
   }
 }

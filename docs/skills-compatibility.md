@@ -33,6 +33,32 @@ full validator124/124, 오류0으로 통과했다. source/public frontmatter10/9
 
 삭제 전 검증 build SHA는1134b48a579411923362edf22dae73e5df8e9b86f4087d2391f5850724b82d70이었다. 이후 리뷰에서 개발용 validation-scope 안내를 수정해 sourceSnapshot/build SHA가 바뀌었다. 그 문서는 public closure에 포함되지 않아 실제 설치 문서285개는 전부 동일하며, native6건을 동일 bytes의 근거로 재사용했다. 옛 결과를 새 파일 호출로 바꾸지 않았다.
 
+## 실제 발동 측정
+
+2026-11-03 `node scripts/measure-skill-routing.mjs --model claude-sonnet-5-5 --runs 3`으로 실제 모델이 고르는 스킬을 측정했다. 실행은 `--skill` 묶음 5개로 나눴다.
+
+| 항목 | 실제 확인 범위 |
+| :--- | :--- |
+| 호스트·모델 | Claude Code 2.1.317 headless(`claude -p`), claude-sonnet-5-5 |
+| 설치 | skills CLI 1.7.4로 소유 임시 프로젝트에 public 9개만 project scope 설치, 외부 팩 없음 |
+| 문장 | `evals/routing/*.json`의 `measure` 한국어 문장 29개(positive 18, negative 11), 문장당 3회, 총 87회 |
+| 실행 구성 | Skill 도구만 허용, 문장은 stdin 전달, 사용자 설정·plugin·MCP·hooks 차단. 호스트 기본 명령과 번들 스킬은 보임 |
+| 결과 | 87회 모두 완료. positive 53/54 발동(문장별 최저 2/3), negative 자기 스킬 오발동 0/33 |
+| 비용 | Claude Code가 보고한 API 요금 환산 $2.73 |
+
+- 발동률이 절반 미만인 positive와 오발동한 negative는 없었다. 측정에 맞춰 description을 바꾸지 않았다.
+- 호스트 번들 스킬과 겹침:
+  - 대시보드 시각화 요청 3회 모두 Claude Code 번들 `dataviz`가 켜졌다. `prj-visualize`는 그중 1회만 함께 켜졌다.
+  - 작업 재개 요청 1회에는 번들 `update-config`가 함께 켜졌다.
+  - 공존 안내는 [설치 안내](skills-installation.md)의 "다른 스킬과 함께 쓸 때" 절에 있다.
+- 대상 내용 없이 요청만 받은 일부 negative(diff 리뷰, 회의록 인포그래픽)는 owner 스킬도 켜지지 않았다.
+- 한계:
+  - 발동은 확률적이다. 모델, Claude Code, skills CLI 버전에 따라 달라진다.
+  - Skill 도구만 허용한 headless 구성이라 일반 대화와 다를 수 있다.
+  - 외부 팩 공존은 측정하지 않았다.
+  - Codex는 실행 출력에 스킬 호출 이벤트가 없어 자동 측정하지 않았다. SKILL.md를 읽는 shell 명령만 보이며, 이것은 발동과 같지 않다.
+- 회귀 검사(`node scripts/validate-skills.mjs`)는 모델을 호출하지 않는다. 측정 방법과 산출물 위치는 [Validation Scope](../.agents/skills/memory-execute/references/validation-scope.md#on-demand-routing-measurement)에 있다.
+
 ## 관측 실패와 한계
 
 - 최초 Claude 호출은 넓은 Glob 결과가100/110개로 잘려 strict scope parser가 실패로 판정했다. 원 결과를 보존하고 좁은 조회를 명시한 별도6건을 통과시켰다. 실패를 parser 완화로 통과시키지 않았다.

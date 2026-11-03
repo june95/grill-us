@@ -23,5 +23,21 @@
         "owner": "prj-memory-explain"
       }
     ]
+  },
+  "measure": {
+    "positive": [
+      {
+        "prompt": "확정한 결정들로 Phase와 Task로 나눈 실행 계획을 세워 줘. 구현은 아직 하지 마."
+      },
+      {
+        "prompt": "이 요구사항을 독립적으로 끝낼 수 있는 작업 단위로 쪼개서 계획 문서를 만들어 줘."
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "지난주에 왜 이 계획으로 정했는지 기록을 찾아서 설명해 줘.",
+        "owner": "prj-memory-explain"
+      }
+    ]
   }
 }

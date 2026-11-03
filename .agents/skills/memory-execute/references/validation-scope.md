@@ -29,7 +29,7 @@
 
 `tests/skill-routing.test.mjs`는 공개 스킬의 발동 경계를 모델 호출 없이 결정적으로 검사한다. 대상은 생성된 `skills/prj-*/SKILL.md`의 name·description과 `evals/routing/<public-name>.json` case 파일이다.
 
-- case 형식: 최상위에는 `skill`(파일명과 같은 공개 이름)과 `trigger`만 둔다. `trigger.positive`는 영어 문장 3개 이상과 선택 `top_k`(1~3, 기본 3)를 둔다. `trigger.negative`는 2개 이상이며, 자기 자신이 아닌 공개 스킬 `owner`가 필수다. 문장은 ASCII 영어만 허용한다.
+- case 형식: 최상위에는 `skill`(파일명과 같은 공개 이름), `trigger`, `measure`만 둔다. `measure`는 아래 on-demand 측정용 문장이며 회귀는 형식만 검사한다. `trigger.positive`는 영어 문장 3개 이상과 선택 `top_k`(1~3, 기본 3)를 둔다. `trigger.negative`는 2개 이상이며, 자기 자신이 아닌 공개 스킬 `owner`가 필수다. 문장은 ASCII 영어만 허용한다.
 - 순위: 영어 소문자·숫자 토큰만 쓰고, 불용어를 빼고, 짧은 접미사를 정리한 뒤 TF-IDF cosine으로 9개 스킬의 점수를 매긴다.
   - positive는 자기 스킬이 `top_k` 안에 있고 점수가 0보다 커야 한다.
   - negative는 자기 스킬이 1위가 아니어야 하고, owner 점수가 0보다 크며 자기보다 높아야 한다.
@@ -37,7 +37,31 @@
 - 충돌: 9개 description의 모든 쌍 유사도가 0.75 이상이면 실패, 0.5 이상이면 경고한다. 충돌은 이름 없이 description만 비교하고, 모든 description에 공통인 단어도 가중치를 갖는 smoothed idf(`ln((1+N)/(1+df))+1`)를 써서 공유 본문이 사라지지 않게 한다. 각 description에는 `Use when` 또는 `Use for` 트리거 문구가 있어야 한다.
 - 검사 자체 검증: suite 안에서 충돌 쌍, 밀린 순위, owner 없는 negative, 형식 오류 fixture가 각각 실패하는지 확인한다.
 - 실패 처리: 검사가 실패하면 description을 `.agents/skills` 원본에서 고친다. 기준값이나 case 문장을 바꿔 통과시키지 않는다. 측정 근거로 기각한 description 변경은 `evals/routing/rejected-description-changes.md`에 추가한다.
-- 한계: 영어 단어 겹침 근사라 의미와 문맥은 판단하지 못한다. 한국어 요청과 실제 모델의 발동은 이 검사로 알 수 없으며, 별도 on-demand 측정에서 다룬다. `evals/`는 공개 패키지에 포함하지 않는다.
+- 한계: 영어 단어 겹침 근사라 의미와 문맥은 판단하지 못한다. 한국어 요청과 실제 모델의 발동은 이 검사로 알 수 없으며, [On-demand Routing Measurement](#on-demand-routing-measurement)에서 다룬다. `evals/`는 공개 패키지에 포함하지 않는다.
+
+## On-demand Routing Measurement
+
+`node scripts/measure-skill-routing.mjs --model <id> [--runs <n>] [--skill <public-name>]... [--with <source> --with-skill <name>] [--dry-run]`은 실제 모델로 공개 스킬의 발동을 측정하는 개발용 도구다. 회귀(`node scripts/validate-skills.mjs`)에는 들어가지 않는다. 회귀는 `measure` 형식과 이 도구의 동작을 가짜 실행기로만 검사하며, 모델을 호출하지 않는다.
+
+- 문장:
+  - `measure.positive`: 그 스킬이 켜져야 하는 실사용 문장(한국어 포함) 2개 이상.
+  - `measure.negative`: 켜지면 안 되는 문장 1개 이상. `owner`는 다른 공개 스킬, `external`(외부 팩·전역 스킬 소관), `none`(스킬 불필요) 중 하나다.
+- 실행:
+  - 소유 OS 임시 프로젝트에 public 9개(요청 시 외부 스킬 추가)를 project scope로 설치한다.
+  - 문장마다 `claude -p`를 지정 횟수만큼 실행한다. 기본은 3회이며, Skill 도구만 허용하고 문장은 stdin으로 전달한다.
+  - 사용자 설정·plugin·MCP·hooks는 막는다. 호스트 기본 명령과 번들 스킬은 보인다.
+- 판정:
+  - stream-json의 Skill 호출 이름을 센다.
+  - 성공 종료, 권한 거부 없음, 모든 도구 호출 응답을 모두 만족한 실행만 점수에 넣는다. 미완료는 따로 센다.
+  - positive 발동률 0.5 미만과 negative 오발동을 개선 후보로 보고한다. 측정 결과에 맞춰 기준이나 문장을 바꾸지 않는다.
+- 종료 코드: 측정 완료(발동률과 무관)는 0이다. 사용법·환경 오류와 완료 실행 0건은 1이다.
+- 비용: 모델 호출 비용이나 구독 사용 한도를 쓴다. 실행 전 `--dry-run`으로 계획을 확인한다. dry-run은 빌드·설치·모델 호출 없이 문장 수, 총 실행 수, 회당 상한 기준 최악 비용을 출력한다.
+- 산출물:
+  - 요약과 축약 원본은 `evals/results/`(git 제외)에 남는다.
+  - stdout·stderr 원본은 OS 임시 `grill-skills-routing-raw-*`에 남는다. 원본에는 스킬 본문이 들어 있을 수 있다. 도구가 지우지 않으므로 확인 후 직접 정리한다.
+- 한계:
+  - Codex는 실행 출력에 스킬 호출 이벤트가 없어 측정하지 않는다. `--host codex`는 모델 호출 없이 exit 1로 끝난다.
+  - 결과는 모델·호스트·CLI 버전과 Skill 전용 headless 구성에서의 관측이다. 일반 대화의 발동을 보장하지 않는다.
 
 ## Markdown Links and Anchors
 

@@ -120,7 +120,8 @@ export async function discoverCodex(run, executable = 'codex', cwd = run.native.
   return observation;
 }
 
-function parseEvents(host, text) {
+/** allCommands는 init의 slash 명령 이름을 거르지 않는다(발동 측정의 "보이는 다른 스킬" 기록용). 기본은 prj-만 남긴다. */
+export function parseEvents(host, text, { allCommands = false } = {}) {
   const events = [];
   for (const line of text.split('\n')) {
     let event;
@@ -129,12 +130,34 @@ function parseEvents(host, text) {
       if (event.type === 'thread.started') events.push({ type: event.type });
       else events.push(event);
     } else if (event.type === 'system' && event.subtype === 'init') {
-      events.push({ type: event.type, subtype: event.subtype, model: event.model, tools: event.tools, plugins: event.plugins, slash_commands: event.slash_commands?.filter(name => name.startsWith('prj-')) });
+      events.push({ type: event.type, subtype: event.subtype, model: event.model, tools: event.tools, plugins: event.plugins, slash_commands: allCommands ? event.slash_commands : event.slash_commands?.filter(name => name.startsWith('prj-')) });
     } else if (event.type === 'assistant' || event.type === 'user') {
       events.push({ type: event.type, content: (event.message?.content || []).filter(content => content.type !== 'thinking') });
     } else if (event.type === 'result') events.push({ type: event.type, subtype: event.subtype, is_error: event.is_error, result: event.result, permission_denials: event.permission_denials, total_cost_usd: event.total_cost_usd });
   }
   return events;
+}
+
+/**
+ * Claude stream-json에서 Skill 도구 호출과 실행 완료 여부를 읽는다.
+ * 완료는 성공 종료, 권한 거부 없음, 모든 도구 호출의 응답, Skill 입력 식별을 모두 만족할 때다.
+ * Skill 입력의 이름 필드를 알 수 없으면 식별 실패로 남기며 추측하지 않는다.
+ */
+export function skillRouting(events) {
+  const uses = events.flatMap(event => event.type === 'assistant' ? event.content || [] : []).filter(item => item.type === 'tool_use');
+  const answered = new Set(events.flatMap(event => event.type === 'user' ? event.content || [] : []).filter(item => item.type === 'tool_result').map(item => item.tool_use_id));
+  const skillUses = uses.filter(item => item.name === 'Skill');
+  const invoked = skillUses.map(item => item.input?.skill ?? item.input?.command).filter(name => typeof name === 'string' && name.trim()).map(name => name.trim().replace(/^\//, ''));
+  const result = events.findLast(event => event.type === 'result');
+  const reasons = [];
+  if (!result) reasons.push('result 이벤트 없음');
+  else {
+    if (result.subtype !== 'success' || result.is_error) reasons.push('성공 종료 아님: ' + result.subtype);
+    if ((result.permission_denials || []).length) reasons.push('권한 거부 ' + result.permission_denials.length + '건');
+  }
+  if (uses.some(item => !answered.has(item.id))) reasons.push('응답 없는 도구 호출');
+  if (invoked.length !== skillUses.length) reasons.push('Skill 입력 식별 실패');
+  return { invoked: [...new Set(invoked)], skillCalls: skillUses.length, completed: reasons.length === 0, reasons, costUsd: result?.total_cost_usd ?? null };
 }
 
 const textContent = value => typeof value === 'string' ? value : Array.isArray(value) ? value.filter(item => item.type === 'text').map(item => item.text).join('\n') : '';

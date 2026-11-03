@@ -51,6 +51,17 @@ claude plugin uninstall grill-us@grill-us --scope user
 
 위 identity와 scope로 설치했던 사용자만 직접 실행한다. 다른 scope/사본은 먼저 설치 목록과 경로를 확인한다. marketplace 전체 제거·cache 강제 삭제·기존 세션 종료는 요구하지 않는다. 옛 이름은 `$grill-us:memory-explain` / `/grill-us:memory-explain`, 새 이름은 `$prj-memory-explain` / `/prj-memory-explain`이다. 마지막 안내용 plugin 릴리스를 추가하지 않는다.
 
+## 다른 스킬과 함께 쓸 때
+
+Claude Code와 Codex는 설치된 스킬의 description을 보고 요청마다 스킬을 스스로 고른다. 역할이 비슷한 스킬이 함께 있으면 의도와 다른 스킬이 켜지거나 여러 스킬이 함께 켜질 수 있다.
+
+- 특정 스킬을 확실히 쓰려면 이름으로 직접 부른다. Claude Code는 `/prj-visualize`, Codex는 `$prj-visualize`처럼 쓴다.
+- 시각화·캡처·리뷰처럼 역할이 겹치는 외부 팩이나 전역 스킬을 함께 설치하면 자동 선택이 겹칠 수 있다.
+  - 호스트에 기본으로 들어 있는 스킬도 마찬가지다.
+  - 2026-11-03 측정에서는 대시보드 시각화 요청 3회 모두 Claude Code 번들 `dataviz`가 켜졌다. `prj-visualize`는 그중 1회만 함께 켜졌다.
+- 같은 이름을 프로젝트와 사용자 전역(`-g`)에 함께 설치했을 때 어느 쪽을 읽는지는 확인하지 않았다. 한 scope에만 두는 것을 권장한다.
+- 측정 근거와 한계는 [호환성 안내](https://github.com/june95/grill-us/blob/main/docs/skills-compatibility.md)의 "실제 발동 측정" 절에 있다. 이 저장소는 외부 팩의 description이나 본문을 저장하지 않는다.
+
 ## 검증 범위
 
 Windows의 Node26.12.1/skills1.7.4에서 최종 후보의 기본·전체 검색9개와 두 에이전트의 전체/단독 설치 bytes를 대조했다. Codex0.166.0·Claude2.1.316의 설명·리뷰·인터뷰 각3건에서 설치된 전체 SKILL, 자체 참고 문서와 변경된 설치/작업공간 절을 읽고 fixture·Git·payload 변경이 없음을 확인했다. 실제 저장소의 최종 회귀 결과는 [호환성 안내](https://github.com/june95/grill-us/blob/main/docs/skills-compatibility.md)에 구분한다.

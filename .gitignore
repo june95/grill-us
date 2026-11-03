@@ -6,3 +6,6 @@
 
 # Generated independent skills; preserve unrelated dist entries
 /dist/grill-us-skills/
+
+# On-demand skill routing measurement output (reduced raw events and summaries)
+/evals/results/
