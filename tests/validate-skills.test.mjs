@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import {
   collectDocuments, readFences, checkLinks, checkTaskMessages, checkExamples, checkSkillFrontmatter, checkHtmlIds,
-  identifyMessage, decodeIgnoreOutput, cleanupGitDirectory,
+  identifyMessage, decodeIgnoreOutput, cleanupGitDirectory, checkGitCases, extractSecretScanCommand, runSecretScanCheck,
   extractMarkdownAnchors, extractTaskTemplateContract, checkMemoryExamples
 } from '../scripts/validate-skills.mjs';
 
@@ -438,7 +438,7 @@ test('fixture process returns exit 1 for a broken link and preserves its files',
   const run = spawnSync(process.execPath, ['--input-type=module', '-e', source], { cwd: root, encoding: 'utf8', timeout: 30000 });
   assert.equal(run.status, 1, run.stderr);
   assert.match(run.stdout, /\[FAIL links\].*README.md:1/);
-  assert.match(run.stdout, /git: checked=16, skipped=0, errors=0/);
+  assert.match(run.stdout, /git: checked=20, skipped=0, errors=0/);
   assert.equal(fs.readFileSync(path.join(root, '.memory/current.md'), 'utf8'), before);
   assert.equal(fs.existsSync(path.join(root, '.git')), false);
 });
@@ -487,9 +487,75 @@ test('isolated Git checks discard inherited repository/config/index environment'
     }
   });
   assert.equal(run.status, 0, run.stdout + run.stderr);
-  assert.equal(JSON.parse(run.stdout).checked, 16);
+  assert.equal(JSON.parse(run.stdout).checked, 20);
   assert.equal(fs.existsSync(index), false);
   assert.equal(fs.existsSync(path.join(root, '.git')), false);
+});
+
+const repositoryRoot = path.resolve(path.dirname(fileURLToPath(moduleURL)), '..');
+const commitCheckSource = () => fs.readFileSync(path.join(repositoryRoot, '.agents/skills/memory-execute/references/commit-check.md'), 'utf8');
+const ownedCheckDirectories = () => fs.readdirSync(os.tmpdir()).filter(name => name.startsWith('grill-skills-check-'));
+
+test('documented secret scan command is extracted once and missing, duplicate or unsafe forms fail', () => {
+  assert.deepEqual(extractSecretScanCommand(commitCheckSource()),
+    ['diff', '--cached', '--no-textconv', '--no-ext-diff', '-i', '-Gpassword|passwd|secret|api[_-]?key|token|private[_-]?key|credential', '--name-only']);
+  const command = "`git diff --cached -i -G'token' --name-only`";
+  assert.deepEqual(extractSecretScanCommand(`Run ${command}.\n<!-- ${command} -->\n`), ['diff', '--cached', '-i', '-Gtoken', '--name-only']);
+  for (const [text, message] of [
+    ['Use `git diff --cached --name-status` only.', /정확히 하나.*0개/],
+    [`${command}\n\n${command}`, /정확히 하나.*2개/],
+    [`${command}\n\n${ticks}sh\ngit diff --cached -G'token' --name-only\n${ticks}\n`, /정확히 하나.*2개/],
+    ["`git diff --cached -G'token' --name-only; cat .env`", /shell 연산자/],
+    ["`git diff --cached -G'token' --name-only --output=leak.txt`", /허용하지 않는 인자/],
+    ["`git diff --cached --textconv -G'token' --name-only`", /허용하지 않는 인자/],
+    ['`git diff --cached --name-only`', /-G 패턴/],
+    ["`git diff --cached -G'token --name-only`", /닫히지 않은 따옴표/]
+  ]) assert.throws(() => extractSecretScanCommand(text), message);
+});
+
+// 변환기·외부 diff를 막은 형태에서 한 가지 조건만 바꿔 위반 대조를 만든다.
+const safeScan = ['diff', '--cached', '--no-textconv', '--no-ext-diff'];
+function withoutLeftovers(run) {
+  const before = new Set(ownedCheckDirectories());
+  run();
+  assert.deepEqual(ownedCheckDirectories().filter(name => !before.has(name)), []);
+}
+
+test('secret scan prints staged file names only and value-printing forms fail', () => withoutLeftovers(() => {
+  const valid = runSecretScanCheck(extractSecretScanCommand(commitCheckSource()));
+  assert.equal(valid.checked, 3);
+  assert.deepEqual(errors(valid), []);
+  // 위반 대조: --name-only가 없으면 patch에 값이 나오므로 검사가 실패해야 하며, 실패 메시지에도 값이 없어야 한다.
+  assert.throws(() => runSecretScanCheck([...safeScan, '-i', '-Gpassword|api[_-]?key']), error => {
+    assert.match(error.message, /가짜 비밀 값이 노출/);
+    assert.doesNotMatch(error.message, /grill-sentinel-/);
+    return true;
+  });
+  // 위반 대조: 대소문자 무시가 빠지거나 파일명 외 상태가 섞이면 통과하지 않는다.
+  assert.throws(() => runSecretScanCheck([...safeScan, '-Gpassword|api[_-]?key', '--name-only']), /파일명 출력 불일치/);
+  assert.throws(() => runSecretScanCheck([...safeScan, '-i', '-Gpassword|api[_-]?key', '--name-status']), /파일명 출력 불일치/);
+}));
+
+test('secret scan must not run textconv converters configured in the repository', () => withoutLeftovers(() => {
+  // 위반 대조: textconv를 막지 않으면 저장소 설정의 변환기가 실행되어 stderr 노출과 탐지 누락이 생긴다.
+  assert.throws(() => runSecretScanCheck(['diff', '--cached', '-i', '-Gpassword|api[_-]?key', '--name-only']), /textconv 변환기를 실행함/);
+}));
+
+test('secret scan treats blank lines or stderr from a clean repository as output', () => withoutLeftovers(() => {
+  // 위반 대조: exit 0이어도 stdout 빈 줄이나 stderr 안내가 있으면 무출력이 아니다.
+  assert.throws(() => runSecretScanCheck(['rev-parse', '--show-prefix']), /깨끗한 staged diff에서 secret 검사 출력이 있음/);
+  assert.throws(() => runSecretScanCheck(['fsck']), /깨끗한 staged diff에서 secret 검사 출력이 있음/);
+}));
+
+test('git category fails when commit-check loses its name-only secret command', () => {
+  const broken = checkGitCases({ commitCheckText: commitCheckSource().replace(/ --name-only`/g, '`') });
+  assert.match(errors(broken).map(d => d.message).join('\n'), /정확히 하나.*0개/);
+  // 위반 대조: 문서 명령에서 --no-textconv가 빠지면 git 범주가 실패한다.
+  const converter = checkGitCases({ commitCheckText: commitCheckSource().replace(' --no-textconv', '') });
+  assert.match(errors(converter).map(d => d.message).join('\n'), /textconv 변환기를 실행함/);
+  const valid = checkGitCases({ commitCheckText: commitCheckSource() });
+  assert.deepEqual(errors(valid), []);
+  assert.equal(valid.checked, 20);
 });
 
 

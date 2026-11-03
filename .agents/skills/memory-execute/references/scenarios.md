@@ -95,6 +95,11 @@
 | C08 | --stage test 또는 check_only에서 목적 달성 | stage-only/check_only는 ready/결과만 기록, 자동 done/포인터 전진 없음 | 지침 walkthrough |
 | C09 | 실패 후 목표를 조사로 완화 또는 후속 Task로 이전 | 승인/Revision/재검증 없이 실패 gate 우회 금지. 기존 실패 보존 | 지침 walkthrough |
 | C10 | old done·prepared intent·환경 변경 뒤 재개 | 과거 계약 불변, 성공 tree 확인 복구 및 영향 증거 최신성 규칙 유지 | 지침 walkthrough |
+| C11 | 승인 없이 테스트를 skip한 diff가 후보에 있음 | 검사 약화 High로 commit-check blocked. task.md Scope/Constraints의 명시 승인이 있을 때만 허용 | 지침 walkthrough |
+| C12 | secret 검사에 후보 문서가 걸렸고 해당 줄은 규칙 설명의 단어 언급 | 값 없이 파일·분류·판단 근거를 Completion Check에 남기고 진행. 후보 자동 제외·수정 없음 | 지침 walkthrough |
+| C13 | secret 검사에 걸린 후보 줄이 실제 비밀 값 | commit하지 않고 blocked, 파일·줄 위치·분류만 알림. 보고·history에 값 없음. 이미 commit·push됐으면 rotate 우선 안내, history rewrite·force push 없음 | 지침 walkthrough |
+| C14 | 버그 Task, 기존 테스트 수단으로 재현 가능 | 수정 전 실패 command·exit를 근거로 남기고, 수정 후 같은 테스트 통과와 회귀 확인. 재현 불가면 사유 기록 후 진행. reproduced만으로 confirmed 아님 | 지침 walkthrough |
+| C15 | validator 규칙을 추가했고 검사 명령이 timeout으로 끝남 | 미실행은 통과 아님. 위반 fixture 실패와 정상 대조군 통과를 실제 실행으로 확인해야 AC 근거 | 지침 walkthrough; git 범주의 secret 명령 검사 |
 
 ## Expected State
 

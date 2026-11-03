@@ -32,13 +32,13 @@ description: Create or extend a .memory Plan with Phase and independently execut
 | Goal / Scope | 단일 관찰 결과·이유·포함/제외 |
 | Constraints | 작업별 Must / Must Not: 책임·재사용·필요한 금지 사항; 적용 없음이면 짧은 이유. 실행 중 사용자 승인이 필요한 행동이 있을 때만 Ask First |
 | Decision Summary / Alignment | 확정 선택·코드 사실, 실제 정본·승인/보존 경계 |
-| Bug Investigation | 버그 Task만 기존 [조사 근거](../memory-execute/references/conventions.md#bug-investigation) 재사용 |
+| Bug Investigation | 버그 Task만 기존 [조사 근거](../memory-execute/references/conventions.md#bug-investigation) 재사용; 재현할 수 있으면 수정 전 실패 테스트, 불가하면 사유 |
 | Dependencies | 선행 ID·실제 링크·필요 결과 |
 | Implementation | path::symbol/문서 heading, 목적·new/modify/read-only, 독립 I01/I02 |
 | Signatures / Data / Flow | 공유 경계의 정확 타입·필드·기본값·nullable·관계·중요 흐름·오류·반환; 계약에 필수인 내부 선택만 고정 |
 | Acceptance Criteria | 사전에 정한 관찰 가능한 완료 기준 |
 | Workflow | 단계 적용 이유/조건과 초기 상태 |
-| Validation | 실제 command/수동 방법, cwd·기대 결과·criterion, 관련 환경 확인 범위 |
+| Validation | 실제 command/수동 방법, cwd·기대 결과·criterion, 관련 환경 확인 범위; 검사를 추가·변경하는 Task는 위반에서 실패·정상에서 통과하는 대조([Evidence and Completion](../memory-execute/references/conventions.md#evidence-and-completion)) |
 | Commit Message | 커밋 대상이면 실제 메시지/trailer, 없으면 해당 없음과 이유 |
 | Completion Check / Progress | 초기 pending 판정·commit 상태·첫 미수행 단계·blocker·다음 행동 |
 | Change Log | 의미 있는 계약 변경·이유·날짜 |

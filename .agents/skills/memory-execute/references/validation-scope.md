@@ -21,7 +21,7 @@
 | examples | 완성형 JavaScript/HTML inline script 구문, 실행하지 않고 파싱 |
 | html-ids | 한 HTML fence의 중복 ID와 지원 entity 정규화 |
 | memory-examples | 교육용 Task/Current/Plan/Phase의 형식과 요약 관계 |
-| git | 격리 저장소 ignore·trailer 동작 |
+| git | 격리 저장소 ignore·trailer 동작, commit-check secret 검사 명령의 단일성·파일명만 출력·textconv 미실행 |
 
 지원 범위의 오류는 exit 1, 오류가 없으면 exit 0이다. 제외 진단이 있는 항목은 부분 확인이며 checked로 성공을 세지 않는다. 검사 성공은 실제 모델 실행·제품 테스트·브라우저 렌더링 성공을 뜻하지 않는다.
 

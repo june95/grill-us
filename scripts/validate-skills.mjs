@@ -3,11 +3,14 @@ import path from 'node:path';
 import os from 'node:os';
 import vm from 'node:vm';
 import { spawnSync } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const scriptPath = fileURLToPath(import.meta.url);
 const projectRoot = path.resolve(path.dirname(scriptPath), '..');
 const tempPrefix = 'grill-skills-check-';
+// secret 검사 명령의 정본. git 범주는 검사 root와 무관하게 이 저장소의 commit-check 문서를 읽는다.
+const secretScanSource = '.agents/skills/memory-execute/references/commit-check.md';
 // WHATWG MIME Sniffing의 JavaScript MIME type essence 목록.
 // https://mimesniff.spec.whatwg.org/#javascript-mime-type
 const javaScriptMimes = new Set([
@@ -898,9 +901,8 @@ export function cleanupGitDirectory(directory) {
   fs.rmSync(resolved, { recursive: true });
 }
 
-export function checkGitCases() {
-  const out = result();
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), tempPrefix));
+/** 상속된 GIT_* 환경과 사용자·시스템 설정을 끊고 소유한 임시 저장소에서만 git을 실행하는 함수를 만든다. */
+function isolatedGit(directory) {
   const env = { ...process.env };
   // Windows의 대소문자 구분 없는 Git 환경 변수도 원본 repo를 가리키지 못하게 한다.
   for (const key of Object.keys(env)) {
@@ -909,7 +911,89 @@ export function checkGitCases() {
   env.GIT_CONFIG_NOSYSTEM = '1';
   env.GIT_CONFIG_GLOBAL = path.join(directory, 'global.gitconfig');
   fs.writeFileSync(env.GIT_CONFIG_GLOBAL, '');
-  const git = (args, options = {}) => spawnSync('git', args, { cwd: directory, env, encoding: 'utf8', timeout: 15000, ...options });
+  return (args, options = {}) => spawnSync('git', args, { cwd: directory, env, encoding: 'utf8', timeout: 15000, ...options });
+}
+
+/** shell 없이 실행하도록 따옴표만 해석하고 연산자·확장 문자는 거부한다. */
+function commandWords(command) {
+  const words = [];
+  let word = '', quote = null, started = false;
+  for (const char of command) {
+    if (quote) {
+      if (char === quote) quote = null;
+      else if (quote === '"' && /[$`\\]/.test(char)) throw new Error('secret 검사 명령의 큰따옴표 안 확장 문자 거부');
+      else word += char;
+    } else if (char === "'" || char === '"') { quote = char; started = true; }
+    else if (/\s/.test(char)) { if (started) words.push(word); word = ''; started = false; }
+    else if (/[|;&<>()$`\\*?[\]{}~!#]/.test(char)) throw new Error('secret 검사 명령의 shell 연산자·확장 문자 거부: ' + char);
+    else { word += char; started = true; }
+  }
+  if (quote) throw new Error('secret 검사 명령의 닫히지 않은 따옴표');
+  if (started) words.push(word);
+  return words;
+}
+
+/** commit-check 문서에서 파일명만 출력하는 staged secret 검사 명령을 정확히 하나 찾아 git 인자로 바꾼다. */
+export function extractSecretScanCommand(text) {
+  const spans = [...markdownOutside(text).matchAll(/(`+)([^`\n]+?)\1/g)].map(m => m[2]);
+  const fenced = readFences(text).fences.flatMap(fence => fence.content.split('\n'));
+  const commands = [...spans, ...fenced].map(value => value.trim())
+    .filter(value => /^git diff --cached(\s|$)/.test(value) && /(^|\s)--name-only(?![\w-])/.test(value));
+  if (commands.length !== 1) throw new Error(`secret 검사 명령(git diff --cached ... --name-only)은 정확히 하나여야 함: ${commands.length}개`);
+  const options = commandWords(commands[0]).slice(3);
+  for (const option of options) {
+    if (!['--name-only', '--no-textconv', '--no-ext-diff', '-i', '--regexp-ignore-case'].includes(option) && !/^-G./.test(option)) throw new Error('secret 검사 명령의 허용하지 않는 인자: ' + option);
+  }
+  if (options.filter(option => /^-G./.test(option)).length !== 1) throw new Error('secret 검사 명령에는 -G 패턴이 하나 있어야 함');
+  return ['diff', '--cached', ...options];
+}
+
+/**
+ * 가짜 값을 stage한 격리 저장소에서 명령을 실행해 파일명만 나오고 값은 나오지 않는지 확인한다.
+ * 깨끗한 staged diff에서는 stdout·stderr가 모두 비어 있어야 한다. 저장소 설정의 textconv 변환기는
+ * 실행되면 안 된다. fixture 변환기는 실행되면 표식을 stderr로 내고 변환 결과를 비워 탐지도 빠뜨린다.
+ * 실패 메시지에는 명령 출력 원문을 넣지 않는다.
+ */
+export function runSecretScanCheck(args, out = result()) {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), tempPrefix));
+  const sentinel = 'grill-sentinel-' + randomUUID();
+  const converter = 'grill-textconv-' + randomUUID();
+  const git = isolatedGit(directory);
+  const mustSucceed = (run, message) => { if (run.error || run.status !== 0) throw new Error(message); };
+  const scan = () => {
+    const run = git(args);
+    const output = `${run.stdout || ''}\n${run.stderr || ''}`;
+    if (output.includes(sentinel)) throw new Error('secret 검사 출력에 가짜 비밀 값이 노출됨');
+    if (output.includes(converter)) throw new Error('secret 검사가 저장소의 textconv 변환기를 실행함');
+    mustSucceed(run, `secret 검사 명령 실행 실패: exit ${run.status ?? 'none'}`);
+    return run;
+  };
+  try {
+    mustSucceed(git(['init', '-q']), 'secret 검사 임시 저장소 초기화 실패');
+    mustSucceed(git(['config', 'diff.grillprobe.textconv', `echo ${converter} 1>&2 #`]), 'secret 검사 textconv fixture 설정 실패');
+    fs.writeFileSync(path.join(directory, '.gitattributes'), '*.env diff=grillprobe\n');
+    const clean = scan();
+    if (clean.stdout !== '' || clean.stderr !== '') throw new Error('깨끗한 staged diff에서 secret 검사 출력이 있음');
+    out.checked++;
+    fs.writeFileSync(path.join(directory, 'upper.env'), `API_KEY=${sentinel}\n`);
+    fs.writeFileSync(path.join(directory, 'lower.env'), `password: ${sentinel}\n`);
+    fs.writeFileSync(path.join(directory, 'plain.md'), 'ordinary text\n');
+    mustSucceed(git(['add', '--', '.gitattributes', 'upper.env', 'lower.env', 'plain.md']), 'secret 검사 fixture stage 실패');
+    const names = scan().stdout.split(/\r?\n/).filter(Boolean).sort();
+    out.checked++;
+    if (names.join('\n') !== 'lower.env\nupper.env') throw new Error(`secret 검사 파일명 출력 불일치: ${names.length}줄`);
+    out.checked++;
+  } finally {
+    try { cleanupGitDirectory(directory); }
+    catch (error) { diagnostic(out, 'git', null, null, `임시 경로 보존: ${directory}; ${error.message}`); }
+  }
+  return out;
+}
+
+export function checkGitCases({ commitCheckText } = {}) {
+  const out = result();
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), tempPrefix));
+  const git = isolatedGit(directory);
   function requireSuccess(run) { if (run.error || run.status !== 0) throw new Error(run.error?.message || run.stderr || `Git exit ${run.status}`); return run.stdout; }
   function expect(condition, message) { if (!condition) throw new Error(message); }
   try {
@@ -953,6 +1037,14 @@ export function checkGitCases() {
   } finally {
     try { cleanupGitDirectory(directory); }
     catch (error) { diagnostic(out, 'git', null, null, `임시 경로 보존: ${directory}; ${error.message}`); }
+  }
+  try {
+    const text = commitCheckText ?? fs.readFileSync(path.join(projectRoot, secretScanSource), 'utf8');
+    const args = extractSecretScanCommand(text);
+    out.checked++;
+    runSecretScanCheck(args, out);
+  } catch (error) {
+    diagnostic(out, 'git', null, null, error.message);
   }
   return out;
 }

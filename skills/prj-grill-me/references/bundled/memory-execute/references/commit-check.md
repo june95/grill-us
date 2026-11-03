@@ -9,9 +9,10 @@
 1. 사전에 정한 Task Goal·Scope·Acceptance Criteria·Alignment와 실제 산출물(변경 또는 조사/검증 근거)을 대조한다. 범위 밖 변경, 누락된 완료 조건, 명백한 결함·회귀 위험을 확인한다.
 2. commit-check **이전**의 적용 단계만 평가한다. 필수 단계는 passed와 현재 유효한 증거, 필요 시는 조건 평가 후 passed 또는 이유 있는 skipped, 해당 없음은 이유 있는 skipped여야 한다. 아직 수행 전인 commit과 running 상태의 이 점검 자체는 선행 완료 조건이 아니다.
 3. [증거·환경](conventions.md#evidence-and-completion)의 현재 Revision/snapshot·변경 영향을 대조한다. 파일 존재만으로 유효하다고 보지 않고 실패·stale를 생략으로 덮지 않는다.
-4. 현재 산출물의 미해결 Critical/High·미승인 변경·AC 미달성이면 blocked다. 대상 결함과 조사 작업은 [Investigation Outcomes](conventions.md#investigation-outcomes)로 구분하되 후속 등록만으로 완료 차단을 해소하지 않는다. 다른 severity도 AC를 막으면 차단한다.
-5. 필요한 정본은 승인된 계약 및 현재 구현·검증과 일치해야 한다. 정본 갱신이 해당 없음이면 그 근거를 읽고 빈 guide-update.md를 요구하지 않는다.
-6. Task Completion Check에 `Verdict: ready / blocked`, Revision·snapshot, 완료 조건별 근거, 단계 적용·판정, blocking finding, 남은 검증 한계를 적는다.
+4. Task diff에 테스트·검사를 약하게 만든 변경이 있는지 [검사 약화 기준](review.md#compliance)으로 확인한다. task.md Scope/Constraints의 명시 승인이 없는 약화는 High이므로 blocked다.
+5. 현재 산출물의 미해결 Critical/High·미승인 변경·AC 미달성이면 blocked다. 대상 결함과 조사 작업은 [Investigation Outcomes](conventions.md#investigation-outcomes)로 구분하되 후속 등록만으로 완료 차단을 해소하지 않는다. 다른 severity도 AC를 막으면 차단한다.
+6. 필요한 정본은 승인된 계약 및 현재 구현·검증과 일치해야 한다. 정본 갱신이 해당 없음이면 그 근거를 읽고 빈 guide-update.md를 요구하지 않는다.
+7. Task Completion Check에 `Verdict: ready / blocked`, Revision·snapshot, 완료 조건별 근거, 단계 적용·판정, blocking finding, 남은 검증 한계를 적는다.
 
 공통 점검 자체가 코드 리팩토링을 수행하지 않는다. 수정이 필요하면 적절한 구현·review-action 단계로 반환한다. 수정 후 영향받은 증거를 갱신하고 다시 판정한다. 단계 단독 commit-check 요청이면 발견 사항만 기록하며 다른 단계·staging·commit·포인터 전진을 수행하지 않는다.
 
@@ -24,6 +25,7 @@
 - staging 후 `git diff --cached --name-status`와 각 staged 경로의 ignore 상태를 다시 확인한다. 전환 예외 외에 ignored 내용 추가·수정은 허용하지 않는다.
 - `git ls-files --stage -- <후보>`로 stage 0의 Git mode/blob ID를 확인한다. unresolved merge stage가 있으면 차단한다. working-tree SHA256은 검증 freshness, staged Git entry는 실제 commit 내용 복구에 사용하여 줄바꿈·clean filter 차이를 구분한다.
 - stage된 변경 내용이 검토·검증한 내용과 같은지 실제 diff와 snapshot으로 확인한다. 후보에 user WIP가 같은 파일에 섞였으면 안전하게 구분할 수 있는지 확인하고 불분명하면 차단한다.
+- commit 전에 [Secret Check](#secret-check)로 staged diff를 확인한다. 실제 비밀 값이 있거나 검사를 실행하지 못하면 commit하지 않는다.
 - 이미 staged된 unrelated 작업을 전체 커밋에 섞거나 임의로 unstage하지 않는다. 명시적 Task 경로만 커밋할 수 있는 방식을 사용하되 그 방식이 기존 사용자 index와 실제 검토 범위를 보존하는지 확인한다. 안전한 분리가 불가능하면 차단한다.
 - 잘못 stage한 경로는 본 실행에서 stage한 것인지 확인하고 index만 복구한다. 로컬 파일·사용자 작업을 삭제하거나 `reset --hard`, 작업 파일 checkout으로 되돌리지 않는다.
 - 명시적 요청 없이 push하지 않는다. 비대화식 commit을 사용하고 shell 문자열 연결 대신 실제 메시지 파일 또는 구조화 입력을 사용한다.
@@ -35,6 +37,21 @@
 - 기계 판독은 `git check-ignore -v -z --no-index --stdin`에 명시 경로를 NUL로 구분해 전달한다. 출력은 `source`, `line`, `pattern`, `pathname`의 NUL 구분 4필드 묶음이다. 여러 경로의 전체 종료 코드를 개별 파일 판정으로 사용하지 않는다. 출력 경로와 입력 후보를 대응시키고, 정상 실행에서 출력 없는 경로만 무매칭으로 처리한다. 필드 누락·알 수 없는 경로는 오류다.
 - ignored 부모 아래의 자식 예외는 적용되지 않을 수 있다. `.gitignore`에 `!` 줄이 있다는 사실 대신 해당 경로에 대해 Git이 반환한 실제 패턴을 따른다.
 - 제외 해제·무매칭은 Git ignore 조건만 충족한다. Task scope, 명시 공유 승인, 기본 로컬 `.memory`, 사용자 index 보존 조건을 별도로 확인하며 `!`를 포괄적인 staging 승인으로 사용하지 않는다.
+
+### Secret Check
+
+staged 내용을 확인한 뒤 commit 전에 아래 명령으로 staged diff를 검사한다. 이 명령은 패턴과 일치한 파일명만 출력하고 값은 출력하지 않는다. `--no-textconv`·`--no-ext-diff`는 저장소 설정의 변환기(textconv)나 외부 diff를 실행하지 않고 원래 staged 내용에서 찾게 한다. 값을 출력하는 형태로 바꾸거나 이 옵션을 빼지 않는다.
+
+`git diff --cached --no-textconv --no-ext-diff -i -G'password|passwd|secret|api[_-]?key|token|private[_-]?key|credential' --name-only`
+
+1. 명령이 실패하거나 실행하지 못했으면 통과로 보지 않는다. exit와 원인을 기록하고 commit을 멈춘다.
+2. 출력된 Task 후보 파일은 실행 담당이 해당 줄을 직접 읽어 실제 비밀 값인지, 단어 언급(규칙 설명·변수 이름·placeholder 등)인지 분류한다. 후보가 아닌 기존 사용자 staged 경로가 출력되면 판단하거나 고치지 않고 경로만 알린다.
+3. 실제 비밀 값이면 commit하지 않고 Completion Check를 blocked로 둔다. 사용자에게는 파일·줄 위치와 분류만 알린다. 파일을 고치거나 후보에서 자동으로 빼지 않으며, 이 실행이 stage한 경로만 위 규칙대로 index를 되돌릴 수 있다.
+4. 단어 언급이면 Completion Check의 Staging 기록에 파일·분류·판단 근거를 값 없이 남기고 진행한다.
+5. 보고서·history·채팅에는 비밀 값이나 그 일부를 쓰지 않는다. 파일·줄 위치·분류만 남긴다.
+6. 이미 commit되었거나 push된 비밀을 발견하면 history rewrite나 force push를 하거나 지시하지 않는다. 사용자에게 해당 비밀의 교체(rotate)를 먼저 안내한다.
+
+이 검사는 알려진 단어만 찾고 binary 파일은 변환하지 않으므로, 출력이 없다고 비밀이 없다고 보장하지 않는다. 비밀 파일을 후보에서 빼는 위 Staging 규칙은 그대로 적용한다.
 
 ## Commit Intent
 
