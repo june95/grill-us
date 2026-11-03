@@ -350,6 +350,10 @@ Candidate Snapshot 형식은 path·A/M/D·working SHA256·staged mode/blob다. �
 - Fallback Reason: {위임 불가 사유·사용자 알림 근거 또는 없음; 사용자 자체 리뷰 요청은 구분}
 - Reviewed Snapshot: {위 Source Snapshot 참조 또는 시도별 path/SHA256; 현재 대상과 일치 확인}
 - Limitations: {실제 도구/샌드박스 제한 수준·지침만의 제한, 부분 결과·미검토 범위}
+- Review Inputs: {1단계 입력(계약·diff·반증 증거)과 2단계 입력(구현 보고·검증 결과), 이어서 호출했는지 새 호출인지}
+- Stage 2 Classification: {1단계 finding별 유지 / 기록된 조정으로 해소 / 계약 오독}
+
+{리뷰어가 둘이면(고위험 Task) 위 항목을 리뷰어별로 적고, 병합 결과(ID 접두·중복·severity·verdict)를 따로 남긴다.}
 
 {조사 목적 Task에서 검사 결과와 목표 달성이 다를 수 있으면 아래 항목을 작성한다. 해당하지 않으면 제거한다.}
 

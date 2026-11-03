@@ -19,6 +19,8 @@
 | R13 | staged/unstaged가 같은 경로,untracked 폴더와 rename이 함께 있음 | 공통 NUL 집계로 범주별 수/전체 합집합·이전 경로를 구분 | staged 대상 버전만 검토하며 집계만으로 untracked 내용까지 읽거나 stage하지 않음 |
 | R14 | 현재 변경과 명시 Task의 후보가 일부 겹침 | 관련 경로·실제 diff/commit·귀속 불명확을 구분 | 경로 겹침만으로 작성자/의도·Task 미완료를 단정하지 않음 |
 | R15 | 기존 PNG와 capture sidecar 검토 | 실제 이미지·capturedAt/viewport/actions/한계의 일치와 미확인 범위를 읽어 finding/권고 반환 | URL 재방문·브라우저 조작·재캡처·metadata 수정·Task/current/history 쓰기 없음. 이미지 존재를 제품/DB 성공으로 세지 않음 |
+| R16 | 변경이 기존 결함 줄을 건드리지 않음, 새 회귀 1건 | 회귀는 일반 finding, 원래 있던 결함은 severity를 보존한 범위 밖 발견으로 구분 반환; 호출부·가드·테스트로 반증되는 의심은 보고하지 않음 | 기존 결함 수정 지시·scope 확대 없음 |
+| R17 | 보안 관점 전담 지시를 받은 위임 | 같은 Compliance 기준에서 입력 검증·권한·secret·외부 입력 경계를 우선 검토, R/S 접두 등 요청한 ID 형식으로 반환 | 다른 리뷰어 결과 병합·기록은 실행 담당 몫, 추가 위임 없음 |
 
 ## Known Defect Fixture
 

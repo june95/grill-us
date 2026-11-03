@@ -51,6 +51,9 @@
 | R04 | Needs Changes/finding 또는 구현 근거 Blocked | 도구 불가로 취급하거나 자체 리뷰로 지우지 않음; 전체 Task만 승인 scope 수정, 완료 차단 유지 | 지침 walkthrough |
 | R05 | 반환 후 대상 snapshot 변경 | 영향 결과 stale, 원 발견 보존·기본 위임 선택에 따른 실제 재리뷰; 새 snapshot 자동 passed 없음 | 지침 walkthrough |
 | R06 | --stage review 또는 비활성 Task review | 기본 위임/불가 절차 동일, 실행 담당 보고·metadata만; 수정/commit/done/전진 없음, 기존 active 보존 | 지침 walkthrough |
+| R07 | 위임 리뷰 2단계 입력 | 1단계에는 계약·diff·반증 증거만, 2단계에 구현 보고·검증 결과; 1단계 finding을 유지·조정으로 해소·계약 오독으로 분류하고 지우지 않음 | 지침 walkthrough |
+| R08 | 고위험 Task, 기본·보안 리뷰어 병렬 중 보안 리뷰어만 실패 | 성공한 결과는 보존하고 보안 관점만 알림 후 Self로 보완; ID 접두·Review Mode를 리뷰어별 기록, 더 엄격한 verdict 적용 | 지침 walkthrough |
+| R09 | 2단계에서 계약 오독으로 분류된 finding | Clarify contract로 계약 문구 보강 권고, 구현 수정 없음; 의미 변경이면 Revision·승인 절차 | 지침 walkthrough |
 
 ## Validation Environment Cases
 
