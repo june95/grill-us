@@ -2,7 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { repository, createRun, assertOwned, consumer, cli, names, installed, listEntries, save, assertSourceUnchanged, removeRun, finishRun, tree, sha } from './helpers/skills-install.mjs';
+import os from 'node:os';
+import childProcess from 'node:child_process';
+import { syncBuiltinESMExports } from 'node:module';
+import { pathToFileURL } from 'node:url';
+import { repository, createRun, assertOwned, consumer, cli, names, installed, listEntries, save, assertSourceUnchanged, removeRun, finishRun, tree, sha, command } from './helpers/skills-install.mjs';
 import { prepareNative, discoverCodex, nativeCase, assessReadEvidence, verifyNativeReadReview, assertClaudeFixtureConfig, auditClaudeReadScope, withoutParentSession, agentChildEnv } from './helpers/native-skills-smoke.mjs';
 
 test('Glob scope guard rejects parent and absolute patterns plus outside result paths', () => {
@@ -138,6 +142,240 @@ test('read evidence guard links successful Claude results and requires explicit 
     save(path.join(evidence, 'read-review.json'), { status: 'Pass', reviewer: 'synthetic-parent', eventsSHA256: sha(fs.readFileSync(path.join(evidence, 'events.json'))), skillRead: true, referenceRead: true, skillPath, referencePaths: [ref], eventIds: ['c2'], observations: 'Synthetic parent inspected both commands and complete matching file contents.' });
     assert.equal(verifyNativeReadReview(run, evidence).method, 'explicit-parent-trace-review');
   } finally { removeRun(run); }
+});
+
+// command timeout 회귀는 합성 Node 자식만 실행한다.
+// fixture 프로세스는 pid 파일을 남기고, stop 파일을 보거나 60초가 지나면 스스로 끝난다. 정리에 PID 신호를 쓰지 않는다.
+// 소유 임시 경로는 grill-command-timeout-* 이다. 다른 suite가 병렬로 새 grill-skills-install-* root를 세므로 그 이름을 쓰지 않는다.
+const timeoutFixture = {
+  'sleeper.cjs': `const fs = require('node:fs'), path = require('node:path');
+const [dir, name, mode] = process.argv.slice(2);
+if (mode === 'ignore-term') process.on('SIGTERM', () => {});
+fs.writeFileSync(path.join(dir, name + '.pid'), String(process.pid));
+const started = Date.now();
+setInterval(() => { if (fs.existsSync(path.join(dir, 'stop')) || Date.now() - started > 60000) process.exit(0); }, 50);
+`,
+  // 곧바로 끝나지만, 분리된 손자가 출력 pipe를 물려받아 계속 잡고 있다.
+  'middle.cjs': `const { spawn } = require('node:child_process'), path = require('node:path');
+const dir = process.argv[2];
+spawn(process.execPath, [path.join(dir, 'sleeper.cjs'), dir, 'grandchild'], { stdio: ['ignore', 'inherit', 'inherit'], detached: true }).unref();
+process.stdout.write('middle-ready\\n');
+`,
+  'quick.cjs': `process.stdout.write('ok');\n`,
+};
+
+const timeoutPrefix = 'grill-command-timeout-';
+
+function timeoutRun(label) {
+  const dir = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), timeoutPrefix + label + '-'));
+  for (const [name, source] of Object.entries(timeoutFixture)) fs.writeFileSync(path.join(dir, name), source);
+  return { dir };
+}
+
+/** 계약상 상한(timeout + killGraceMs + closeWaitMs + 5초) 안에 반환하지 않으면 실패한다. */
+async function boundedCommand(args, options) {
+  const limit = options.timeout + options.killGraceMs + options.closeWaitMs + 5000;
+  let timer;
+  const late = new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('command did not return within ' + limit + 'ms')), limit); });
+  try { return await Promise.race([command(process.execPath, args, options), late]); }
+  finally { clearTimeout(timer); }
+}
+
+/**
+ * helper의 taskkill 호출을 기록한다. fail이면 실행하지 않고 실패 status를 돌려준다.
+ * hang이면 helper가 넘긴 options 그대로 20초 동안 끝나지 않는 프로세스를 대신 실행한다(실행 상한 확인용).
+ */
+function watchTaskkill({ fail = false, hang = false, failAfterKill = false } = {}) {
+  const original = childProcess.spawnSync, calls = [];
+  childProcess.spawnSync = (file, args, options) => {
+    if (/^taskkill(?:\.exe)?$/i.test(path.basename(String(file)))) {
+      calls.push([...args]);
+      if (fail) return { pid: 0, output: [null, null, null], stdout: null, stderr: null, status: 1, signal: null };
+      if (hang) return original(process.execPath, ['-e', 'setTimeout(() => {}, 20000)'], options);
+      // 실제로 끝낸 뒤 실패 status를 돌려준다(일부 후손 종료 실패와 같은 모양).
+      if (failAfterKill) return { ...original(file, args, options), status: 1 };
+    }
+    return original(file, args, options);
+  };
+  syncBuiltinESMExports();
+  return { calls, restore() { childProcess.spawnSync = original; syncBuiltinESMExports(); } };
+}
+
+/** helper가 process group(음수 PID)에 보낸 신호를 순서대로 기록한다. fail이면 EPERM으로 실패시킨다. */
+function watchGroupSignals({ fail = false } = {}) {
+  const original = process.kill, signals = [];
+  process.kill = (pid, signal) => {
+    if (pid < 0) {
+      signals.push(signal);
+      if (fail) throw Object.assign(new Error('kill EPERM'), { code: 'EPERM' });
+    }
+    return original.call(process, pid, signal);
+  };
+  return { signals, restore() { process.kill = original; } };
+}
+
+/** stop 파일로 fixture를 끝내고, pid 파일을 남긴 프로세스가 모두 끝난 것을 확인한 뒤 소유 임시 경로를 지운다. */
+async function stopTimeoutRun({ dir }, expected = []) {
+  fs.writeFileSync(path.join(dir, 'stop'), '');
+  const waitFor = async (check, message) => {
+    for (const deadline = Date.now() + 15000; !check(); await new Promise(resolve => setTimeout(resolve, 50))) if (Date.now() > deadline) throw new Error(message);
+  };
+  const pidOf = file => { try { const pid = Number(fs.readFileSync(path.join(dir, file), 'utf8')); return Number.isInteger(pid) && pid > 0 ? pid : null; } catch { return null; } };
+  for (const name of expected) await waitFor(() => pidOf(name + '.pid'), 'fixture process never started: ' + name);
+  for (const file of fs.readdirSync(dir).filter(file => file.endsWith('.pid'))) {
+    await waitFor(() => pidOf(file), 'fixture pid file stayed incomplete: ' + file);
+    const pid = pidOf(file);
+    await waitFor(() => { try { process.kill(pid, 0); return false; } catch (error) { return error.code === 'ESRCH'; } }, 'fixture process still running: ' + file);
+  }
+  const owned = fs.realpathSync(dir);
+  if (path.dirname(owned) !== fs.realpathSync(os.tmpdir()) || !path.basename(owned).startsWith(timeoutPrefix)) throw new Error('Not an owned timeout fixture: ' + dir);
+  // 방금 끝난 프로세스의 파일 잠금이 Windows에서 잠시 남을 수 있어(EPERM) 짧게 다시 시도한다.
+  fs.rmSync(owned, { recursive: true, maxRetries: 10, retryDelay: 100 });
+  assert.equal(fs.existsSync(owned), false);
+}
+
+test('command timeout returns when a detached descendant keeps output pipes open', { timeout: 60000 }, async () => {
+  const fixture = timeoutRun('pipe'), taskkill = watchTaskkill(), groupSignals = watchGroupSignals();
+  try {
+    const result = await boundedCommand([path.join(fixture.dir, 'middle.cjs'), fixture.dir], { cwd: fixture.dir, timeout: 4000, killGraceMs: 500, closeWaitMs: 1000 });
+    assert.equal(result.timedOut, true);
+    assert.equal(result.exit, 0);
+    assert.equal(result.terminationFailed, true);
+    assert.match(result.error, /output pipes stayed open/);
+    assert.match(result.stdout, /middle-ready/);
+    assert(fs.existsSync(path.join(fixture.dir, 'grandchild.pid')), 'the descendant holding the pipes must have started');
+    // 자식 exit를 관측한 뒤에는 같은 PID(Windows)나 group ID(POSIX)로 종료를 요청하지 않는다(재사용 방지).
+    assert.deepEqual(taskkill.calls, []);
+    assert.deepEqual(groupSignals.signals, []);
+  } finally {
+    taskkill.restore();
+    groupSignals.restore();
+    await stopTimeoutRun(fixture, ['grandchild']);
+  }
+});
+
+test('command timeout escalates to SIGKILL when the process group ignores SIGTERM', { timeout: 60000, skip: process.platform === 'win32' ? 'POSIX process-group signals only; Windows uses taskkill /T /F' : false }, async () => {
+  const fixture = timeoutRun('sigkill'), groupSignals = watchGroupSignals();
+  try {
+    const result = await boundedCommand([path.join(fixture.dir, 'sleeper.cjs'), fixture.dir, 'child', 'ignore-term'], { cwd: fixture.dir, timeout: 3000, killGraceMs: 500, closeWaitMs: 1000 });
+    assert.equal(result.timedOut, true);
+    assert.equal(result.signal, 'SIGKILL');
+    assert.equal(result.terminationFailed, false);
+    assert.equal(result.error, null);
+    assert.deepEqual(groupSignals.signals, ['SIGTERM', 'SIGKILL']);
+  } finally {
+    groupSignals.restore();
+    await stopTimeoutRun(fixture);
+  }
+});
+
+test('command timeout keeps normal exit and ordinary timeout results', { timeout: 60000 }, async () => {
+  const fixture = timeoutRun('ordinary'), taskkill = watchTaskkill(), groupSignals = watchGroupSignals();
+  const keys = ['startedAt', 'finishedAt', 'executable', 'args', 'cwd', 'exit', 'signal', 'timedOut', 'error', 'stdout', 'stderr', 'terminationFailed'].sort();
+  try {
+    const normal = await boundedCommand([path.join(fixture.dir, 'quick.cjs')], { cwd: fixture.dir, timeout: 30000, killGraceMs: 500, closeWaitMs: 1000 });
+    assert.deepEqual(Object.keys(normal).sort(), keys);
+    assert.deepEqual({ exit: normal.exit, signal: normal.signal, timedOut: normal.timedOut, terminationFailed: normal.terminationFailed, error: normal.error, stdout: normal.stdout },
+      { exit: 0, signal: null, timedOut: false, terminationFailed: false, error: null, stdout: 'ok' });
+    assert.deepEqual(taskkill.calls, []);
+    assert.deepEqual(groupSignals.signals, []);
+    // 실제 taskkill은 Windows에서 0.5초를 넘길 수 있어(측정 약 0.6초) 실행 상한 killGraceMs는 기본값을 쓴다.
+    const stopped = await boundedCommand([path.join(fixture.dir, 'sleeper.cjs'), fixture.dir, 'child'], { cwd: fixture.dir, timeout: 3000, killGraceMs: 5000, closeWaitMs: 1000 });
+    assert.deepEqual(Object.keys(stopped).sort(), keys);
+    assert.equal(stopped.timedOut, true);
+    assert.equal(stopped.terminationFailed, false);
+    assert.equal(stopped.error, null);
+    if (process.platform === 'win32') {
+      // exit를 관측하기 전에, 살아 있는 자식 PID로 한 번만 tree 종료를 요청한다.
+      assert.equal(stopped.exit, 1);
+      assert.deepEqual(taskkill.calls, [['/PID', fs.readFileSync(path.join(fixture.dir, 'child.pid'), 'utf8'), '/T', '/F']]);
+    } else {
+      // SIGTERM으로 끝나 유예 안에 close가 오면 SIGKILL은 보내지 않는다.
+      assert.equal(stopped.signal, 'SIGTERM');
+      assert.deepEqual(groupSignals.signals, ['SIGTERM']);
+    }
+  } finally {
+    taskkill.restore();
+    groupSignals.restore();
+    await stopTimeoutRun(fixture);
+  }
+});
+
+test('command timeout reports a forced termination that fails', { timeout: 60000 }, async () => {
+  const fixture = timeoutRun('kill-failure');
+  const injected = process.platform === 'win32' ? watchTaskkill({ fail: true }) : watchGroupSignals({ fail: true });
+  try {
+    const result = await boundedCommand([path.join(fixture.dir, 'sleeper.cjs'), fixture.dir, 'child'], { cwd: fixture.dir, timeout: 1000, killGraceMs: 500, closeWaitMs: 1000 });
+    assert.equal(result.timedOut, true);
+    assert.equal(result.exit, null);
+    assert.equal(result.terminationFailed, true);
+    if (process.platform === 'win32') {
+      assert.match(result.error, /taskkill exit 1/);
+      assert.equal(injected.calls.length, 1);
+      // taskkill이 실패를 알리면, 이후 close가 와도 tree 종료를 확인했다고 보지 않는다.
+      injected.restore();
+      const partial = watchTaskkill({ failAfterKill: true });
+      try {
+        const killed = await boundedCommand([path.join(fixture.dir, 'sleeper.cjs'), fixture.dir, 'partial'], { cwd: fixture.dir, timeout: 2000, killGraceMs: 5000, closeWaitMs: 1000 });
+        assert.equal(killed.timedOut, true);
+        assert.equal(killed.exit, 1);
+        assert.equal(killed.terminationFailed, true);
+        assert.match(killed.error, /taskkill exit 1/);
+        assert.doesNotMatch(killed.error, /pipes stayed open|still running/);
+      } finally { partial.restore(); }
+    } else {
+      // SIGTERM이 실패해도 유예 뒤 SIGKILL을 시도하고, 강제 종료 실패를 알린다.
+      assert.deepEqual(injected.signals, ['SIGTERM', 'SIGKILL']);
+      assert.match(result.error, /SIGKILL to process group failed: EPERM/);
+    }
+  } finally {
+    injected.restore();
+    await stopTimeoutRun(fixture, ['child']);
+  }
+});
+
+test('command timeout bounds a taskkill that does not return', { timeout: 60000, skip: process.platform !== 'win32' ? 'Windows taskkill only' : false }, async () => {
+  const fixture = timeoutRun('taskkill-hang'), taskkill = watchTaskkill({ hang: true });
+  try {
+    const result = await boundedCommand([path.join(fixture.dir, 'sleeper.cjs'), fixture.dir, 'child'], { cwd: fixture.dir, timeout: 1000, killGraceMs: 500, closeWaitMs: 1000 });
+    assert.equal(result.timedOut, true);
+    assert.equal(result.terminationFailed, true);
+    assert.match(result.error, /taskkill ETIMEDOUT/);
+    assert.equal(taskkill.calls.length, 1);
+  } finally {
+    taskkill.restore();
+    await stopTimeoutRun(fixture, ['child']);
+  }
+});
+
+/** 강제 종료 실패를 주입한 별도 caller 프로세스. command()가 포기한 뒤 caller가 스스로 종료해야 한다. */
+const releaseCaller = helperUrl => `import childProcess from 'node:child_process';
+import path from 'node:path';
+import { syncBuiltinESMExports } from 'node:module';
+import { command } from ${JSON.stringify(helperUrl)};
+const dir = process.argv[2];
+if (process.platform === 'win32') {
+  const original = childProcess.spawnSync;
+  childProcess.spawnSync = (file, args, options) => /taskkill/i.test(String(file)) ? { pid: 0, output: [null, null, null], stdout: null, stderr: null, status: 1, signal: null } : original(file, args, options);
+  syncBuiltinESMExports();
+} else {
+  const original = process.kill;
+  process.kill = (pid, signal) => { if (pid < 0) throw Object.assign(new Error('kill EPERM'), { code: 'EPERM' }); return original.call(process, pid, signal); };
+}
+const result = await command(process.execPath, [path.join(dir, 'sleeper.cjs'), dir, 'child'], { cwd: dir, timeout: 1000, killGraceMs: 500, closeWaitMs: 1000 });
+process.stdout.write(JSON.stringify({ terminationFailed: result.terminationFailed, exit: result.exit }));
+`;
+
+test('command timeout lets the caller process exit after abandoning a running child', { timeout: 60000 }, async () => {
+  const fixture = timeoutRun('release');
+  try {
+    fs.writeFileSync(path.join(fixture.dir, 'caller.mjs'), releaseCaller(pathToFileURL(path.join(repository, 'tests/helpers/skills-install.mjs')).href));
+    const caller = childProcess.spawnSync(process.execPath, [path.join(fixture.dir, 'caller.mjs'), fixture.dir], { cwd: fixture.dir, encoding: 'utf8', timeout: 20000, windowsHide: true });
+    // 포기한 자식의 pipe나 process handle을 놓지 않으면 caller는 그 자식이 끝날 때까지 종료하지 못한다.
+    assert.equal(caller.error?.code, undefined, 'caller must exit without waiting for the abandoned child');
+    assert.equal(caller.status, 0, caller.stderr);
+    assert.deepEqual(JSON.parse(caller.stdout), { terminationFailed: true, exit: null });
+  } finally { await stopTimeoutRun(fixture, ['child']); }
 });
 
 test('real pinned skills CLI installs each public skill and both agents without touching user scope', { timeout: 900000 }, async t => {

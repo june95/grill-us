@@ -5,7 +5,7 @@ import path from 'node:path';
 import { repository, names } from './helpers/skills-install.mjs';
 import { checkSkillFrontmatter } from '../scripts/validate-skills.mjs';
 import { claudeArgs, createResultDirectory, loadItems, main, measureErrors, parseArgs, resultName, runOnce, summarize } from '../scripts/measure-skill-routing.mjs';
-import { skillRouting } from './helpers/native-skills-smoke.mjs';
+import { skillRouting, agentChildEnv } from './helpers/native-skills-smoke.mjs';
 import { spawnSync } from 'node:child_process';
 import os from 'node:os';
 
@@ -327,14 +327,16 @@ test('measurement CLI rejects bad usage before any install or model call', () =>
     [['--model', 'm', '--with', 'https://example.com/' + 'ghp' + '_' + 'a'.repeat(36), '--with-skill', 'idea'], /인증정보/]
   ]) assert.throws(() => parseArgs(argv), message, JSON.stringify(argv));
   assert.deepEqual(parseArgs(['--model', 'm', '--with', 'https://github.com/o/r', '--with-skill', 'idea']).withSources, ['https://github.com/o/r']);
-  // 실제 CLI도 사용 오류에서는 설치용 임시 root를 만들지 않고 exit 1로 끝난다.
-  const ownedRoots = () => fs.readdirSync(os.tmpdir()).filter(name => name.startsWith('grill-skills-install-'));
-  const before = new Set(ownedRoots());
-  const run = spawnSync(process.execPath, [path.join(repository, 'scripts', 'measure-skill-routing.mjs'), '--model', 'claude-opus-5-5', '--host', 'codex'], { encoding: 'utf8' });
-  assert.equal(run.status, 1);
-  assert.match(run.stderr, /Codex/);
-  assert.equal(run.stdout, '');
-  assert.deepEqual(ownedRoots().filter(name => !before.has(name)), []);
+  // 실제 CLI도 사용 오류에서는 설치용 임시 root 등 아무것도 만들지 않고 exit 1로 끝난다.
+  // 자식의 임시 폴더를 이 테스트 소유 폴더로 지정한다. 병렬 suite가 공용 임시 폴더에 만드는 root와 섞이지 않는다.
+  const temp = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'grill-skills-usage-'));
+  try {
+    const run = spawnSync(process.execPath, [path.join(repository, 'scripts', 'measure-skill-routing.mjs'), '--model', 'claude-opus-5-5', '--host', 'codex'], { encoding: 'utf8', env: agentChildEnv(temp) });
+    assert.equal(run.status, 1);
+    assert.match(run.stderr, /Codex/);
+    assert.equal(run.stdout, '');
+    assert.deepEqual(fs.readdirSync(temp), []);
+  } finally { fs.rmSync(temp, { recursive: true, force: true }); }
 });
 
 test('skill routing parser counts only completed runs with identified Skill calls', () => {

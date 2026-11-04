@@ -129,25 +129,77 @@ export function assertConsumer(run, cwd) {
   return actual;
 }
 
-/** timeout은 이 호출이 생성한 process tree에만 적용하고 종료까지 기다린다. */
-export async function command(executable, args, { cwd, env, timeout = 120000, input = '' }) {
+/**
+ * timeout은 이 호출이 생성한 process tree에만 적용하고, 제한 시간 안에 반환한다.
+ * 종료 요청은 두 플랫폼 모두 자식 exit를 관측하기 전에만 보낸다. 그동안은 자식이 회수되지 않아
+ * PID(Windows)와 group ID(POSIX)가 이 호출의 것으로 남는다. 관측한 뒤에는 재사용될 수 있다.
+ * - POSIX: 자식 process group에 SIGTERM을 보내고(실패해도) killGraceMs 안에 close가 없으면 같은 group에 SIGKILL을 보낸다.
+ * - Windows: taskkill /T /F를 killGraceMs 상한으로 실행하고 exit status를 확인한다.
+ * 마지막 종료 시도 뒤 closeWaitMs 안에 close가 없으면(자식이 끝났는데 후손이 pipe를 잡은 경우 포함) stdio를 닫고 반환한다.
+ * 이때나 강제 종료(SIGKILL·taskkill)가 실패했을 때는 terminationFailed: true이고 error에 정리된 사유를 남긴다.
+ * killGraceMs·closeWaitMs는 테스트가 짧은 값을 쓰기 위한 선택 옵션이다.
+ */
+export async function command(executable, args, { cwd, env, timeout = 120000, input = '', killGraceMs = 5000, closeWaitMs = 10000 }) {
   const startedAt = new Date().toISOString();
   const child = spawn(executable, args, { cwd, env, windowsHide: true, detached: process.platform !== 'win32', stdio: ['pipe', 'pipe', 'pipe'] });
-  let stdout = '', stderr = '', timedOut = false, error = null;
+  let stdout = '', stderr = '', timedOut = false, error = null, forcedFailed = false;
+  const reasons = [];
   child.stdout.on('data', value => { stdout += value; });
   child.stderr.on('data', value => { stderr += value; });
   child.on('error', value => { error = value.message; });
   child.stdin.on('error', value => { error ||= value.message; });
-  const timer = setTimeout(() => {
-    timedOut = true;
-    if (!child.pid) return;
-    if (process.platform === 'win32') spawnSync('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' });
-    else { try { process.kill(-child.pid, 'SIGTERM'); } catch {} }
-  }, timeout);
-  child.stdin.end(input);
-  const result = await new Promise(resolve => child.on('close', (exit, signal) => resolve({ exit, signal })));
-  clearTimeout(timer);
-  return { startedAt, finishedAt: new Date().toISOString(), executable, args, cwd, ...result, timedOut, error: error && clean(error), stdout: clean(stdout), stderr: clean(stderr) };
+  const timers = new Set();
+  const after = (ms, action) => { const timer = setTimeout(() => { timers.delete(timer); action(); }, ms); timers.add(timer); };
+  const exited = () => child.exitCode !== null || child.signalCode !== null;
+  // 이 호출이 만든 group에만 보낸다. ESRCH는 group에 남은 프로세스가 없다는 뜻이라 실패가 아니다.
+  const signalGroup = name => {
+    try { process.kill(-child.pid, name); return true; }
+    catch (failure) {
+      if (failure.code === 'ESRCH') return true;
+      reasons.push(name + ' to process group failed: ' + (failure.code || failure.message));
+      return false;
+    }
+  };
+  const result = await new Promise(resolve => {
+    const finish = (exit, signal, unclosed) => {
+      for (const timer of timers) clearTimeout(timer);
+      timers.clear();
+      resolve({ exit, signal, unclosed });
+    };
+    child.on('close', (exit, signal) => finish(exit, signal, null));
+    // close를 더 기다리지 않는다. 남은 pipe를 닫고, 끝나지 않은 자식 handle이 부모 종료를 막지 않게 한다.
+    const abandon = () => {
+      const unclosed = exited() ? 'child exited but its output pipes stayed open (a descendant may still be running)'
+        : 'child was still running ' + closeWaitMs + 'ms after the last termination attempt';
+      for (const stream of [child.stdin, child.stdout, child.stderr]) stream?.destroy();
+      child.unref();
+      finish(child.exitCode, child.signalCode, unclosed);
+    };
+    after(timeout, () => {
+      timedOut = true;
+      // 이미 exit를 관측했으면 종료 요청을 보내지 않고, 남은 pipe가 닫히기만 기다린다.
+      if (!child.pid || exited()) return after(closeWaitMs, abandon);
+      if (process.platform === 'win32') {
+        // exit를 관측하기 전에는 libuv가 자식 process handle을 열어 두므로 이 PID는 재사용되지 않는다.
+        // spawnSync라 taskkill이 끝날 때까지 exit 처리(handle 닫기)가 끼어들지 않는다. 대신 실행 상한을 둔다.
+        const kill = spawnSync('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore', timeout: killGraceMs });
+        if (kill.error || kill.status !== 0) {
+          forcedFailed = true;
+          reasons.push('taskkill ' + (kill.error ? kill.error.code || kill.error.message : 'exit ' + kill.status));
+        }
+        return after(closeWaitMs, abandon);
+      }
+      signalGroup('SIGTERM');
+      after(killGraceMs, () => {
+        if (!exited() && !signalGroup('SIGKILL')) forcedFailed = true;
+        after(closeWaitMs, abandon);
+      });
+    });
+    child.stdin.end(input);
+  });
+  const terminationFailed = forcedFailed || Boolean(result.unclosed);
+  if (terminationFailed) error = [error, 'timeout termination not confirmed: ' + [...reasons, result.unclosed].filter(Boolean).join('; ')].filter(Boolean).join('; ');
+  return { startedAt, finishedAt: new Date().toISOString(), executable, args, cwd, exit: result.exit, signal: result.signal, timedOut, error: error && clean(error), stdout: clean(stdout), stderr: clean(stderr), terminationFailed };
 }
 
 export async function cli(run, args, cwd = run.root) {
