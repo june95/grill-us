@@ -67,6 +67,35 @@ full validator124/124, 오류0으로 통과했다. source/public frontmatter10/9
   - Codex는 실행 출력에 스킬 호출 이벤트가 없어 자동 측정하지 않았다. SKILL.md를 읽는 shell 명령만 보이며, 이것은 발동과 같지 않다.
 - 회귀 검사(`node scripts/validate-skills.mjs`)는 모델을 호출하지 않는다. 측정 방법과 산출물 위치는 [Validation Scope](../.agents/skills/memory-execute/references/validation-scope.md#on-demand-routing-measurement)에 있다.
 
+### 2026-11-04 prj-memory-tidy 추가 뒤 측정
+
+공개 스킬이 10개가 된 뒤(0.6.0) `node scripts/measure-skill-routing.mjs --model claude-sonnet-5-5 --runs 3 --skill prj-memory-tidy --skill prj-memory-explain --skill prj-memory-execute --skill prj-memory-review`로 한 번에 측정했다. 측정 범위와 비용은 실행 전에 사용자에게 확인받았다.
+
+| 항목 | 실제 확인 범위 |
+| :--- | :--- |
+| 호스트·모델 | Claude Code 2.1.318 headless(`claude -p`), claude-sonnet-5-5 |
+| 설치 | skills CLI 1.7.4로 소유 임시 프로젝트에 public 10개만 project scope 설치, 외부 팩 없음 |
+| 문장 | tidy·explain·execute·review의 `measure` 한국어 문장 16개(positive 8, negative 8), 문장당 3회, 총 48회. negative 중 3개는 owner가 tidy다(explain·execute·review case에 하나씩) |
+| 실행 구성 | Skill 도구만 허용, 문장은 stdin 전달, 사용자 설정·plugin 설정·MCP·hooks 차단. 상위 에이전트 세션의 변수(`CLAUDECODE`, `CLAUDE_*`, `ORCA_*`)는 넘기지 않았다. 호스트 기본 명령과 번들 스킬은 보였지만 켜진 경우는 없었다 |
+| 결과 | 48회 모두 완료. positive 24/24 발동(문장마다 3/3), negative 자기 스킬 오발동 4/24 |
+| 비용 | Claude Code가 보고한 API 요금 환산 $1.78(48회 모두 보고) |
+
+- tidy:
+  - positive 2개는 모두 3/3 발동했다.
+  - tidy case의 negative 2개(결정 이유 설명은 explain 소관, Task를 끝내며 그 Task의 작업 파일 정리는 execute 소관)에서 tidy는 0/6이었다. owner는 각각 3/3 켜졌다.
+  - explain·execute·review case에 넣은 tidy owner negative 3개에서는 tidy가 9/9 켜졌다.
+- 오발동(개선 후보로만 기록하고 description은 바꾸지 않았다):
+  - explain: ".memory 전체를 점검해서 남은 작업 파일 목록을 보여 줘."(owner tidy)에서 3/3 켜졌다. 같은 실행에서 tidy도 3/3 켜졌다.
+  - explain: "새로운 캐시 정책을 결정해야 해. 질문하면서 정해 줘."(owner grill-me)에서 1/3 켜졌다. grill-me는 3/3 켜졌다. 2026-11-03 측정에서는 이 문장의 오발동이 없었다.
+  - execute·review case의 tidy owner negative에서는 자기 스킬 오발동이 없었다.
+- 함께 켜진 경우: execute positive "현재 작업 이어서 진행해 줘." 3회 중 1회에 explain이 함께 켜졌다.
+- execute case의 "이 diff만 읽기 전용으로 리뷰해서 문제점만 알려줘."(owner review)에서는 2회 아무 스킬도 켜지지 않았고 1회 review가 켜졌다. 2026-11-03의 관측(대상 내용 없는 diff 리뷰 요청)과 비슷하다.
+- 한계:
+  - 2026-11-03 측정과 범위, Claude Code 버전, 환경 변수 조건이 다르다. 두 결과를 그대로 비교하지 않는다.
+  - 문장당 3회라 1/3 차이는 우연과 구분하지 못한다.
+  - 나머지 공개 스킬(grill-me·intake·plan·wiki·page-capture·visualize)은 이번에 다시 재지 않았다.
+  - 위 측정의 한계(확률적 발동, Skill 전용 headless, 외부 팩 미측정, Codex 미측정)는 같다.
+
 ## 관측 실패와 한계
 
 - 최초 Claude 호출은 넓은 Glob 결과가100/110개로 잘려 strict scope parser가 실패로 판정했다. 원 결과를 보존하고 좁은 조회를 명시한 별도6건을 통과시켰다. 실패를 parser 완화로 통과시키지 않았다.
