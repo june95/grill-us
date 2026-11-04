@@ -178,7 +178,7 @@ function loadCases() {
   return files.map(file => ({ file, data: JSON.parse(fs.readFileSync(path.join(casesRoot, file), 'utf8')) }));
 }
 
-test('routing case files exist for all nine public skills and are well-formed', () => {
+test('routing case files exist for all ten public skills and are well-formed', () => {
   const cases = loadCases();
   assert.deepEqual(cases.map(item => path.basename(item.file, '.json')), [...names].sort());
   for (const { file, data } of cases) {
@@ -212,9 +212,9 @@ test('routing checks fail on deliberate violations', () => {
     { name: 'prj-gamma', description: 'Create slide decks and charts from notes. Use for presentations.' }
   ]);
   assert.deepEqual(collisions(colliding).fail.length, 1);
-  // 모든 공개 스킬이 같은 description을 쓰면 36쌍 모두 충돌로 실패해야 한다(공통 단어도 가중치를 가져야 함).
+  // 모든 공개 스킬(10개)이 같은 description을 쓰면 45쌍 모두 충돌로 실패해야 한다(공통 단어도 가중치를 가져야 함).
   const skills = publicSkills();
-  assert.deepEqual(collisions(buildIndex(skills.map(skill => ({ name: skill.name, description: skills[0].description })))).fail.length, 36);
+  assert.deepEqual(collisions(buildIndex(skills.map(skill => ({ name: skill.name, description: skills[0].description })))).fail.length, 45);
   // 트리거 문구가 없는 description은 실패한다.
   assert.deepEqual(missingTriggerPhrase([{ name: 'prj-alpha', description: 'Review diffs.' }]), ['prj-alpha']);
 

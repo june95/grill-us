@@ -1,6 +1,6 @@
 # grill-us 설치 안내
 
-공식 배포는 skills CLI로 설치하는 `prj-*` 9개다.
+공식 배포는 skills CLI로 설치하는 `prj-*` 10개다.
 
 ```sh
 npx skills@latest add june95/grill-us

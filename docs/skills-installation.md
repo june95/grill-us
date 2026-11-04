@@ -1,6 +1,6 @@
 # skills CLI 설치 안내
 
-승인된 공식 설치 경로는 skills CLI와 public `prj-*` 9개다. 이 변경은 아직 공개 push 전이며 아래 GitHub 주소가 새 snapshot을 제공하는지는 공개 반영 후 별도 확인해야 한다. 로컬 후보 검증을 공개 주소 설치 성공으로 해석하지 않는다.
+승인된 공식 설치 경로는 skills CLI와 public `prj-*` 10개다. 이 변경은 아직 공개 push 전이며 아래 GitHub 주소가 새 snapshot을 제공하는지는 공개 반영 후 별도 확인해야 한다. 로컬 후보 검증을 공개 주소 설치 성공으로 해석하지 않는다.
 
 ## 설치
 
@@ -19,7 +19,7 @@ npx skills@latest add june95/grill-us --skill prj-memory-explain -a codex
 npx skills@latest add june95/grill-us --skill prj-memory-explain -a claude-code
 ```
 
-공식 항목은 `prj-grill-me`, `prj-memory-intake`, `prj-memory-plan`, `prj-memory-execute`, `prj-memory-review`, `prj-memory-explain`, `prj-memory-wiki`, `prj-page-capture`, `prj-visualize`의9개다. 필요한 공통 문서는 각 스킬 안에 포함하며 다른 스킬 등록을 자동 설치하지 않는다. 후속 작업에 다른 항목이 필요하면 해당 이름을 안내한다.
+공식 항목은 `prj-grill-me`, `prj-memory-intake`, `prj-memory-plan`, `prj-memory-execute`, `prj-memory-review`, `prj-memory-explain`, `prj-memory-tidy`, `prj-memory-wiki`, `prj-page-capture`, `prj-visualize`의10개다. 필요한 공통 문서는 각 스킬 안에 포함하며 다른 스킬 등록을 자동 설치하지 않는다. 후속 작업에 다른 항목이 필요하면 해당 이름을 안내한다.
 
 Codex에서는 `$prj-memory-explain`, Claude Code에서는 `/prj-memory-explain`처럼 선택한다. 스킬/참고 문서가 있는 위치와 작업 프로젝트를 구분하고 `.memory`는 원래 사용자 프로젝트에 보존한다.
 
@@ -66,4 +66,6 @@ Claude Code와 Codex는 설치된 스킬의 description을 보고 요청마다 �
 
 Windows의 Node26.12.1/skills1.7.4에서 최종 후보의 기본·전체 검색9개와 두 에이전트의 전체/단독 설치 bytes를 대조했다. Codex0.166.0·Claude2.1.316의 설명·리뷰·인터뷰 각3건에서 설치된 전체 SKILL, 자체 참고 문서와 변경된 설치/작업공간 절을 읽고 fixture·Git·payload 변경이 없음을 확인했다. 실제 저장소의 최종 회귀 결과는 [호환성 안내](https://github.com/june95/grill-us/blob/main/docs/skills-compatibility.md)에 구분한다.
 
-공식 public9개는 `skills/` 생성물이며 개발 source9개와 CodeBurn의 internal 표시는 기본 검색에서 숨기는 정책이다. 명시 internal 요청/opt-in은 공식 설치 범위 밖이며 비밀 보호 수단이 아니다. 다른 OS/CLI 버전·global native 호출·전체 workflow·공개 주소 설치/업데이트는 별도 검증이다. 기존 plugin의 당시 결과를 새 방식 성공으로 확대하지 않는다.
+위 수치는 공개 스킬이 9개였던 당시 결과다. 0.6.0에서 추가한 `prj-memory-tidy`는 이 native 호출 확인에 들지 않았다. 로컬 회귀(`node scripts/validate-skills.mjs`)는 고정한 skills CLI로 10개의 단독·전체 설치를 대조한다. `prj-memory-tidy`의 실제 발동은 아직 측정하지 않았다.
+
+공식 public10개는 `skills/` 생성물이며 개발 source10개와 CodeBurn의 internal 표시는 기본 검색에서 숨기는 정책이다. 명시 internal 요청/opt-in은 공식 설치 범위 밖이며 비밀 보호 수단이 아니다. 다른 OS/CLI 버전·global native 호출·전체 workflow·공개 주소 설치/업데이트는 별도 검증이다. 기존 plugin의 당시 결과를 새 방식 성공으로 확대하지 않는다.

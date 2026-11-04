@@ -20,6 +20,10 @@
       {
         "prompt": "Explain the findings recorded for the last completed task.",
         "owner": "prj-memory-explain"
+      },
+      {
+        "prompt": "Audit the .memory records for leftover files and status mismatches.",
+        "owner": "prj-memory-tidy"
       }
     ]
   },
@@ -36,6 +40,10 @@
       {
         "prompt": "리뷰 지적사항 고치고 커밋까지 해 줘.",
         "owner": "prj-memory-execute"
+      },
+      {
+        "prompt": ".memory 기록에 남은 작업 파일과 상태 불일치를 점검해 줘.",
+        "owner": "prj-memory-tidy"
       }
     ]
   }

@@ -21,6 +21,10 @@
       {
         "prompt": "Review the latest commit for regressions.",
         "owner": "prj-memory-review"
+      },
+      {
+        "prompt": "Audit the whole .memory for unreferenced files and delete the ones I approve.",
+        "owner": "prj-memory-tidy"
       }
     ]
   },
@@ -37,6 +41,10 @@
       {
         "prompt": "새로운 캐시 정책을 결정해야 해. 질문하면서 정해 줘.",
         "owner": "prj-grill-me"
+      },
+      {
+        "prompt": ".memory 전체를 점검해서 남은 작업 파일 목록을 보여 줘.",
+        "owner": "prj-memory-tidy"
       }
     ]
   }

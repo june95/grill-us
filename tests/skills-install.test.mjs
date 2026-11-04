@@ -430,10 +430,10 @@ test('real pinned skills CLI installs each public skill and both agents without 
     }
   }
   assertSourceUnchanged(run);
-  assert.equal(cases.filter(item => item.name).length, 18);
+  assert.equal(cases.filter(item => item.name).length, 20);
   assert.equal(cases.filter(item => item.full).length, 4);
   save(path.join(run.evidence, 'installation-results.json'), { checkedAt: new Date().toISOString(), cliVersion: run.version, source: run.source, buildSHA256: run.buildSHA256, cases, native: run.native });
   save(path.join(run.root, 'context.json'), run);
-  console.log('SKILLS_INSTALL_RESULT ' + JSON.stringify({ independent: 18, full: 4, native: run.native, commands: run.commands.length }));
+  console.log('SKILLS_INSTALL_RESULT ' + JSON.stringify({ independent: 20, full: 4, native: run.native, commands: run.commands.length }));
   succeeded = true;
 });

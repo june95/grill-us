@@ -1,6 +1,6 @@
 # Project Memory Starter Kit
 
-요구사항·설계 결정·구현·검증을 사용자 프로젝트의 로컬 `.memory`에 기록하고 이어서 작업하는 Codex·Claude Code 스킬9개입니다.
+요구사항·설계 결정·구현·검증을 사용자 프로젝트의 로컬 `.memory`에 기록하고 이어서 작업하는 Codex·Claude Code 스킬10개입니다.
 
 ## 설치
 
@@ -20,6 +20,7 @@ npx skills@latest add june95/grill-us
 | [prj-memory-execute](.agents/skills/memory-execute/SKILL.md) | 현재 Task 또는 지정 단계 실행·검증·완료 |
 | [prj-memory-review](.agents/skills/memory-review/SKILL.md) | 파일·diff·commit·Task 독립 무쓰기 리뷰 |
 | [prj-memory-explain](.agents/skills/memory-explain/SKILL.md) | 결정·계획·진행·완료 설명 |
+| [prj-memory-tidy](.agents/skills/memory-tidy/SKILL.md) | 쌓인 `.memory` 무쓰기 점검과 승인한 항목만 정리 |
 | [prj-memory-wiki](.agents/skills/memory-wiki/SKILL.md) | 명시 문서 수집·출처 기반 질의 |
 | [prj-page-capture](.agents/skills/page-capture/SKILL.md) | 기존 호스트 도구로 PNG·JSON 증거 캡처 |
 | [prj-visualize](.agents/skills/visualize/SKILL.md) | 명시 HTML 시각화 생성 |
@@ -35,7 +36,7 @@ Codex에서는 `$prj-memory-explain`, Claude Code에서는 `/prj-memory-explain`
 
 ## 배포 저장소 관리
 
-편집 정본은 `.agents/skills`와 `packaging/grill-us.json`의 명시 allowlist입니다. source 폴더/name은 기존 내부 ID를 유지하고 source9개와 CodeBurn은 internal로 숨깁니다. 설치 대상은 생성한 `skills/prj-*`입니다. CodeBurn runtime·개인 기록·개발용 도구는 공식 payload에 포함하지 않습니다.
+편집 정본은 `.agents/skills`와 `packaging/grill-us.json`의 명시 allowlist입니다. source 폴더/name은 기존 내부 ID를 유지하고 source10개와 CodeBurn은 internal로 숨깁니다. 설치 대상은 생성한 `skills/prj-*`입니다. CodeBurn runtime·개인 기록·개발용 도구는 공식 payload에 포함하지 않습니다.
 
 ~~~sh
 node scripts/build-skills.mjs
@@ -52,6 +53,7 @@ node scripts/validate-skills.mjs
 명확한 수정·이슈 → prj-memory-intake → Plan/Phase/Task 등록 → prj-memory-execute
 중요한 설계 분기 → prj-grill-me → 결정 확정 → prj-memory-plan → prj-memory-execute
 기록된 설계·계획·진행·완료 결과 질문 → prj-memory-explain → 읽기 전용 설명
+쌓인 .memory 점검·정리 → prj-memory-tidy → 무쓰기 점검 목록 → 승인한 항목만 정리
 ~~~
 
 명확함은 변경 규모뿐 아니라 코드 근거·범위·완료 조건·검증 경로로 판단합니다. 작은 수정에도 권한·데이터·API 의미의 미결정이 있으면 해당 부분을 확인합니다. 원하는 동작이 명확한 버그의 원인은 코드에서 조사하며, 필요한 재현 정보만 질문합니다.
@@ -175,6 +177,7 @@ T01부터 T03까지 순서대로 진행해줘
 - 이전 위치는 기존 Task·보고·Plan별 state로 보존합니다. 성공 커밋 의도를 초기화하기 전에 Task의 커밋 보고와 마지막 성공 정보를 남기며, 미해결 prepared/failed 의도는 덮어쓰지 않습니다. 매 전환 archive 사본을 만들지 않고 기존 사본은 유지합니다.
 - 임시 스크립트·명령 원본 출력·리뷰 위임 원문·중간 상태·사본·빌드 산출물 같은 작업 파일은 `.memory`에 두지 않고 OS 임시 폴더의 Task 소유 폴더에 둡니다. `.memory`에는 기록과 보고서가 인용한 요약 증거만 남기며(Task당 100개·20MB), 세션을 넘어 이어야 하는 작은 재개 상태만 Task의 `work/`에 둡니다. 상세는 [Working Files](.agents/skills/memory-execute/references/conventions.md#working-files)를 따릅니다.
 - Task를 완료할 때 작업 파일을 정리합니다. 소유와 권한 조건이 확인된 작업 파일은 묻지 않고 지우고, 그 밖에 보고서가 인용하지 않는 파일은 목록으로 보고해 승인받은 것만 지웁니다. 링크는 따라가지 않으며, 정리 결과는 commit 보고(커밋 없는 완료면 Task의 Completion Check)에 남깁니다. 상세는 [Working File Cleanup](.agents/skills/memory-execute/references/commit-check.md#working-file-cleanup)을 따릅니다.
+- 이미 쌓인 `.memory`는 [prj-memory-tidy](.agents/skills/memory-tidy/SKILL.md)로 점검합니다. 점검은 파일을 쓰지 않고 번호 붙은 목록만 보고하며, 정리는 사용자가 번호·경로로 승인한 항목만 지웁니다. 기록 파일은 지우지 않고 링크는 따라가지 않습니다.
 - memory-explain은 이 기록을 읽어 설명하며 설명 결과를 보고·history로 자동 저장하지 않습니다.
 - 코드·계약·관련 검증 환경 변경 뒤에는 영향을 받은 증거의 최신성을 확인합니다.
 - 제품 테스트와 공유 가이드는 해당 프로젝트의 기존 디렉터리에 둡니다.
@@ -212,7 +215,7 @@ node scripts/validate-skills.mjs
 - **HTML ID:** 각 html fence 안의 시작 태그에서 같은 ID를 찾아 중복 속성의 파일/행·최초 행을 표시합니다. 서로 다른 fence는 독립적이며 속성명은 대소문자를 구분하지 않고 ID 값은 구분합니다. 태그/속성 구분에는 HTML ASCII 공백만 사용하고 NBSP 등은 이름/값의 일부로 유지합니다. comments, script/style 및 기타 raw-text 내용, quoted 속성 안의 문자열과 data-id는 ID로 오인하지 않습니다. 빈/boolean id도 비교하지만 일반 HTML 문법 오류까지 검사하지는 않습니다.
 - **ID 문자 참조:** 숫자 참조(잘못된 범위의 replacement와 C1 치환 포함)는 [HTML 규칙](https://html.spec.whatwg.org/multipage/parsing.html#numeric-character-reference-end-state)에 따라 한 번만 정규화합니다. named reference는 `amp`/`lt`/`gt`/`quot`와 해당 대문자형, `apos`/`nbsp`를 지원합니다. 다른 named reference가 있으면 해당 ID만 정보 진단과 함께 비교에서 제외합니다. 전체 entity 표, 실제 DOM 트리·namespace·스크립트의 동적 ID 변화는 검사 범위가 아닙니다.
 - **Git:** OS 임시 저장소에서 ignore 부정 패턴·부모 제외·NUL 출력·tracked 경로·오류와 표준/과거 메시지 식별을 확인합니다. commit-check 문서의 secret 검사 명령을 정확히 하나 추출해 shell 없이 실행하고, 가짜 값을 stage하면 파일명만 나오고 값은 나오지 않는지, 저장소에 설정된 textconv 변환기를 실행하지 않는지, 깨끗하면 stdout·stderr가 모두 비는지 확인합니다. 임시 저장소의 명시 파일만 staging하고 소유 경로를 확인한 뒤 정리합니다. 실제 프로젝트의 index·config·current를 변경하지 않습니다.
-- **스킬 발동 경계:** `evals/routing`의 영어 trigger case로 공개 스킬 9개의 발동 순위, negative의 owner, description 쌍 유사도(0.75 이상 실패), 트리거 문구를 단어 겹침 근사로 검사합니다. 한국어 요청과 실제 모델의 발동은 판단하지 않습니다([Skill Routing](.agents/skills/memory-execute/references/validation-scope.md#skill-routing)).
+- **스킬 발동 경계:** `evals/routing`의 영어 trigger case로 공개 스킬 10개의 발동 순위, negative의 owner, description 쌍 유사도(0.75 이상 실패), 트리거 문구를 단어 겹침 근사로 검사합니다. 한국어 요청과 실제 모델의 발동은 판단하지 않습니다([Skill Routing](.agents/skills/memory-execute/references/validation-scope.md#skill-routing)).
 
 회귀 검사만 실행하려면 `node --test tests/validate-skills.test.mjs tests/build-skills.test.mjs tests/repository-skills.test.mjs tests/skills-install.test.mjs tests/skill-routing.test.mjs`를 사용합니다. 전체 검사는 격리 npx 통합 시험을 포함해 네트워크와 skills CLI1.7.4 다운로드가 필요합니다. 시험한 환경은 Node26.12.1·Windows이며 전체 검사는 Node22.20 이상을 요구합니다. Native 모델 호출은 별도 시험입니다.
 

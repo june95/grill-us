@@ -11,7 +11,7 @@ import { checkSkillFrontmatter, checkLinks, readFences, rewriteMarkdownLinks } f
 
 const repository = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const moduleFile = path.join(repository, 'scripts/build-skills.mjs');
-const names = ['grill-me', 'memory-intake', 'memory-plan', 'memory-execute', 'memory-review', 'memory-explain', 'memory-wiki', 'page-capture', 'visualize'];
+const names = ['grill-me', 'memory-intake', 'memory-plan', 'memory-execute', 'memory-review', 'memory-explain', 'memory-tidy', 'memory-wiki', 'page-capture', 'visualize'];
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const metadata = root => JSON.parse(fs.readFileSync(path.join(root, 'packaging/grill-us.json'), 'utf8'));
 const outputAt = root => path.join(root, 'dist/grill-us-skills');
@@ -70,12 +70,12 @@ function sourceSnapshot(root) {
   return Object.fromEntries(metadata(root).sourceFiles.map(file => [file, hash(fs.readFileSync(sourceAt(root, file)))]));
 }
 
-test('nine public skills resolve independently and preserve canonical inputs, descriptions and provenance', t => {
+test('ten public skills resolve independently and preserve canonical inputs, descriptions and provenance', t => {
   const root = fixture(t), before = sourceSnapshot(root);
   const built = buildSkills({ repoRoot: root });
   assert.deepEqual(sourceSnapshot(root), before);
   assert.deepEqual(fs.readdirSync(built.outputRoot).filter(file => fs.statSync(path.join(built.outputRoot, file)).isDirectory()).sort(), names.map(name => 'prj-' + name).sort());
-  assert.equal(built.files.filter(file => file.endsWith('/SKILL.md')).length, 9);
+  assert.equal(built.files.filter(file => file.endsWith('/SKILL.md')).length, 10);
   assert(!built.files.some(file => /codeburn|runtime|scripts\/|tests\/|\.memory|plugin\.json/i.test(file)));
   for (const name of names) {
     const isolated = path.join(root, 'isolated', 'prj-' + name);

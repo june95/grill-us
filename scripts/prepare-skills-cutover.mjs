@@ -140,7 +140,7 @@ export function prepareSkillsCutover({ repoRoot = repository } = {}) {
     for (const [file, bytes] of input.files) { const target = path.join(root, file); fs.mkdirSync(path.dirname(target), { recursive: true }); fs.writeFileSync(target, bytes); }
     const sources = [...input.files.keys()].filter(file => file.endsWith('/SKILL.md')).map(file => path.join(root, file));
     const checked = checkSkillFrontmatter(root, sources);
-    if (checked.checked !== 10 || checked.diagnostics.some(item => item.severity === 'error')) throw new Error('후보 source frontmatter 실패');
+    if (checked.checked !== 11 || checked.diagnostics.some(item => item.severity === 'error')) throw new Error('후보 source frontmatter 실패');
     buildSkills({ repoRoot: root, outDir: path.join(root, 'skills') });
     const snapshot = manifest(root);
     const marker = { formatVersion: 1, purpose, id, inputRepo: source, sourceSnapshot: input.sourceSnapshot, toolSnapshot, publicNames: input.names, ...snapshot };

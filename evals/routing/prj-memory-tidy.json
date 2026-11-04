@@ -1,0 +1,47 @@
+{
+  "skill": "prj-memory-tidy",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Audit the .memory folder for leftover working files and unreferenced files.",
+        "top_k": 1
+      },
+      {
+        "prompt": "Check the project memory for an oversized current file and status mismatches."
+      },
+      {
+        "prompt": "Delete only the leftover working files I approve from the audit list."
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Explain the rationale recorded for decision D03 and its scope.",
+        "owner": "prj-memory-explain"
+      },
+      {
+        "prompt": "Run only the commit check stage for the current task.",
+        "owner": "prj-memory-execute"
+      }
+    ]
+  },
+  "measure": {
+    "positive": [
+      {
+        "prompt": ".memory에 남은 작업 파일이나 인용되지 않은 파일이 있는지 점검해 줘."
+      },
+      {
+        "prompt": ".memory 점검 목록에서 내가 승인한 작업 파일만 정리해 줘."
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "이 결정을 선택한 이유를 기록에서 찾아 설명해 줘.",
+        "owner": "prj-memory-explain"
+      },
+      {
+        "prompt": "현재 Task를 끝내면서 그 Task의 작업 파일도 정리해 줘.",
+        "owner": "prj-memory-execute"
+      }
+    ]
+  }
+}

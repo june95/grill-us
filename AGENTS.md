@@ -12,6 +12,7 @@
 | 현재 작업·지정 단계 실행 | [prj-memory-execute](.agents/skills/memory-execute/SKILL.md) | 구현·검증·완료 판정·재개 |
 | Task·Phase 또는 파일·diff·commit 독립 검토 | [prj-memory-review](.agents/skills/memory-review/SKILL.md) | 무쓰기 검토 결과·finding·범위/근거·한계 반환 |
 | 결정 검색·설계·계획·진행·완료 설명 | [prj-memory-explain](.agents/skills/memory-explain/SKILL.md) | 결정 후보·적용 범위·출처와 기록·코드·Git 근거의 읽기 전용 설명 |
+| 쌓인 `.memory` 점검·정리 | [prj-memory-tidy](.agents/skills/memory-tidy/SKILL.md) | 무쓰기 점검 목록, 번호·경로로 승인한 항목만 정리, 기록은 지우지 않음 |
 
 ## Essential Boundaries
 

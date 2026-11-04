@@ -7,7 +7,7 @@ import { checkLinks, checkSkillFrontmatter, readFences, rewriteMarkdownLinks } f
 
 const scriptPath = fileURLToPath(import.meta.url);
 const repositoryRoot = path.resolve(path.dirname(scriptPath), '..');
-const sourceNames = ['grill-me', 'memory-intake', 'memory-plan', 'memory-execute', 'memory-review', 'memory-explain', 'memory-wiki', 'page-capture', 'visualize'];
+const sourceNames = ['grill-me', 'memory-intake', 'memory-plan', 'memory-execute', 'memory-review', 'memory-explain', 'memory-tidy', 'memory-wiki', 'page-capture', 'visualize'];
 const generator = 'scripts/build-skills.mjs';
 const ownerFile = '.grill-us-skills-build.json';
 const fixtureFile = '.grill-us-skills-fixture.json';
@@ -345,6 +345,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === scriptPath) {
     const args = process.argv.slice(2);
     if (args.length > 1 || args.length === 1 && !['--publish', '--check-published'].includes(args[0])) throw new Error('사용법: node scripts/build-skills.mjs [--publish | --check-published]');
     const result = args[0] === '--check-published' ? checkPublishedSkills() : buildSkills(args[0] === '--publish' ? { outDir: path.join(repositoryRoot, 'skills') } : {});
-    console.log((args[0] === '--check-published' ? 'Verified ' : 'Built ') + result.outputRoot + ': ' + result.files.length + ' files, 9 skills. Native installation is a separate check.');
+    console.log((args[0] === '--check-published' ? 'Verified ' : 'Built ') + result.outputRoot + ': ' + result.files.length + ' files, ' + sourceNames.length + ' skills. Native installation is a separate check.');
   } catch (error) { console.error(error.message); process.exitCode = 1; }
 }

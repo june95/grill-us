@@ -27,7 +27,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | Git 품질·후보·ignore·staging·secret·intent | [commit-check.md](commit-check.md#quality-gate), [Staging](commit-check.md#staging), [Secret Check](commit-check.md#secret-check), [Commit Intent](commit-check.md#commit-intent) | Task 후보와 사용자 index 분리, 커밋 전 secret 검사는 파일명만 출력 |
 | 재개·전환·복구 알고리즘 | [resume.md](resume.md#stale-evidence), [Switch](resume.md#switch), [Recovery](resume.md#recovery) | 미해결 intent 보존, 실제 결과 확인 후 재개 |
 | current 크기·압축 | [State Ownership](#state-ownership), [Current Compaction](resume.md#current-compaction) | 템플릿 절만, 150줄 이하, 원문을 history에 먼저 보존한 뒤 압축 |
-| 기존 `.memory` 점검·정리 | `prj-memory-tidy` 스킬 | 점검은 무쓰기, 정리는 명시 승인 항목만, 기록은 지우지 않음 |
+| 기존 `.memory` 점검·정리 | [prj-memory-tidy](bundled/memory-tidy/guide.md) | 점검은 무쓰기, 정리는 명시 승인 항목만, 기록은 지우지 않음 |
 
 기본 읽기는 요청·존재하는 대상 Task/결정과 이 공통 규약이다. 실행·재개에는 현재 checkpoint와 resume을 확인하고, 선택한 단계의 지침만 추가한다. 형식 작성에는 해당 templates 섹션, 경로/정본/명령이 불명확하면 project-profile, 최종 품질·커밋에는 commit-check를 읽는다. 관련 없는 단계·시나리오 전체를 매번 로드하지 않으며 이미 확인한 같은 내용은 재사용한다.
 

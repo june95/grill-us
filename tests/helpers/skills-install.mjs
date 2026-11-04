@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 export const repository = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const cliVersion = '1.7.4';
-export const names = ['grill-me', 'memory-intake', 'memory-plan', 'memory-execute', 'memory-review', 'memory-explain', 'memory-wiki', 'page-capture', 'visualize'].map(name => 'prj-' + name);
+export const names = ['grill-me', 'memory-intake', 'memory-plan', 'memory-execute', 'memory-review', 'memory-explain', 'memory-tidy', 'memory-wiki', 'page-capture', 'visualize'].map(name => 'prj-' + name);
 export const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 export const within = (root, target) => {
   const relative = path.relative(root, target);
