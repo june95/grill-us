@@ -27,6 +27,8 @@ Task scope·AC·Dependencies와 현재 근거를 확인한다. Compliant 또는 
 
 범위 안 결함은 수정하고 영향 검증만 반복한다. 같은 실패를 새 근거 없이 반복하지 않으며 환경/설계 blocker는 원인·다음 행동을 남긴다. 변경한 구현·테스트·가이드의 관련 review/test evidence를 갱신한다.
 
+임시 스크립트, 검증 원본 출력, 비교용 사본은 [작업 파일](conventions.md#working-files)로 `.memory` 밖에 두고, 보고에는 요약과 근거만 남긴다.
+
 ## Progress
 
 implementation.md에 I01/I02별 무엇·왜, 실제 대상·핵심 설명·주석 변화·검증·계획 조정/승인·남은 일을 기록한다. [Reporting](conventions.md#reporting)의 실제 범위만 체크하고 passed를 Task done으로 해석하지 않는다. 범위 밖 발견은 권고만 보고한다.

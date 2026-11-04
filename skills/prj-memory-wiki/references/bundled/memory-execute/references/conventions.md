@@ -9,6 +9,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | 공통 규칙 | 상세 소유자 | 소비자가 남길 요약 |
 | :--- | :--- | :--- |
 | ID·로컬 경로·상태·활성 위치 | [Paths](#paths), [Task Fields](#task-fields), [State Ownership](#state-ownership) | 실제 대상과 현재/마지막 완료를 구분, 사용자 위치 보존 |
+| 작업 파일·증거 예산 | [Working Files](#working-files) | 작업 파일은 `.memory` 밖 OS 임시 폴더, 재개 상태만 `work/`, 요약 증거와 Task당 예산, `.memory` 안 코드 실행·링크·인증 정보 금지 |
 | 등록·분할·확정 선택 | [Registration and Planning](#registration-and-planning), [Change Boundaries](#change-boundaries) | 계획/등록 구현 금지, 미결정만 질문, 충돌 선택은 한 번 지적 |
 | 단계 선택·단독 실행 경계 | [Workflow](#workflow), [Stage Isolation](#stage-isolation) | 요청한 단계만 수행, 자동 완료/전진 금지 |
 | 증거·완료·조사 결과·환경 영향 | [Evidence and Completion](#evidence-and-completion), [Investigation Outcomes](#investigation-outcomes), [Environment Evidence](#environment-evidence) | 실패/stale 보존, 실행하지 못한 검사는 통과 아님, 검사 추가·변경은 위반·정상 대조, 검사 결과와 목적 판정 구분 |
@@ -42,6 +43,10 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | 일일 이력 | `.memory/history/YYYY-MM-DD.md` |
 | 선택적 프로젝트 설정 | `.memory/project.md` |
 | 명시 수집한 로컬 문서 지식 | `.memory/wiki/` — 상세 형식은 memory-wiki 소유 |
+| 단독 실행한 UI 캡처 | `.memory/captures/` — 위치·형식은 prj-page-capture 계약 소유 |
+| 세션을 넘겨 이어야 하는 Task 재개 상태 | 해당 Task 폴더의 `work/` — [Working Files](#working-files) |
+
+- `.memory` 루트에는 위 표의 항목만 둔다. 임시 스크립트·원본 출력·사본 같은 작업 파일은 [Working Files](#working-files)를 따른다.
 
 - Plan ID는 `YYYY-MM-DD-{slug}`, Phase ID는 `P01-{slug}`, Task 폴더는 `T01-{slug}` 형식이다. 날짜는 새 Plan 생성일이며 기존 Plan 추가 시 바꾸지 않는다.
 - 같은 날짜·slug의 Plan ID가 있으면 기존 내용·목표를 먼저 확인한다. 같은 목표는 등록 규칙에 따라 연결/재사용하고 다른 신규 목표가 충돌하면 구별되는 ID를 선택한다. 기존 Plan 파일·ID를 새 요청으로 덮어쓰지 않는다.
@@ -54,6 +59,45 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 - 경로와 링크는 작성한 문서 기준 상대 경로를 사용한다. 보고서의 Covered Files는 저장소 기준 상대 경로다. 경로를 쓰기 전에 의도한 프로젝트 안인지 확인한다.
 - 기본적으로 `.memory`는 로컬 관리한다. 명시적인 공유 예외는 실제 Git ignore 정책과 함께 확인하며 force-add로 우회하지 않는다.
 - `.memory` 경로는 확인한 사용자 작업공간 root 기준이며 plugin 설치/cache 경로와 구분한다. 설치된 스킬·참고 문서는 읽기 전용이고 실제 작업공간 발견/미확인 시 질문은 [Skill Installation and Workspace](project-profile.md#skill-installation-and-workspace)를 따른다. cache 안에 상태를 만들지 않는다.
+
+## Working Files
+
+작업 파일은 기록이 아니라 작업 중에 만드는 파일이다. 임시 스크립트와 테스트 도구, 명령·테스트·모델의 원본 출력과 로그, 중간 상태와 반복 시도 결과, 저장소·폴더 사본과 기준선, 빌드 산출물과 캐시, 리뷰·모델 위임의 지시문·응답 원문이 여기에 속한다. 작업 파일은 `.memory`에 두지 않는다.
+
+| 대상 | 위치 | 처리 |
+| :--- | :--- | :--- |
+| 작업 파일 | OS 임시 폴더 바로 아래의 Task 소유 폴더. 호스트가 세션 전용 scratch를 주면 그곳도 쓸 수 있다(소유 표시와 자동 정리는 OS 임시 소유 폴더에만 적용) | 만든 경로를 그 Task의 단계 보고에 적고, Task가 끝나면 지운다 |
+| 세션을 넘겨 이어야 하는 작은 재개 상태 | 해당 Task 폴더의 `work/` 하나 | 진행 표시·남은 항목 목록처럼 재개에 필요한 것만 둔다. 코드·원본 출력·사본은 두지 않고, Task가 끝나면 통째로 지운다 |
+| 보고서가 인용하는 증거 | 해당 Task 폴더 | 요약·건수·지표·SHA256과 대표 표본 몇 개만 둔다. 아래 증거 예산을 지킨다 |
+| 계속 보관해야 하는 원본 | 사용자가 정한 위치 | 위치를 사용자에게 묻고, 보고서에는 경로와 SHA256만 남긴다 |
+
+- 소유 표시:
+  - 폴더는 OS 임시 폴더 바로 아래에 새로 만든다. 이미 있는 폴더를 재사용하지 않는다. 이름은 `prj-memory-{plan-id}-{task-id}-` 접두어와 임의 접미어다.
+  - 폴더는 현재 사용자만 읽고 쓸 수 있게 만든다(POSIX는 0700, Windows는 사용자 프로필 아래 TEMP처럼 사용자 전용 위치). 이를 보장할 수 없으면 비밀이 담길 수 있는 원본(인증 출력, 리뷰·모델 응답 원문, 환경 정보)은 저장하지 않고 요약만 남긴다.
+  - 그 안에 `.prj-memory-owner.json`을 둔다. 필드는 project(사용자 프로젝트 root의 실제 절대 경로), path(이 폴더의 실제 절대 경로), plan, phase, task, createdAt, purpose다.
+  - 소유로 인정하는 조건은 모두 맞아야 한다:
+    - 폴더가 OS 임시 폴더 바로 아래의 실제 디렉터리다. 링크·junction·reparse point가 아니다.
+    - 표시 파일이 링크가 아닌 일반 파일이다.
+    - project·path·plan·phase·task가 현재 프로젝트, 폴더의 실제 경로, 이 Task와 같다.
+    - 그 경로가 이 Task의 단계 보고에 기록되어 있다.
+  - 하나라도 어긋나면 소유로 보지 않는다.
+- Task 없는 활동: 인터뷰, 등록 전 조사, wiki 수집, 점검처럼 Task가 없는 활동은 Task ID를 만들지 않는다.
+  - 접두어는 `prj-memory-{activity}-`이고, activity는 스킬 이름과 날짜다(예: `grill-me-20261104`).
+  - 표시 파일에는 plan·phase·task 대신 activity를 적고, 경로는 그 활동의 history 기록이나 채팅 보고에 남긴다.
+  - 활동이 끝나기 전에 스스로 지운다.
+  - 이 절은 쓰기 권한을 새로 주지 않는다. 읽기 전용 스킬의 무쓰기 경계는 그대로다.
+- `.memory` 루트에는 [Paths](#paths) 표의 항목만 둔다: `current.md`, `project.md`, `decisions/`, `plans/`, `phases/`, `state/`, `history/`, `wiki/`, `captures/`.
+- Task 폴더에는 `task.md`, 단계 보고(`*.md`), 보고서가 인용하는 작은 증거(snapshot·commit intent·메시지 파일 포함), `captures/`, `work/`만 둔다.
+- 증거 예산:
+  - Task 폴더에서 보고서(`*.md`)와 `work/`를 뺀 파일은 합계 100개·20MB 안에 둔다.
+  - 넘을 것 같으면 요약으로 바꾸거나, 원본을 보관할 위치를 사용자에게 묻는다.
+- 대량 결과(항목별 결과 파일, 반복 실행 출력 등)는 건수·지표·SHA256·대표 표본 몇 개로 요약해 보고서에 남기고, 원본은 작업 파일로 다룬다. 원 근거·실패 증거를 보존하라는 규칙은 이 요약과 표본으로 지킨다. 실패 판단에 필요한 오류 줄은 보고서에 인용한다.
+- 코드는 `.memory` 밖에서만 실행한다. `.memory` 안에 스크립트를 두고 실행하거나, 실행 부산물(`__pycache__` 등)이 `.memory`에 생기게 하지 않는다.
+- `.memory` 안에 심볼릭 링크와 junction을 만들지 않는다.
+- `.memory`에 인증 정보, 세션, 토큰, PID·포트 같은 실행 제어 정보와 그 로그를 두지 않는다. 보고서에는 값 없이 필요한 사실만 적는다.
+- 사용자가 보관 위치를 정하면 그 위치를 따른다([Change Boundaries](#change-boundaries)).
+- 기록을 원자적으로 바꾸려고 같은 폴더에 잠깐 만드는 임시 파일([Completion](resume.md#completion))은 바로 교체되므로 예외다. 중단으로 남은 것은 지운다.
+- 이 규칙은 새로 만드는 파일에 적용한다. 과거 완료 Task의 보고·증거를 소급해 고치거나 지우지 않는다.
 
 ## Decision Fields
 
@@ -229,6 +273,7 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 - 검증의 기록·재사용에는 아래 Environment Evidence를 조건부로 적용한다. Revision·내용 snapshot과 함께 결과에 실제 영향을 주는 환경의 동일성 또는 변경 영향을 확인한다.
 - 실행한 보고에는 Task, Stage, Blueprint Revision, Covered Files, Source Snapshot, Checked At, Result, Blockers, Next Action을 포함한다.
 - 현재 파일의 SHA256은 `Get-FileHash` 등의 읽기 전용 도구로 확인한다. 새 파일도 포함하고 삭제된 경로는 deleted로 기록한다. 원문·비밀 값 대신 필요한 hash만 기록한다.
+- 증거 파일의 위치와 양은 [Working Files](#working-files)를 따른다. 원본 출력은 작업 파일이고, 보고에는 요약·SHA256·판단에 필요한 줄을 남긴다.
 - HEAD 식별자는 checkpoint의 Base HEAD와 별도로 기록한다. source snapshot은 covered 파일 내용이므로 커밋으로 HEAD가 달라졌다는 이유만으로 동일 내용의 검증을 무효화하지 않는다.
 - 검증 freshness의 working SHA256과 커밋 복구의 staged mode/blob는 역할이 다르다. Candidate Snapshot과 줄바꿈/삭제 대조 절차는 [Staging](commit-check.md#staging) 및 [Recovery](resume.md#recovery)를 따른다.
 - 추가 테스트 파일이나 구현 조정이 생기면 실제 변경 scope와 해당 증거를 갱신한다. 변경된 내용에 영향을 받는 단계만 stale로 표시하고 재수행한다.
@@ -331,6 +376,7 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 | 원인이 뻔하니 테스트 없이 바로 고친다 | 재현할 수 있으면 수정 전 실패 테스트를 먼저 남기고, 불가하면 사유를 기록한다 | [Bug Investigation](#bug-investigation) |
 | 새 검사를 넣었으니 동작할 것이다 | 위반에서 실패하고 정상에서 통과하는지 확인해야 근거가 된다 | [Evidence and Completion](#evidence-and-completion) |
 | secret 검사에 걸린 파일은 대개 단어라서 넘어간다 | 걸린 줄을 직접 읽어 실제 값과 단어 언급을 구분하고, 근거를 값 없이 남긴다 | [Secret Check](commit-check.md#secret-check) |
+| 원본을 다 남겨야 근거가 된다 | 근거는 보고서의 요약·SHA256·대표 표본이다. 원본은 작업 파일이고, 계속 보관할 때만 사용자가 정한 위치에 둔다 | [Working Files](#working-files) |
 
 ## Untrusted Input
 
@@ -365,6 +411,6 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 
 기록 N은 기존 최대 번호 +1이며 기존 항목을 재작성하지 않는다. 한국어 보고를 기본으로 하되 프로젝트 관례와 사용자 지시를 따른다. 핵심 변경의 무엇·왜, 필요한 짧은 인용, 검증 한계, 범위 밖 발견 사항을 변경 규모에 맞게 설명한다. 발견이 없으면 특이사항 없음이라고 명시한다.
 
-새 이력도 [Reporting](#reporting)의 의미 보존 기준을 따른다. Result에는 해당 활동의 결과를 적고 실패/미실행의 구분과 남은 조건을 유지한다. 상세 로그는 Evidence에 연결하고 Blocker / Next Action에는 실제 재개 조건과 행동을 남긴다. 활동 완료를 Task done이나 검사 성공으로 바꾸지 않는다.
+새 이력도 [Reporting](#reporting)의 의미 보존 기준을 따른다. Result에는 해당 활동의 결과를 적고 실패/미실행의 구분과 남은 조건을 유지한다. 상세 근거는 Evidence의 단계 보고에 연결하고(원본 로그는 [Working Files](#working-files)를 따른다) Blocker / Next Action에는 실제 재개 조건과 행동을 남긴다. 활동 완료를 Task done이나 검사 성공으로 바꾸지 않는다.
 
 제목의 `stage-plan-id-task-id`는 신규 실행 이력의 명명 예시이며 제목 문자열만으로 대상을 식별하지 않는다. 본문의 실제 Task 링크·ID·Checked At·Evidence가 식별 근거다. 인터뷰·등록·계획처럼 stage가 아닌 활동은 `activity-{decision-id 또는 plan-id/task-id}`로 명명하고 해당 결정/계획 링크를 남긴다. Task가 없는 인터뷰에 가짜 Task ID를 부여하거나 과거 제목을 새 형식으로 고치지 않는다.

@@ -47,4 +47,6 @@ test가 적용되거나 요청됐을 때만 읽는다. [공통 규약](conventio
 
 test.md의 Pass / Pass with Issues / Fail / Blocked는 해당 목적의 결과다. [Stage Report](templates.md#stage-report)에 AC coverage·새/변경 테스트·실제 command/cwd/exit·제약·다음 행동을 기록한다. 조사 목적에는 관측 실패와 Objective Assessment를 함께 표시해 검사 통과로 오해하지 않게 한다.
 
+테스트·명령의 원본 출력과 임시 fixture는 [작업 파일](conventions.md#working-files)로 다룬다. test.md에는 command/cwd/exit와 판단에 필요한 요약·SHA256·오류 줄을 남긴다.
+
 증거/환경 재사용은 [Evidence and Completion](conventions.md#evidence-and-completion), test-only의 review stale·포인터 보존은 [Stage Isolation](conventions.md#stage-isolation)을 따른다. 실제 명령·수동 대조·모델 실행을 구분하며 test passed만으로 Task done/commit/전진하지 않는다.
