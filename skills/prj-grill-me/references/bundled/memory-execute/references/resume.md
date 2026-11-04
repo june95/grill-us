@@ -81,6 +81,7 @@ review 중단 재개는 실제 반환·미완료 여부와 대상 snapshot을 �
 ## Completion
 
 - [완료 의미](conventions.md#evidence-and-completion)와 [Quality Gate](commit-check.md#quality-gate)로 준비·커밋 정책 결과를 확인한 전체 실행만 finalize한다. 관측 실패/조사 목적은 구분하며 stage-only/check_only는 자동 done·전진하지 않는다.
+- 성공 commit 또는 커밋 없는 완료를 확인한 뒤 Task done을 기록하기 전에 [작업 파일 정리](commit-check.md#working-file-cleanup)를 한다. 정리 실패와 승인 대기는 기록하고 done을 막지 않는다.
 - done Task를 근거로 Phase Tasks 표·done count를 갱신하고 Plan 요약을 갱신한 뒤 current를 다음 Task로 전진한다.
 - 다음 Task는 같은 Plan의 순서와 실제 Dependencies를 확인한다. 완료되지 않은 선행 Task를 건너뛰어 검증 실패를 숨기지 않는다.
 - 마지막 Task 완료 시 Phase와 Plan done, current Active Task·Active Stage 없음. 다른 pending Plan을 임의로 시작하지 않는다.

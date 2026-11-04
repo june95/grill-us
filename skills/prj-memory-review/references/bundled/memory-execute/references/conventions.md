@@ -9,7 +9,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | 공통 규칙 | 상세 소유자 | 소비자가 남길 요약 |
 | :--- | :--- | :--- |
 | ID·로컬 경로·상태·활성 위치 | [Paths](#paths), [Task Fields](#task-fields), [State Ownership](#state-ownership) | 실제 대상과 현재/마지막 완료를 구분, 사용자 위치 보존 |
-| 작업 파일·증거 예산 | [Working Files](#working-files) | 작업 파일은 `.memory` 밖 OS 임시 폴더, 재개 상태만 `work/`, 요약 증거와 Task당 예산, `.memory` 안 코드 실행·링크·인증 정보 금지 |
+| 작업 파일·증거 예산·완료 시 정리 | [Working Files](#working-files), [Working File Cleanup](commit-check.md#working-file-cleanup) | 작업 파일은 `.memory` 밖 OS 임시 폴더, 재개 상태만 `work/`, 요약 증거와 Task당 예산, `.memory` 안 코드 실행·링크·인증 정보 금지, 완료 때 소유분 자동·나머지 승인 정리와 링크 미추적 |
 | 등록·분할·확정 선택 | [Registration and Planning](#registration-and-planning), [Change Boundaries](#change-boundaries) | 계획/등록 구현 금지, 미결정만 질문, 충돌 선택은 한 번 지적 |
 | 단계 선택·단독 실행 경계 | [Workflow](#workflow), [Stage Isolation](#stage-isolation) | 요청한 단계만 수행, 자동 완료/전진 금지 |
 | 증거·완료·조사 결과·환경 영향 | [Evidence and Completion](#evidence-and-completion), [Investigation Outcomes](#investigation-outcomes), [Environment Evidence](#environment-evidence) | 실패/stale 보존, 실행하지 못한 검사는 통과 아님, 검사 추가·변경은 위반·정상 대조, 검사 결과와 목적 판정 구분 |
@@ -66,24 +66,25 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 
 | 대상 | 위치 | 처리 |
 | :--- | :--- | :--- |
-| 작업 파일 | OS 임시 폴더 바로 아래의 Task 소유 폴더. 호스트가 세션 전용 scratch를 주면 그곳도 쓸 수 있다(소유 표시와 자동 정리는 OS 임시 소유 폴더에만 적용) | 만든 경로를 그 Task의 단계 보고에 적고, Task가 끝나면 지운다 |
-| 세션을 넘겨 이어야 하는 작은 재개 상태 | 해당 Task 폴더의 `work/` 하나 | 진행 표시·남은 항목 목록처럼 재개에 필요한 것만 둔다. 코드·원본 출력·사본은 두지 않고, Task가 끝나면 통째로 지운다 |
+| 작업 파일 | OS 임시 폴더 바로 아래의 Task 소유 폴더. 호스트가 세션 전용 scratch를 주면 그곳도 쓸 수 있다(소유 표시와 자동 정리는 OS 임시 소유 폴더에만 적용) | 만든 경로를 그 Task의 단계 보고에 적고, Task 완료 때 [작업 파일 정리](commit-check.md#working-file-cleanup)의 조건에 따라 지운다 |
+| 세션을 넘겨 이어야 하는 작은 재개 상태 | 해당 Task 폴더의 `work/` 하나 | 진행 표시·남은 항목 목록처럼 재개에 필요한 것만 둔다. 코드·원본 출력·사본은 두지 않고, Task 완료 때 [작업 파일 정리](commit-check.md#working-file-cleanup)의 조건에 따라 통째로 지운다 |
 | 보고서가 인용하는 증거 | 해당 Task 폴더 | 요약·건수·지표·SHA256과 대표 표본 몇 개만 둔다. 아래 증거 예산을 지킨다 |
 | 계속 보관해야 하는 원본 | 사용자가 정한 위치 | 위치를 사용자에게 묻고, 보고서에는 경로와 SHA256만 남긴다 |
 
 - 소유 표시:
   - 폴더는 OS 임시 폴더 바로 아래에 새로 만든다. 이미 있는 폴더를 재사용하지 않는다. 이름은 `prj-memory-{plan-id}-{task-id}-` 접두어와 임의 접미어다.
-  - 폴더는 현재 사용자만 읽고 쓸 수 있게 만든다(POSIX는 0700, Windows는 사용자 프로필 아래 TEMP처럼 사용자 전용 위치). 이를 보장할 수 없으면 비밀이 담길 수 있는 원본(인증 출력, 리뷰·모델 응답 원문, 환경 정보)은 저장하지 않고 요약만 남긴다.
-  - 그 안에 `.prj-memory-owner.json`을 둔다. 필드는 project(사용자 프로젝트 root의 실제 절대 경로), path(이 폴더의 실제 절대 경로), plan, phase, task, createdAt, purpose다.
+  - 폴더는 현재 사용자만 읽고 쓸 수 있게 만든다(POSIX는 0700, Windows는 사용자 프로필 아래 TEMP처럼 사용자 전용 위치). 이를 보장할 수 없으면 비밀이 담길 수 있는 원본(인증 출력, 리뷰·모델 응답 원문, 환경 정보)은 저장하지 않고 요약만 남긴다. 그런 폴더는 [작업 파일 정리](commit-check.md#working-file-cleanup)의 권한 조건을 만족하지 않으므로 완료 때 자동으로 지우지 않는다.
+  - 그 안에 `.prj-memory-owner.json`을 둔다. 필드는 project(사용자 프로젝트 root의 실제 절대 경로), path(이 폴더의 실제 절대 경로), plan, phase, task, createdAt, purpose, nonce(예측할 수 없는 임의 값)다.
+  - 만든 경로와 nonce를 그 Task의 단계 보고에 기록한다. 만든 직후 확인할 수 있으면 파일 시스템 식별자(POSIX dev·inode, Windows 볼륨 일련번호·파일 ID)도 함께 기록한다.
   - 소유로 인정하는 조건은 모두 맞아야 한다:
     - 폴더가 OS 임시 폴더 바로 아래의 실제 디렉터리다. 링크·junction·reparse point가 아니다.
     - 표시 파일이 링크가 아닌 일반 파일이다.
     - project·path·plan·phase·task가 현재 프로젝트, 폴더의 실제 경로, 이 Task와 같다.
-    - 그 경로가 이 Task의 단계 보고에 기록되어 있다.
+    - 경로와 nonce(기록했다면 식별자도)가 이 Task의 단계 보고에 기록된 값과 같다.
   - 하나라도 어긋나면 소유로 보지 않는다.
 - Task 없는 활동: 인터뷰, 등록 전 조사, wiki 수집, 점검처럼 Task가 없는 활동은 Task ID를 만들지 않는다.
   - 접두어는 `prj-memory-{activity}-`이고, activity는 스킬 이름과 날짜다(예: `grill-me-20261104`).
-  - 표시 파일에는 plan·phase·task 대신 activity를 적고, 경로는 그 활동의 history 기록이나 채팅 보고에 남긴다.
+  - 표시 파일에는 plan·phase·task 대신 activity를 적고, 경로와 nonce는 그 활동의 history 기록이나 채팅 보고에 남긴다.
   - 활동이 끝나기 전에 스스로 지운다.
   - 이 절은 쓰기 권한을 새로 주지 않는다. 읽기 전용 스킬의 무쓰기 경계는 그대로다.
 - `.memory` 루트에는 [Paths](#paths) 표의 항목만 둔다: `current.md`, `project.md`, `decisions/`, `plans/`, `phases/`, `state/`, `history/`, `wiki/`, `captures/`.
@@ -261,6 +262,8 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 | design-guide-update/guide-update | 요청 모드의 정본/사용 안내 | 제품 구현 |
 | commit-check | 품질·후보·현재 index 읽기와 판정 | 코드 수정·staging·commit |
 | commit | 유효한 선행 판정에 따른 후보 staging·intent·실제 commit | 부족한 증거를 만드는 전체 workflow |
+
+작업 파일 정리는 전체 Task 실행의 완료 처리에서만 한다([Working File Cleanup](commit-check.md#working-file-cleanup)). 단독 단계는 만든 작업 파일 경로를 보고에 남기고 지우지 않는다.
 
 모든 단독 단계/check_only는 Task done·포인터 전진을 자동 수행하지 않는다. 비활성 대상은 그 결과만 갱신하고 기존 current/checkpoint Position을 보존한다. 의도의 Target Task는 정확히 기록하며 미해결 prepared/failed를 다른 대상으로 덮지 않는다.
 

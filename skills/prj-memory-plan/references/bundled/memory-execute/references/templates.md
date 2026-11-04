@@ -149,6 +149,7 @@ Implementation에는 적용 작업을 적는다. 분석 전용이면 조사 절�
 - Blocking Findings: 없음 또는 {해결되지 않은 문제}
 - Remaining Risks: {확인하지 못한 영역}
 - Staging: 아직 수행하지 않음
+- Working File Cleanup: 아직 수행하지 않음 {커밋 없는 완료일 때 [작업 파일 정리](commit-check.md#working-file-cleanup)의 옮기기 전 기록과 결과를 적는다. 커밋한 Task는 commit 보고에 적는다}
 
 ## Progress
 
@@ -357,6 +358,10 @@ Candidate Snapshot 형식은 path·A/M/D·working SHA256·staged mode/blob다. �
 - Stage 2 Classification: {1단계 finding별 유지 / 기록된 조정으로 해소 / 계약 오독}
 
 {리뷰어가 둘이면(고위험 Task) 위 항목을 리뷰어별로 적고, 병합 결과(ID 접두·중복·severity·verdict)를 따로 남긴다.}
+
+{commit 보고에만 아래 항목을 작성한다. 다른 단계에서는 제거한다.}
+
+- Working File Cleanup: {[작업 파일 정리](commit-check.md#working-file-cleanup) 결과: 옮기기 전에 적은 원래 경로·새 경로(식별자), 지운 경로·개수·용량, 남긴 경로와 이유, 승인 대기 목록, 소유 폴더의 배타적 신규 생성 여부. 비밀 가능 값 제외}
 
 {조사 목적 Task에서 검사 결과와 목표 달성이 다를 수 있으면 아래 항목을 작성한다. 해당하지 않으면 제거한다.}
 

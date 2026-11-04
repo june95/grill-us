@@ -155,7 +155,7 @@ T01부터 T03까지 순서대로 진행해줘
 │       ├── T01-first/
 │       │   ├── task.md
 │       │   ├── 실제 실행한 단계의 결과 문서
-│       │   └── work/                   # 세션을 넘는 작은 재개 상태(완료 때 삭제)
+│       │   └── work/                   # 세션을 넘는 작은 재개 상태(완료 때 정리)
 │       └── T02-next/
 │           └── task.md
 ├── current.md
@@ -172,6 +172,7 @@ T01부터 T03까지 순서대로 진행해줘
 - current의 Checkpoint는 실제 활성 또는 보존한 Plan state 링크이고, Last Completed Task는 마지막 완료의 Plan/Task·확인한 커밋 또는 no-commit 사유·완료 근거입니다. 활성 Task가 없어도 보존한 state 링크는 남길 수 있습니다. 완료 이력이나 참조할 state가 없으면 없음으로 적습니다.
 - 이전 위치는 기존 Task·보고·Plan별 state로 보존합니다. 성공 커밋 의도를 초기화하기 전에 Task의 커밋 보고와 마지막 성공 정보를 남기며, 미해결 prepared/failed 의도는 덮어쓰지 않습니다. 매 전환 archive 사본을 만들지 않고 기존 사본은 유지합니다.
 - 임시 스크립트·명령 원본 출력·중간 상태·사본·빌드 산출물 같은 작업 파일은 `.memory`에 두지 않고 OS 임시 폴더의 Task 소유 폴더에 둡니다. `.memory`에는 기록과 보고서가 인용한 요약 증거만 남기며(Task당 100개·20MB), 세션을 넘어 이어야 하는 작은 재개 상태만 Task의 `work/`에 둡니다. 상세는 [Working Files](.agents/skills/memory-execute/references/conventions.md#working-files)를 따릅니다.
+- Task를 완료할 때 작업 파일을 정리합니다. 소유와 권한 조건이 확인된 작업 파일은 묻지 않고 지우고, 그 밖에 보고서가 인용하지 않는 파일은 목록으로 보고해 승인받은 것만 지웁니다. 링크는 따라가지 않으며, 정리 결과는 commit 보고(커밋 없는 완료면 Task의 Completion Check)에 남깁니다. 상세는 [Working File Cleanup](.agents/skills/memory-execute/references/commit-check.md#working-file-cleanup)을 따릅니다.
 - memory-explain은 이 기록을 읽어 설명하며 설명 결과를 보고·history로 자동 저장하지 않습니다.
 - 코드·계약·관련 검증 환경 변경 뒤에는 영향을 받은 증거의 최신성을 확인합니다.
 - 제품 테스트와 공유 가이드는 해당 프로젝트의 기존 디렉터리에 둡니다.
