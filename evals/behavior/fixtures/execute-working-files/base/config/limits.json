@@ -1,0 +1,5 @@
+{
+  "perMinute": 50,
+  "burst": 10,
+  "windowSeconds": 60
+}

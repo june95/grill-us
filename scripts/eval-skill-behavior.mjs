@@ -42,6 +42,10 @@ const isObject = value => Boolean(value) && typeof value === 'object' && !Array.
 const safeText = value => typeof value === 'string' && value.trim() === value && value.length > 0 && !/[\u0000-\u0008\u000b-\u001f\u007f]/.test(value);
 const safeRelative = value => typeof value === 'string' && value.length > 0 && value.length <= 200 && !path.isAbsolute(value) && !value.includes('\\')
   && !value.split('/').some(part => part === '' || part === '.' || part === '..') && !/[\u0000-\u001f\u007f]/.test(value);
+// 경로 정규식은 ^…$로 쓰고, 판정할 때 ^(?:…)$로 감싼다. 최상위 |가 있어도 경로 전체가 일치해야 통과한다.
+const fullPath = pattern => new RegExp('^(?:' + pattern.slice(1, -1) + ')$');
+// 파일 이름 인용: 앞뒤가 파일 이름 글자가 아닐 때만 인정한다(다른 이름의 일부는 인용이 아님). 문장 끝 마침표는 경계로 본다.
+const mentions = name => new RegExp('(?<![A-Za-z0-9._-])' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![A-Za-z0-9_-]|\\.[A-Za-z0-9])');
 
 /** 시나리오 파일 형식 오류 목록(모델 호출 없음). */
 export function scenarioErrors(data, fileName) {
@@ -61,7 +65,7 @@ export function scenarioErrors(data, fileName) {
   const workspace = checks.workspace ?? {};
   if (!isObject(workspace)) errors.push('checks.workspace는 객체여야 함');
   else {
-    for (const key of Object.keys(workspace)) if (!['unchanged', 'noCommit', 'files', 'doneRequiresCommit'].includes(key)) errors.push('허용하지 않는 workspace 키: ' + key);
+    for (const key of Object.keys(workspace)) if (!['unchanged', 'noCommit', 'files', 'doneRequiresCommit', 'newMemoryFiles'].includes(key)) errors.push('허용하지 않는 workspace 키: ' + key);
     for (const key of ['unchanged', 'noCommit']) if (key in workspace && workspace[key] !== true) errors.push(key + '는 true로만 씀');
     if ('files' in workspace) {
       if (!Array.isArray(workspace.files) || !workspace.files.length) errors.push('files는 비어 있지 않은 배열이어야 함');
@@ -83,6 +87,15 @@ export function scenarioErrors(data, fileName) {
       if (!isObject(rule) || !safeRelative(rule.task) || !isObject(rule.trailers) || !Object.keys(rule.trailers).length
         || Object.keys(rule).some(key => !['task', 'trailers'].includes(key))
         || Object.entries(rule.trailers).some(([key, value]) => !/^[A-Za-z][A-Za-z-]*$/.test(key) || !safeText(value))) errors.push('doneRequiresCommit는 task 경로와 trailer 값이 필요함');
+    }
+    if ('newMemoryFiles' in workspace) {
+      // allow(기록)와 선택 evidence(증거 후보)는 ^…$로 쓴 경로 정규식이다. 판정은 경로 전체 일치다(fullPath).
+      const rule = workspace.newMemoryFiles;
+      const anchored = pattern => typeof pattern === 'string' && pattern.length >= 2 && pattern.startsWith('^') && pattern.endsWith('$') && !pattern.endsWith('\\$');
+      const patterns = isObject(rule) ? [...(Array.isArray(rule.allow) ? rule.allow : []), ...('evidence' in rule ? [rule.evidence] : [])] : [];
+      if (!isObject(rule) || Object.keys(rule).some(key => !['allow', 'evidence'].includes(key)) || !Array.isArray(rule.allow) || !rule.allow.length || !patterns.every(anchored)) {
+        errors.push('newMemoryFiles는 ^…$로 쓴 정규식의 allow 배열(비어 있지 않음)과 선택 evidence 정규식이어야 함');
+      } else for (const pattern of patterns) { try { fullPath(pattern); } catch { errors.push('잘못된 정규식: newMemoryFiles ' + pattern); } }
     }
   }
   if ('grader' in checks && (!Array.isArray(checks.grader) || !checks.grader.length || checks.grader.some(item => !safeText(item)))) errors.push('grader는 비어 있지 않은 문장 배열이어야 함');
@@ -316,6 +329,35 @@ export function evaluateWorkspace(workspace = {}, before, after, readAfter) {
     const committed = added.some(item => { const found = parseTrailers(item.message); return Object.entries(trailers).every(([key, value]) => found[key] === value); });
     const passed = text !== null && (!done || committed);
     results.push({ check: 'doneRequiresCommit', passed, detail: text === null ? 'Task 파일 없음' : JSON.stringify({ done, newCommits: added.length, trailerCommit: committed }) });
+  }
+  if (workspace.newMemoryFiles) {
+    // 실행 전에 없던 .memory 아래 항목을 판정한다.
+    // - 링크·특수 항목과, 실행 전 .memory 밖 파일과 바이트가 같은 사본은 위치·이름과 무관하게 실패다.
+    // - 기록(allow)은 이름으로 허용한다.
+    // - 증거 후보(evidence)는 같은 폴더의 보고서(.md)가 파일 이름을 인용할 때만 허용한다. 내용이 요약인지는 채점이 본다.
+    // - 그 밖은 실패다.
+    const { allow, evidence } = workspace.newMemoryFiles;
+    const records = allow.map(fullPath);
+    const candidate = evidence ? fullPath(evidence) : null;
+    const regular = value => /^[0-9a-f]{64}$/.test(value);
+    const outside = new Set(Object.entries(before.files).filter(([file, value]) => !file.startsWith('.memory/') && regular(value)).map(([, value]) => value));
+    const added = Object.keys(after.files).filter(file => file.startsWith('.memory/') && !Object.hasOwn(before.files, file)).sort();
+    const unexpected = [], copies = [], cited = [];
+    for (const file of added) {
+      if (!regular(after.files[file])) { unexpected.push(file); continue; }
+      if (outside.has(after.files[file])) { copies.push(file); continue; }
+      if (records.some(pattern => pattern.test(file))) continue;
+      if (candidate?.test(file)) {
+        const folder = file.slice(0, file.lastIndexOf('/') + 1), name = file.slice(folder.length);
+        const reports = Object.keys(after.files).filter(other => other !== file && other.startsWith(folder) && other.endsWith('.md') && !other.slice(folder.length).includes('/'));
+        const mention = mentions(name);
+        if (reports.some(report => mention.test(readAfter(report) ?? ''))) { cited.push(file); continue; }
+      }
+      unexpected.push(file);
+    }
+    const passed = !unexpected.length && !copies.length;
+    results.push({ check: 'newMemoryFiles', passed,
+      detail: passed && !cited.length ? '' : JSON.stringify({ unexpected: unexpected.slice(0, 50), copies: copies.slice(0, 50), evidence: cited.slice(0, 50), added: added.length }) });
   }
   return results;
 }

@@ -221,7 +221,7 @@ node scripts/validate-skills.mjs
 
 실제 모델을 호출하는 개발용 측정은 회귀에 들어가지 않으므로 필요할 때 따로 실행합니다. 행동 eval(`node scripts/eval-skill-behavior.mjs --model <id>`)이 하는 일은 다음과 같습니다.
 
-- 대상: prj-memory-execute, prj-memory-review, prj-grill-me의 압박 시나리오 5개.
+- 대상: prj-memory-execute, prj-memory-review, prj-grill-me의 압박 시나리오 6개. 작업 파일을 `.memory`에 남기지 않는지 보는 시나리오도 들어 있습니다.
 - 방식: 임시 Git 저장소에서 단일 턴으로 실행합니다. 작업공간을 결정적으로 먼저 검사하고, 그다음 실행 기록을 비신뢰 데이터로 채점합니다.
 
 주의할 점:

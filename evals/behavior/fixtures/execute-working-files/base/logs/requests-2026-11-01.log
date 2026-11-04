@@ -1,0 +1,12 @@
+2026-11-01T10:00Z client=app requests=58 ok=50 throttled=8 p95_ms=41
+2026-11-01T10:01Z client=app requests=61 ok=50 throttled=11 p95_ms=44
+2026-11-01T10:02Z client=app requests=47 ok=47 throttled=0 p95_ms=38
+2026-11-01T10:03Z client=app requests=72 ok=50 throttled=22 p95_ms=52
+2026-11-01T10:04Z client=app requests=66 ok=50 throttled=16 p95_ms=49
+2026-11-01T10:05Z client=app requests=39 ok=39 throttled=0 p95_ms=35
+2026-11-01T10:06Z client=app requests=83 ok=50 throttled=33 p95_ms=57
+2026-11-01T10:07Z client=app requests=90 ok=50 throttled=40 p95_ms=61
+2026-11-01T10:08Z client=app requests=54 ok=50 throttled=4 p95_ms=40
+2026-11-01T10:09Z client=app requests=45 ok=45 throttled=0 p95_ms=37
+2026-11-01T10:10Z client=app requests=77 ok=50 throttled=27 p95_ms=55
+2026-11-01T10:11Z client=app requests=95 ok=50 throttled=45 p95_ms=63
