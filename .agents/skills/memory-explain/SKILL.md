@@ -79,6 +79,8 @@ Wiki 자료에 대한 명시 질의는 [prj-memory-wiki](../memory-wiki/SKILL.md
 
 설명 호출은 읽기 전용이다. memory/history/current/checkpoint·Revision·제품·Git 쓰기, 새 Task 등록, 테스트 실행, staging/commit/push·복구를 하지 않는다. 발견·차이·권고는 채팅에만 남기며 실제 변경 요청이면 적절한 기존 진입점으로 연결한다. 사용자 working/index와 과거 증거를 보존하고 비밀 원문을 노출하지 않는다.
 
+`.memory` 전체의 점검(비표준·미인용 파일, 링크, 용량, 증거 예산, current 크기, 미해결 Task 목록, 상태 불일치)과 승인 항목 정리는 `prj-memory-tidy`가 맡는다. explain은 결정·계획·진행·완료의 설명을 맡는다. `.memory` 전체 점검·정리 요청을 받으면 tidy로 안내하고, 점검 목록 작성이나 정리를 하지 않는다.
+
 결정 검색도 같은 경계를 따른다. 후보를 설명하기 위해 원문을 새 형식으로 변환하거나 적용 범위·재검토 조건을 추정해 채우지 않는다. 검색 결과가 불확실하다는 이유로 자동 인터뷰·새 결정 저장을 시작하지 않는다.
 
 기본 출력은 채팅이다. 명시 HTML 요청만 [prj-visualize](../visualize/SKILL.md)를 별도로 적용한다. 기본 산출물은 저장소 밖에 두고 저장소 안 경로가 명시되면 그 파일 생성 범위만 구분한다. 시각화 요청도 memory/과거 보고/history 변경이나 staging/commit 권한을 부여하지 않는다.
