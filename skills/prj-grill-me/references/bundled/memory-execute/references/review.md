@@ -86,6 +86,8 @@
 
 실행 담당은 반환 범위·Revision·snapshot·근거와 현재 대상을 대조한다. 검토하지 않은 경로/AC를 통과로 확대하지 않으며 보고의 [조건부 review 필드](templates.md#stage-report)를 채우고 실제 결과에 맞게 workflow/history를 기록한다. 반환 이후 변경된 대상은 [Re-review](#re-review)와 기존 evidence 규칙을 적용한다.
 
+리뷰 위임의 지시문·diff·반환 원문 파일은 [작업 파일](conventions.md#working-files)이다. 코드와 출력 원문이 담길 수 있으므로 OS 임시 폴더의 Task 소유 폴더(또는 호스트가 준 세션 scratch)에 두고 `.memory`에 두지 않는다. review 보고에는 호출별 시각·exit, 노출되면 토큰 수, 지시문·반환 원문의 SHA256, 판정과 finding 요약만 남긴다([Stage Report](templates.md#stage-report)의 Call Records).
+
 ### Fallback and Findings
 
 - 기능 부재·상위 제약·실행 실패·중단·미완료 반환이면 원인·실제 시도·부분 결과를 보존하고, 사용자에게 사유와 자체 리뷰로 계속한다는 사실을 알린 뒤 실행 담당이 부족한 검토를 수행한다. 무한 재시도하지 않는다. Review Mode는 Self로 기록하며 확보된 별도 검토의 범위도 구분하고 독립 리뷰 완료를 주장하지 않는다. 사용자 자체 리뷰 요청은 위임 실패와 구분해 미시도 이유로 기록한다.

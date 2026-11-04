@@ -362,6 +362,7 @@ Candidate Snapshot 형식은 path·A/M/D·working SHA256·staged mode/blob다. �
 - Limitations: {실제 도구/샌드박스 제한 수준·지침만의 제한, 부분 결과·미검토 범위}
 - Review Inputs: {1단계 입력(계약·diff·반증 증거)과 2단계 입력(구현 보고·검증 결과), 이어서 호출했는지 새 호출인지}
 - Stage 2 Classification: {1단계 finding별 유지 / 기록된 조정으로 해소 / 계약 오독}
+- Call Records: {호출별 시작·완료 시각, exit, 노출되면 토큰 수, 지시문·반환 원문 SHA256. 원문은 작업 파일(OS 임시·세션 scratch)에 두고 `.memory`에 두지 않음}
 
 {리뷰어가 둘이면(고위험 Task) 위 항목을 리뷰어별로 적고, 병합 결과(ID 접두·중복·severity·verdict)를 따로 남긴다.}
 

@@ -11,7 +11,17 @@
 
 ## Output
 
-기본 산출은 `name.png`와 `name.json`이다. 이름은 안전한 짧은 label·시각·충돌 없는 suffix 등으로 만들고 URL query·입력값·비밀을 파일명에 넣지 않는다. 별도 지정이 없으면 확인한 사용자 project root의 `.memory/captures/`에 쓴다. 공유용 `docs/`나 프로젝트 밖 위치는 사용자가 지정한 경우에만 쓴다.
+기본 산출은 `name.png`와 `name.json`이다. 이름은 안전한 짧은 label·시각·충돌 없는 suffix 등으로 만들고 URL query·입력값·비밀을 파일명에 넣지 않는다. 공유용 `docs/`나 프로젝트 밖 위치는 사용자가 지정한 경우에만 쓴다.
+
+기본 위치는 실행 맥락에 따라 정한다. 사용자가 위치를 지정하면 그 지정이 우선이다.
+
+- Task 안: `prj-memory-execute` 실행 담당이 Task 단계(test 등)에서 그 Task를 지정해 호출하면 그 Task 폴더의 `captures/`에 쓴다. Task 증거이므로 [증거 예산](../../memory-execute/references/conventions.md#working-files)에 들어간다.
+- 단독 실행: 사용자가 직접 요청하면 확인한 사용자 project root의 `.memory/captures/`에 쓴다. 활성 Task가 있어도 current로 Task를 추정하지 않는다.
+- 최종본만 남긴다:
+  - 기본 위치에는 요청에 답하는 최종본만 둔다.
+  - 다시 찍기·비교용 중간본처럼 최종본이 아닌 시도는 [작업 파일](../../memory-execute/references/conventions.md#working-files)이다. OS 임시 폴더의 작업 폴더에서 만들고 기본 위치에 쌓지 않는다.
+  - 최종본은 확인을 마친 실제 bytes를 기본 위치에 새 파일로 저장한다(아래 2~4 적용).
+  - 이미 기본 위치에 저장한 파일을 최종본만 남기려고 지우거나 덮어쓰지 않는다(아래 2·5). 그런 파일이 생기면 아래 실패·부분 결과 규칙대로 보고한다.
 
 1. 경로를 절대 경로로 해석하고 기존 component/실제 경계를 확인한다. plugin 설치·source/cache 내부와 그곳을 가리키는 alias/junction에는 쓰지 않는다. 쓰기 경계를 확인하지 못하면 중단한다.
 2. PNG와 JSON 모두 기존 파일 유무를 확인한다. 기본 이름이 충돌하면 새 이름을 선택하고, 명시한 경로가 충돌하면 기존 파일을 보존하며 다른 경로를 안내한다. 현재 요청이 명시적으로 허용한 덮어쓰기만 그 범위에서 처리한다.

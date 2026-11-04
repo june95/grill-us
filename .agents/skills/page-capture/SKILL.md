@@ -11,7 +11,7 @@ metadata:
 
 ## Resolve Request
 
-1. 대상 URL/탭, 실제 사용자 project root, 출력 위치, 필요한 준비·조작과 viewport/fullPage 요청을 확인한다. 이미 주어진 값은 다시 묻지 않는다. 기본 출력은 사용자 프로젝트의 `.memory/captures/`이며 plugin 설치/cache를 프로젝트로 추정하지 않는다.
+1. 대상 URL/탭, 실제 사용자 project root, 출력 위치, 필요한 준비·조작과 viewport/fullPage 요청을 확인한다. 이미 주어진 값은 다시 묻지 않는다. 기본 출력은 [Output](references/capture-contract.md#output)을 따른다. Task 단계에서 실행 담당이 호출하면 그 Task 폴더의 `captures/`, 사용자가 직접 요청하면 사용자 프로젝트의 `.memory/captures/`이며, 어느 쪽이든 최종본만 남긴다. plugin 설치/cache를 프로젝트로 추정하지 않는다.
 2. [Capability](references/capture-contract.md#capability)에 따라 현재 제공된 도구의 문서와 실제 핸들을 확인한다. navigation/interaction/screenshot, 실제 viewport 확인, PNG 저장·파일 열람이 필요하다. 존재하지 않는 API를 가정하거나 새 도구·MCP·브라우저·숨은 runtime을 설치하지 않는다. 호스트 도구가 로그인된 실제 브라우저 프로필을 쓰게 되면 캡처 전에 사용자에게 알린다.
 3. 독립 `prj-memory-review`/`prj-memory-explain`의 읽기 전용 요청에서는 캡처를 실행하지 않는다. 기존 이미지를 읽어 검토·설명하고 새 캡처는 별도 실행 요청으로 연결한다. 실행 담당이 test 단계에서 호출하면 담당자가 산출을 evidence로 연결한다.
 
