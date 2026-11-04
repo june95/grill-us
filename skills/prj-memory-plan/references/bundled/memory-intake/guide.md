@@ -41,7 +41,7 @@ description: Register a clear change, bug, or issue as a .memory task without im
 
 실제 진행 링크가 손상된 경우 먼저 복원하며, 확인 불충분한 손상을 초기 placeholder로 간주해 새 active로 덮지 않는다.
 
-쓰기 직전 current가 바뀌었는지 다시 확인한다. 전환 전 이전 재개/마지막 완료 근거를 보존하며 가짜 링크나 새로운 archive 사본을 만들지 않는다.
+쓰기 직전 current가 바뀌었는지 다시 확인한다. 전환 전 이전 재개/마지막 완료 근거를 Task·Plan state·history에 보존하며 가짜 링크나 새로운 archive 사본을 만들지 않는다. current를 쓸 때 [Current Compaction](../memory-execute/references/resume.md#current-compaction) 조건을 확인한다.
 
 ## Report
 

@@ -168,6 +168,7 @@ T01부터 T03까지 순서대로 진행해줘
 
 - task.md는 상세 계약·workflow·완료 조건의 정본입니다.
 - current는 활성 위치, state는 재개·커밋 의도, Phase/Plan은 실제 Task 상태의 요약입니다.
+- current에는 템플릿 절만 두고 150줄 이하로 유지합니다. 지난 위치와 완료 기록은 history·state·Task 보고에 남기고, 보류 위치와 미해결 커밋 의도만 Status에 링크로 둡니다. 넘치면 다음 상태 쓰기 때 옮길 원문을 history에 먼저 남기고 압축합니다([Current Compaction](.agents/skills/memory-execute/references/resume.md#current-compaction)).
 - 결정 문서는 생성일·주제로 독립 ID를 갖습니다. Plan 생성 전 인터뷰나 기존 Plan의 후속 결정도 파일명을 유지하고 Plan/Task에서 실제 경로를 링크합니다. 여러 Plan이 같은 결정을 참조할 수 있으며, 기존 파일·링크를 옮기거나 합치지 않습니다.
 - current의 Checkpoint는 실제 활성 또는 보존한 Plan state 링크이고, Last Completed Task는 마지막 완료의 Plan/Task·확인한 커밋 또는 no-commit 사유·완료 근거입니다. 활성 Task가 없어도 보존한 state 링크는 남길 수 있습니다. 완료 이력이나 참조할 state가 없으면 없음으로 적습니다.
 - 이전 위치는 기존 Task·보고·Plan별 state로 보존합니다. 성공 커밋 의도를 초기화하기 전에 Task의 커밋 보고와 마지막 성공 정보를 남기며, 미해결 prepared/failed 의도는 덮어쓰지 않습니다. 매 전환 archive 사본을 만들지 않고 기존 사본은 유지합니다.

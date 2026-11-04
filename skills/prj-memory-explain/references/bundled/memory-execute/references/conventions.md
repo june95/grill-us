@@ -26,6 +26,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | 사용자 없는 실행의 질문 지점 | [Unattended Runs](#unattended-runs) | 추천안 확정 금지, blocker 보고, 위치·intent 보존 |
 | Git 품질·후보·ignore·staging·secret·intent | [commit-check.md](commit-check.md#quality-gate), [Staging](commit-check.md#staging), [Secret Check](commit-check.md#secret-check), [Commit Intent](commit-check.md#commit-intent) | Task 후보와 사용자 index 분리, 커밋 전 secret 검사는 파일명만 출력 |
 | 재개·전환·복구 알고리즘 | [resume.md](resume.md#stale-evidence), [Switch](resume.md#switch), [Recovery](resume.md#recovery) | 미해결 intent 보존, 실제 결과 확인 후 재개 |
+| current 크기·압축 | [State Ownership](#state-ownership), [Current Compaction](resume.md#current-compaction) | 템플릿 절만, 150줄 이하, 원문을 history에 먼저 보존한 뒤 압축 |
 
 기본 읽기는 요청·존재하는 대상 Task/결정과 이 공통 규약이다. 실행·재개에는 현재 checkpoint와 resume을 확인하고, 선택한 단계의 지침만 추가한다. 형식 작성에는 해당 templates 섹션, 경로/정본/명령이 불명확하면 project-profile, 최종 품질·커밋에는 commit-check를 읽는다. 관련 없는 단계·시나리오 전체를 매번 로드하지 않으며 이미 확인한 같은 내용은 재사용한다.
 
@@ -340,6 +341,9 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 - 같은 `.memory`를 변경하는 실행 담당은 한 번에 한 명이다. 제품·Git·보고·Task/current/checkpoint/history 쓰기는 실행 담당이 수행하며, 별도 읽기 전용 리뷰어는 결과만 반환한다. Codex/Claude Code 등 도구를 교체할 때 기존 실행을 끝내거나 멈추고 기록을 확인해 순차 재개한다. 단일 current를 유지하며 자동 잠금 엔진·다중 current·자동 worktree 생성으로 구현하지 않는다. 리뷰 권한·결과 기록은 [Review Delegation](review.md#review-delegation)을 따른다.
 - Task의 Status·Workflow·Completion Check·Progress가 작업 상태의 정본이다.
 - current는 활성 Plan·Phase·Task와 Active Stage·Blocker·Next Step·정책의 책갈피다. 상세 청사진을 중복 보관하지 않는다.
+  - [Current 템플릿](templates.md#current)의 절만 두고 150줄 이하로 유지한다. 보류 위치와 미해결 commit intent는 Status에 그 Plan state 링크 한 줄씩 둔다.
+  - 지난 위치·완료 기록·전환 메모는 history·Plan별 state·Task 보고에 남기고 current에 쌓지 않는다.
+  - 150줄을 넘거나 템플릿 밖 내용이 있으면, current를 쓰는 실행이 다음 상태 쓰기 때 묻지 않고 [current 압축](resume.md#current-compaction)을 한다.
 - current의 Checkpoint는 실제 활성 또는 보존한 Plan별 state 링크다. Last Completed Task는 활성 위치와 별개로 마지막 완료의 Plan ID·Task ID, 확인한 commit hash 또는 명시 no-commit/변경 없음 사유, 실제 완료 evidence를 가리킨다. 완료 이력이 없으면 없음으로 기록하고 가짜 경로·hash를 만들지 않는다. 과거 current에 이 정보가 없으면 Task/보고로 확인 가능한 범위만 읽는다.
 - Phase의 done count와 Plan의 요약은 Task 실제 상태로 갱신한다. 커밋 실패 전에 done을 쓰지 않는다.
 - 새 등록은 기존 활성 작업을 유지한다. 우선 처리 지시가 있을 때만 Task 재개 상태와 Plan checkpoint를 먼저 보존하고 current를 전환한다.
@@ -347,7 +351,7 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 - 기본 실행은 활성 Task 하나다. 연속 실행은 요청한 범위를 따른다. 단계만 요청한 실행은 그 단계만 수행하고 포인터를 자동 전진하지 않는다.
 - 마지막 Task 완료 시 Phase/Plan done과 Active Task·Stage 없음을 기록한다. 다른 pending Plan을 임의로 시작하지 않는다.
 - checkpoint와 원자적 기록·커밋 복구 절차는 [resume.md](resume.md)를 따른다.
-- 이전 위치 보존은 기존 Task·보고·Plan별 checkpoint에 필요한 재개/완료 근거를 남기는 뜻이다. 매 전환마다 전체 checkpoint 사본이나 별도 archive를 만들지 않는다. 기존 사본과 과거 완료 증거는 보존하고 미해결 커밋 의도는 덮어쓰지 않는다.
+- 이전 위치 보존은 기존 Task·보고·Plan별 checkpoint와 history에 필요한 재개/완료 근거를 남기는 뜻이다. current에 이전 위치·이전 완료를 쌓는 뜻이 아니다. 매 전환마다 전체 checkpoint 사본이나 별도 archive를 만들지 않는다. 기존 사본과 과거 완료 증거는 보존하고 미해결 커밋 의도는 덮어쓰지 않는다.
 
 ## Change Boundaries
 

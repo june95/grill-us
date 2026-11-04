@@ -45,7 +45,7 @@ review 중단 재개는 실제 반환·미완료 여부와 대상 snapshot을 �
 
 - 전환 전에 단순 초기 placeholder와 실제 진행 링크 손상을 구분한다. 실재 진행 근거가 있으면 기존 Task·보고·Plan checkpoint와 필요한 실제 Git 결과를 대조해 이전 위치/재개 단계/미해결 intent를 먼저 복원한다. 근거가 불충분하거나 충돌하면 손상·필요한 다음 확인을 기록하고 새 active로 덮지 않는다. 이는 기존 위치 복구이며 새 Task 생성/완료 추정이 아니다.
 - 새 요청 등록은 현재 진행 중 Task를 유지한다. 활성 작업이 없으면 첫 실행 가능한 새 Task를 활성화할 수 있다.
-- 사용자 우선 처리 지시가 있으면 old Task Resume Stage·Blocker·Next Step과 Plan checkpoint를 먼저 저장하고 new current를 기록한다.
+- 사용자 우선 처리 지시가 있으면 old Task Resume Stage·Blocker·Next Step과 Plan checkpoint를 먼저 저장하고 new current를 기록한다. 보류한 위치는 current Status에 그 Plan state 링크 한 줄로만 남기고, 전환 메모를 current에 쌓지 않는다([Current Compaction](#current-compaction)).
 - 상세 상태는 old Task에 유지한다. current를 전환했다고 해당 작업을 done 또는 blocker 해결로 바꾸지 않는다.
 - 이 저장은 기존 Task·보고·Plan별 checkpoint의 갱신이며 매 전환의 전체 사본 생성 의무가 아니다. 별도 archive 경로는 추가하지 않고 기존 사본은 그대로 둔다. 같은 Plan의 새 Task로 전진할 때도 이전 성공 근거 보존과 미해결 intent 차단을 먼저 확인한다.
 - 등록·전환 실패 중간에 current를 먼저 새 링크로 변경하지 않는다. 같은 Plan에서 여러 Task가 있어도 Task ID와 현재 단계가 모호하지 않아야 한다.
@@ -82,8 +82,35 @@ review 중단 재개는 실제 반환·미완료 여부와 대상 snapshot을 �
 
 - [완료 의미](conventions.md#evidence-and-completion)와 [Quality Gate](commit-check.md#quality-gate)로 준비·커밋 정책 결과를 확인한 전체 실행만 finalize한다. 관측 실패/조사 목적은 구분하며 stage-only/check_only는 자동 done·전진하지 않는다.
 - 성공 commit 또는 커밋 없는 완료를 확인한 뒤 Task done을 기록하기 전에 [작업 파일 정리](commit-check.md#working-file-cleanup)를 한다. 정리 실패와 승인 대기는 기록하고 done을 막지 않는다.
-- done Task를 근거로 Phase Tasks 표·done count를 갱신하고 Plan 요약을 갱신한 뒤 current를 다음 Task로 전진한다.
+- done Task를 근거로 Phase Tasks 표·done count를 갱신하고 Plan 요약을 갱신한 뒤 current를 다음 Task로 전진한다. 이전 Last Completed Task는 그 Task의 commit 보고·Plan state·history에 남아 있으므로 current에 "이전 완료"로 쌓지 않는다. current를 쓸 때 [Current Compaction](#current-compaction) 조건을 확인한다.
 - 다음 Task는 같은 Plan의 순서와 실제 Dependencies를 확인한다. 완료되지 않은 선행 Task를 건너뛰어 검증 실패를 숨기지 않는다.
 - 마지막 Task 완료 시 Phase와 Plan done, current Active Task·Active Stage 없음. 다른 pending Plan을 임의로 시작하지 않는다.
 - 복구 시 Task 기록과 확인한 Git 결과를 정본으로 삼아 요약을 다시 계산한다. 다른 단계의 blocker를 임의로 지우지 않는다.
 - Task·checkpoint·current 기록은 같은 디렉터리의 임시 파일에 완성 내용을 쓴 뒤 교체한다. 원본부터 삭제하지 않는다. 여러 문서의 교체를 단일 트랜잭션이라고 주장하지 않으며 중간 중단은 위 근거로 복구한다.
+
+
+## Current Compaction
+
+current를 쓰는 실행은 상태를 쓸 때 이 절차를 확인하고, 해당하면 묻지 않고 압축한다. memory-execute·memory-intake·memory-plan처럼 current를 쓰는 모든 스킬이 대상이다. 읽기 전용 스킬은 current를 쓰지 않으므로 압축하지 않는다.
+
+- 먼저 확인: history에서 가장 나중의 current 압축 기록에 교체 확인 기록이나 확인 불가 기록이 없으면 아래 중단 뒤 재개부터 한다. 크기 조건보다 먼저 본다. 압축·확인·확인 불가 기록은 Result를 "current 압축"으로 시작해 찾을 수 있게 한다.
+- 조건: current가 150줄을 넘거나, [Current 템플릿](templates.md#current) 밖의 절·항목이 있을 때.
+- 순서:
+  1. 분류: 템플릿 밖 내용을 항목별로 나눈다. 활성 위치, 보류 위치(다른 Plan의 재개 위치), 미해결 commit intent, 완료 기록, 그 밖의 메모다.
+  2. 남길 형태: 활성 위치는 템플릿 절에 둔다. 보류 위치와 미해결 intent는 Status에 그 Plan state 링크로 한 줄씩 줄인다. Task·state·Git 근거로 완료가 확인되지 않은 위치는 완료 기록으로 옮기지 않고 보류 위치로 남기며, 확인할 일을 Next Step에 적는다.
+  3. 원문 보존: current에서 지우거나 줄이는 모든 내용이 대상이다. 옮기는 항목뿐 아니라, 링크로 줄이는 보류 위치·intent의 세부 내용(보류 사유, 재개 조건, intent 세부)도 포함한다.
+     - history·Plan별 state·Task 보고에 같은 사실이 있는지 확인한다. 없거나 같은지 애매하면 오늘 history에 원문 그대로 먼저 추가한다. 원문 보존이며 결과 요약의 중복 기록이 아니다.
+     - 링크로 줄인 항목의 원문을 history에 추가했으면, Status의 그 링크 줄에 history 기록도 함께 연결한다.
+     - 보존을 확인할 수 없는 항목은 줄이거나 옮기지 않고 그대로 둔다.
+  4. 압축 기록: 교체하기 전에 오늘 history에 남긴다. 교체 전 current의 줄 수와 SHA256, 교체할 내용의 줄 수와 SHA256, 옮기거나 줄인 항목 수, 원문을 추가한 기록을 적는다.
+  5. 교체: current를 원자적으로 교체한다([Completion](#completion)의 임시 파일 방식).
+  6. 교체 확인: 교체된 current의 SHA256이 4단계의 교체할 내용 값과 같은지 확인하고, history에 확인 기록을 새로 덧붙인다.
+- 중단 뒤 재개:
+  - 4단계 기록은 있는데 6단계 확인이 없으면, current의 SHA256을 그 기록의 교체할 내용 값과 대조한다.
+  - 같으면 교체는 끝난 것이다. 확인 기록만 덧붙인다.
+  - 다르면 교체 여부를 확인할 수 없다. 교체 뒤 다른 쓰기로 current가 바뀌었을 수도 있기 때문이다. 완료로도 미교체로도 단정하지 않는다. 확인 불가 기록(현재 SHA256, 교체 전 값과 같은지)을 history에 남기고, 지금 current로 조건과 원문 보존부터 다시 본다.
+  - 확인 기록이나 확인 불가 기록이 있으면 그 압축은 끝난 것으로 보고 다시 대조하지 않는다.
+  - 4단계 전에 끊겼으면 current 원본이 그대로이므로 처음부터 다시 한다.
+  - 어느 경우든 이미 history에 추가한 원문은 3단계 확인에서 찾히므로 다시 추가하지 않는다.
+- 원문을 잃지 않는다. 기존 history 기록은 고치거나 지우지 않고(확인은 새 기록으로 덧붙인다), state의 기존 내용도 지우지 않는다. 별도 archive 사본은 만들지 않는다.
+- 압축은 기록 정리다. 위치 전환, Task 상태 변경, 완료 판정을 하지 않는다.

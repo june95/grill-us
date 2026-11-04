@@ -277,6 +277,12 @@ active Plan/Phase는 in_progress로 표시할 수 있어도 Task가 실제 시�
 
 각 항목의 의미·보존은 [State Ownership](conventions.md#state-ownership)을 따른다. 활성 Task 없음과 보존 state 링크는 구분하고, 완료 이력이 없으면 Last Completed Task는 없음이다. no-commit은 SHA 대신 사유·실제 완료 근거를 연결한다.
 
+current에는 위 절만 두고 150줄 이하로 유지한다.
+- Status에는 위 필드와, 활성 작업에 바로 필요한 한 줄 항목(Plan 상태·집계, 적용 중인 사용자 지시·정책)만 둔다.
+- 보류 위치(다른 Plan의 재개 위치)나 미해결 commit intent가 있으면 Status에 그 Plan state 링크를 한 줄씩 둔다. 새 절을 만들지 않는다.
+- 지난 위치·완료 기록·전환 메모는 current에 쌓지 않고 history·Plan별 state·Task 보고에 남긴다.
+- 150줄을 넘거나 템플릿 밖 절·항목이 있으면 다음 상태 쓰기 때 [current 압축](resume.md#current-compaction)을 한다.
+
 ## Checkpoint
 
 기록 위치는 `.memory/state/{plan-id}.md`이며 링크는 이 파일 위치 기준으로 작성한다. [resume.md](resume.md)의 복구 조건을 따른다.

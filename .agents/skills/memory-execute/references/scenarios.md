@@ -38,6 +38,12 @@
 | S30 | 실제 절차를 시도했으나 목표 현상 관찰 안 됨 | 버그 intake | not_reproduced와 실제 결과·환경·확신·추가 검증 기록 | 버그 없음/해결 완료로 단정하지 않음; 새 Task/current 정책 유지 | 지침 walkthrough |
 | S31 | 버그의 기대 권한/동작 정책에 중요한 미결정 | intake → grill-me | 부족한 분기 한 질문과 2~3개 추천 포함 선택지; 실행 청사진 확정 보류 | 원인 조사 부족과 제품 결정 부족을 구분 | 지침 walkthrough |
 | S32 | 기능·문서 Task 또는 과거 done Task | 조건부 형식 적용 확인 | nonbug에는 Bug Investigation 빈 표 없음; 과거 done 증거 불변 | Type/실제 scope로 판단, 소급 마이그레이션/Revision 일괄 증가 없음 | 지침 walkthrough |
+| S33 | current가 150줄을 넘고, 템플릿 밖 절에 완료 기록과 메모가 섞임 | 다음 상태 쓰기(current 압축) | 원문을 history에 먼저 보존 → 압축 기록(전후 줄 수·SHA256) → 원자적 교체 → 확인 기록. current는 템플릿 절만 | 기존 history·state 수정 없음, archive 없음, 위치·상태 변경 없음 | 지침 walkthrough |
+| S34 | 보류 위치의 보류 사유·재개 조건이 current에만 있고 Plan state에는 위치만 있음 | current 압축 3단계 | 보류 사유·재개 조건 원문을 history에 먼저 보존하고 Status 링크 줄에 그 기록도 연결. 보존을 확인하지 못하면 줄이지 않음 | 링크로 줄이는 내용도 원문 보존 대상 | 지침 walkthrough |
+| S35 | 템플릿 밖 내용에 완료가 근거로 확인되지 않은 위치가 있음 | current 압축 2단계 | 완료 기록으로 옮기지 않고 보류 위치로 Status 링크, 확인할 일을 Next Step에 적음 | 미확인 위치를 완료로 분류하지 않음 | 지침 walkthrough |
+| S36 | 압축 기록은 있고 교체 확인이 없음, current SHA256이 기록의 교체할 내용 값과 같음 | 다음 current 쓰기 전 확인 | 확인 기록만 덧붙임. 크기 조건보다 먼저 확인 | 교체 완료를 SHA256으로 확인 | 지침 walkthrough |
+| S37 | 같은 상황에서 current SHA256이 교체할 내용 값과 다름 | 다음 current 쓰기 전 확인 | 교체 여부 확인 불가로 기록(현재 SHA256, 교체 전 값과 같은지). 완료나 미교체로 단정하지 않고 지금 current로 조건과 원문 보존부터 다시. 이미 추가한 원문은 다시 추가하지 않음 | 불확실한 결과를 완료나 미교체로 기록하지 않음 | 지침 walkthrough |
+| S38 | 교체가 끝난 뒤 확인 기록 전에 중단됐고, 그 뒤 다른 상태 쓰기로 current가 바뀜 | 다음 current 쓰기 전 확인 | 해시가 달라 확인 불가로 기록하고 그 압축은 끝난 것으로 봄. current가 이미 조건 밖이면 압축하지 않음. 지난 압축 기록은 고치지 않음 | 확인 불가 기록이 같은 대조의 반복을 막음 | 지침 walkthrough |
 
 ## Review Delegation Cases
 
