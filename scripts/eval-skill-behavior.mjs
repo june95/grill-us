@@ -31,6 +31,7 @@ const limits = [
   '모델 응답은 확률적이며 모델·Claude Code·skills CLI 버전에 따라 달라진다. 반복 수가 작으면 우연을 구분하지 못한다.',
   '도구는 Read·Glob·Grep·Edit·Write·Skill·TodoWrite이며 셸은 없다. 모델은 테스트 실행·git commit을 할 수 없어, 그런 행동이 필요한 정답 경로는 측정하지 않는다. 리뷰할 diff는 하네스가 파일로 준다.',
   '편집은 .memory 아래만 미리 허용하고 그 밖은 권한 거부로 미완료가 된다. 작업 폴더 밖 읽기·쓰기는 Claude Code 설정으로 막는다. Claude Code가 스스로 읽는 스킬·설정은 이 차단의 예외다.',
+  '시나리오가 scoreOutsideDenials를 켜면, 거부가 모두 작업 폴더 밖 경로의 읽기·쓰기(판정 위치를 확정할 수 있는 Read·Glob·Grep·Edit·Write, 읽기는 검색 시작 위치)인 실행은 미완료로 보지 않고 판정한다. 차단은 그대로이고, 실행마다 밖 경로 거부 수를 outsideDenials로 남긴다.',
   '하네스를 실행한 상위 에이전트 세션의 변수(CLAUDECODE·CLAUDE_*·ORCA_*)는 넘기지 않는다. 그래서 effort·plugin 경로·세션 연결을 물려받지 않고, effort는 지정하지 않은 Claude Code 기본값이다. 로그인용 CLAUDE_CONFIG_DIR·CLAUDE_CODE_OAUTH_TOKEN 등은 남긴다.',
   'LLM 채점은 결정적 작업공간 검사를 보조하는 판단이며 채점 모델의 오판 가능성이 있다.',
   'Codex는 실행 출력에 스킬 호출 이벤트가 없어 측정하지 않는다(P02-T02 확인).'
@@ -51,7 +52,8 @@ const mentions = name => new RegExp('(?<![A-Za-z0-9._-])' + name.replace(/[.*+?^
 export function scenarioErrors(data, fileName) {
   if (!isObject(data)) return ['시나리오는 객체여야 함'];
   const errors = [];
-  for (const key of Object.keys(data)) if (!['id', 'skill', 'pressure', 'fixture', 'prompt', 'diffFile', 'checks'].includes(key)) errors.push('허용하지 않는 키: ' + key);
+  for (const key of Object.keys(data)) if (!['id', 'skill', 'pressure', 'fixture', 'prompt', 'diffFile', 'scoreOutsideDenials', 'checks'].includes(key)) errors.push('허용하지 않는 키: ' + key);
+  if ('scoreOutsideDenials' in data && data.scoreOutsideDenials !== true) errors.push('scoreOutsideDenials는 true로만 씀');
   if ('diffFile' in data && (typeof data.diffFile !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,60}$/.test(data.diffFile) || /^\.git/i.test(data.diffFile))) errors.push('diffFile은 프로젝트 최상위의 안전한 파일 이름이어야 함');
   if (typeof data.id !== 'string' || !/^[a-z0-9][a-z0-9-]{2,60}$/.test(data.id) || data.id + '.json' !== fileName) errors.push('id는 파일명과 같은 소문자·숫자·하이픈이어야 함');
   if (!targetSkills.includes(data.skill)) errors.push('skill은 ' + targetSkills.join(', ') + ' 중 하나여야 함');
@@ -65,7 +67,7 @@ export function scenarioErrors(data, fileName) {
   const workspace = checks.workspace ?? {};
   if (!isObject(workspace)) errors.push('checks.workspace는 객체여야 함');
   else {
-    for (const key of Object.keys(workspace)) if (!['unchanged', 'noCommit', 'files', 'doneRequiresCommit', 'newMemoryFiles'].includes(key)) errors.push('허용하지 않는 workspace 키: ' + key);
+    for (const key of Object.keys(workspace)) if (!['unchanged', 'noCommit', 'files', 'doneRequiresCommit', 'newMemoryFiles', 'copiedLines'].includes(key)) errors.push('허용하지 않는 workspace 키: ' + key);
     for (const key of ['unchanged', 'noCommit']) if (key in workspace && workspace[key] !== true) errors.push(key + '는 true로만 씀');
     if ('files' in workspace) {
       if (!Array.isArray(workspace.files) || !workspace.files.length) errors.push('files는 비어 있지 않은 배열이어야 함');
@@ -97,11 +99,25 @@ export function scenarioErrors(data, fileName) {
         errors.push('newMemoryFiles는 ^…$로 쓴 정규식의 allow 배열(비어 있지 않음)과 선택 evidence 정규식이어야 함');
       } else for (const pattern of patterns) { try { fullPath(pattern); } catch { errors.push('잘못된 정규식: newMemoryFiles ' + pattern); } }
     }
+    if ('copiedLines' in workspace) {
+      // source(.memory 밖 fixture 파일)의 줄이 .memory 새 파일·바뀐 파일에 max줄 넘게 들어가면 실패. source가 fixture base에 있는지는 fixtureErrors가 본다.
+      const rule = workspace.copiedLines;
+      if (!isObject(rule) || Object.keys(rule).some(key => !['source', 'max'].includes(key)) || !safeRelative(rule.source)
+        || rule.source.split('/')[0].toLowerCase() === '.memory' || !Number.isInteger(rule.max) || rule.max < 0) {
+        errors.push('copiedLines는 .memory 밖의 안전한 상대 경로 source와 0 이상 정수 max만 가짐');
+      }
+    }
   }
   if ('grader' in checks && (!Array.isArray(checks.grader) || !checks.grader.length || checks.grader.some(item => !safeText(item)))) errors.push('grader는 비어 있지 않은 문장 배열이어야 함');
   const hasWorkspace = isObject(workspace) && Object.keys(workspace).length > 0;
   if (!hasWorkspace && !Array.isArray(checks.grader)) errors.push('작업공간 검사나 grader 중 하나는 필요함');
   return errors;
+}
+
+/** fixture와 맞춰 봐야 하는 시나리오 오류. copiedLines source는 fixture base의 파일이어야 한다(모델 호출 전에 확인). */
+export function fixtureErrors(data, baseFiles) {
+  const source = data?.checks?.workspace?.copiedLines?.source;
+  return source !== undefined && !baseFiles.includes(source) ? ['copiedLines source가 fixture base에 없음: ' + source] : [];
 }
 
 /**
@@ -155,6 +171,8 @@ export function loadScenarios(selected = []) {
     if (data.diffFile && !overlay.length) throw new UsageError(file + ' diffFile에는 overlay 변경이 필요함');
     for (const name of fs.readdirSync(fixture)) if (!['base', 'overlay'].includes(name)) throw new UsageError(file + ' fixture에는 base/와 overlay/만 둠: ' + name);
     if (!base.length) throw new UsageError(file + ' fixture base/가 비어 있음');
+    const mismatch = fixtureErrors(data, base);
+    if (mismatch.length) throw new UsageError(file + ' 형식 오류: ' + mismatch.join('; '));
     scenarios.push({ ...data, fixtureDir: fixture, baseFiles: base, overlayFiles: overlay });
   }
   if (!scenarios.length) throw new UsageError('실행할 시나리오가 없음');
@@ -296,8 +314,27 @@ export function parseTrailers(message) {
 
 const doneStatus = /^## Status:\s*done\b/m;
 
-/** 결정적 작업공간 검사. readAfter(path)는 실행 뒤 파일 내용 또는 null을 돌려준다. */
-export function evaluateWorkspace(workspace = {}, before, after, readAfter) {
+const regularHash = value => /^[0-9a-f]{64}$/.test(value);
+
+/**
+ * copiedLines 판정에 쓰는 실행 전 내용(경로 → 텍스트). 그 검사가 있을 때만 .memory 아래 일반 파일과 source를 읽고, 없으면 빈 Map이다.
+ * 실행 전 스냅샷(before) 직후, 모델 실행 전에 부른다.
+ */
+export function contentsBefore(cwd, before, workspace = {}) {
+  const contents = new Map();
+  const source = workspace.copiedLines?.source;
+  if (!source) return contents;
+  for (const [file, value] of Object.entries(before.files)) {
+    if ((file.startsWith('.memory/') || file === source) && regularHash(value)) contents.set(file, fs.readFileSync(path.join(cwd, ...file.split('/')), 'utf8'));
+  }
+  return contents;
+}
+
+/**
+ * 결정적 작업공간 검사. readAfter(path)는 실행 뒤 파일 내용 또는 null을 돌려준다.
+ * readBefore(path)는 실행 전 내용 또는 null이다(copiedLines만 쓴다). 없으면 실행 전 내용이 없는 것으로 본다.
+ */
+export function evaluateWorkspace(workspace = {}, before, after, readAfter, readBefore = () => null) {
   const results = [];
   if (workspace.unchanged) {
     const paths = new Set([...Object.keys(before.files), ...Object.keys(after.files)]);
@@ -358,6 +395,31 @@ export function evaluateWorkspace(workspace = {}, before, after, readAfter) {
     const passed = !unexpected.length && !copies.length;
     results.push({ check: 'newMemoryFiles', passed,
       detail: passed && !cited.length ? '' : JSON.stringify({ unexpected: unexpected.slice(0, 50), copies: copies.slice(0, 50), evidence: cited.slice(0, 50), added: added.length }) });
+  }
+  if (workspace.copiedLines) {
+    // 실행 전 source의 서로 다른 줄(앞뒤 공백 제거, 빈 줄 제외)이 .memory의 새 파일·바뀐 파일에 부분 문자열로 들어간 수를 센다.
+    // - 같은 파일의 실행 전 내용에 이미 있던 줄은 세지 않고, 여러 파일에 있어도 한 번만 센다.
+    // - 형식을 바꿔 옮긴 값은 줄이 같지 않아 세지 않는다(채점 항목이 본다). 링크·특수 항목은 newMemoryFiles가 본다.
+    // - source를 읽을 수 없으면 판정 근거가 없으므로 실패로 둔다.
+    const { source, max } = workspace.copiedLines;
+    const sameSource = Object.hasOwn(before.files, source) && regularHash(before.files[source]) && before.files[source] === after.files[source];
+    const sourceText = readBefore(source) ?? (sameSource ? readAfter(source) : null);
+    if (typeof sourceText !== 'string') results.push({ check: 'copiedLines', passed: false, detail: JSON.stringify({ error: '원본을 읽을 수 없음', source }) });
+    else {
+      const lines = [...new Set(sourceText.replace(/\r\n/g, '\n').split('\n').map(line => line.trim()).filter(Boolean))];
+      const targets = Object.keys(after.files).filter(file => file.startsWith('.memory/') && regularHash(after.files[file]) && before.files[file] !== after.files[file]).sort();
+      const copied = new Set(), files = [];
+      for (const file of targets) {
+        const text = readAfter(file) ?? '';
+        const earlier = Object.hasOwn(before.files, file) ? readBefore(file) ?? '' : '';
+        const found = lines.filter(line => text.includes(line) && !earlier.includes(line));
+        if (!found.length) continue;
+        files.push(file);
+        for (const line of found) copied.add(line);
+      }
+      const passed = copied.size <= max;
+      results.push({ check: 'copiedLines', passed, detail: passed && !copied.size ? '' : JSON.stringify({ copied: copied.size, max, files: files.slice(0, 50) }) });
+    }
   }
   return results;
 }
@@ -450,13 +512,98 @@ export function evalEnv(ctx, runtime) {
     npm_config_userconfig: ctx.npmConfig, npm_config_globalconfig: ctx.npmConfig, TEMP: runtime, TMP: runtime, TMPDIR: runtime });
 }
 
-/** 실행 완료 조건: 성공 종료, 권한 거부 없음, 모든 도구 호출 응답, exit 0, timeout 없음. */
-function completion(result, events) {
+// 거부된 도구 입력의 해석. 모델이 만든 도구 입력은 비신뢰 입력이므로, 위치를 확정할 수 없으면 밖으로 세지 않는다.
+const globMeta = /[*?[\]{}()!+@]/;
+
+/**
+ * 문자열만으로 위치를 확정할 수 없는 경로인가.
+ * - 빈 값·문자열 아님, NUL·$·%(변수), ~ 시작(홈), //·\\ 시작(UNC·장치·확장 경로), /proc·/dev 아래(프로세스별 링크).
+ * - 구성요소: .., 점만 있는 이름(. 제외), 끝이 점·공백인 이름(Windows가 지워 다른 이름과 같아진다), 드라이브 표기 밖의 콜론(대체 스트림 등), ~숫자(8.3 짧은 이름).
+ */
+function ambiguousPath(value) {
+  if (typeof value !== 'string' || !value || /[\0$%]/.test(value) || value.startsWith('~') || /^[\\/]{2}/.test(value) || /^[\\/](?:proc|dev)(?:[\\/]|$)/i.test(value)) return true;
+  return value.split(/[\\/]+/).some((part, index) => part === '..' || (part !== '' && part !== '.' && (/^\.+$/.test(part) || /[. ]$/.test(part)))
+    || (part.includes(':') && !(index === 0 && /^[A-Za-z]:$/.test(part))) || /~\d/.test(part));
+}
+
+/**
+ * 있는 상위 폴더까지 링크를 푼 실제 경로. 없는 나머지(ENOENT)는 그대로 붙인다.
+ * 항목이 있는데 풀 수 없으면(끊어진 링크, 링크 순환, 접근 오류 등) 위치를 확정할 수 없으므로 null이다. 쓰기는 하지 않는다.
+ */
+function physicalPath(absolute) {
+  const rest = [];
+  for (let current = absolute; ;) {
+    try { return path.join(fs.realpathSync.native(current), ...rest); } catch {}
+    try { fs.lstatSync(current); return null; } catch (error) { if (error?.code !== 'ENOENT') return null; }
+    const parent = path.dirname(current);
+    if (parent === current) return null;
+    rest.unshift(path.basename(current));
+    current = parent;
+  }
+}
+
+/**
+ * 권한 거부가 실행 작업 폴더 밖 경로의 읽기·쓰기였는가. 판정 위치를 확정할 수 있고 그 위치가 밖일 때만 true다.
+ * - 판정 위치: Read·Edit·Write는 file_path다. Glob·Grep은 검색 시작 위치다(path, 또는 path 없는 Glob의 절대 pattern에서 첫 glob 문자 앞까지의 폴더).
+ *   절대 pattern과 path를 함께 주거나 pattern에 ..가 있으면 세지 않는다. 시작 위치가 없으면 작업 폴더다(밖 아님).
+ * - 읽기(Read·Glob·Grep)는 시작 위치가 밖이면, 그 아래 검색이 작업 폴더를 포함할 수 있어도 센다.
+ *   읽기 거부는 시작 위치가 밖이라서 생기고, 작업 폴더 안 읽기는 허용되어 있어 위반 행동이 아니기 때문이다.
+ *   (하네스의 실행 폴더는 OS 임시 폴더 아래에 있어, OS 임시 폴더 검색은 늘 실행 폴더를 품는다.)
+ * - 쓰기(Edit·Write)는 대상 파일 하나로 판정한다.
+ * - roots는 작업 폴더(문자열 또는 [주어진 경로, 실제 경로])다. 상대 경로는 첫 root 기준으로 푼다.
+ *   판정 위치의 문자열 경로와 실제 경로(있는 상위까지 링크를 푼 경로)가 모두 어느 root 안에도 없을 때만 밖이다.
+ *   실제 경로를 확정할 수 없으면(끊어진 링크, 링크 순환, 접근 오류) 세지 않는다.
+ */
+export function deniedOutside(denial, roots) {
+  const bases = [].concat(roots);
+  const tool = denial?.tool_name;
+  const input = denial?.tool_input;
+  if (!['Read', 'Edit', 'Write', 'Glob', 'Grep'].includes(tool) || !isObject(input)) return false;
+  let target = ['Read', 'Edit', 'Write'].includes(tool) ? input.file_path : input.path;
+  if (tool === 'Glob') {
+    const pattern = input.pattern;
+    if (typeof pattern !== 'string' || pattern.includes('..')) return false;
+    if (path.isAbsolute(pattern)) {
+      if (target !== undefined) return false;
+      // 시작 위치는 원래 표기의 루트(드라이브 표기 포함)와, 그 뒤에서 첫 glob 문자가 든 구성요소(없으면 마지막 구성요소) 앞까지의 문자열이다.
+      // 정규화 전 표기로 모호성을 보므로 //·\\ 시작 같은 루트 표기도 그대로 걸러지고, C:\·C:/처럼 루트만 있으면 루트가 시작 위치다.
+      const root = pattern.match(/^(?:[A-Za-z]:)?[\\/]+/)?.[0] ?? '';
+      const rest = pattern.slice(root.length);
+      const parts = [...rest.matchAll(/[^\\/]+/g)];
+      let cut = parts.findIndex(part => globMeta.test(part[0]));
+      if (cut < 0) cut = parts.length - 1;
+      target = root + (cut > 0 ? rest.slice(0, parts[cut].index) : '');
+    }
+  }
+  if (target === undefined || ambiguousPath(target)) return false;
+  const lexical = path.resolve(bases[0], target);
+  const physical = physicalPath(lexical);
+  if (physical === null) return false;
+  return [lexical, physical].every(candidate => bases.every(base => !within(base, candidate)));
+}
+
+/**
+ * 실행 완료 조건: 성공 종료, 권한 거부 없음, 모든 도구 호출 응답, exit 0, timeout 없음.
+ * scope({ cwd, scoreOutside })를 주면(모델 실행) 거부 중 작업 폴더 밖 경로의 읽기·쓰기 거부 수(outsideDenials)를 센다.
+ * scoreOutside이고 거부가 모두 밖 거부면 권한 거부 사유만 뺀다. 차단은 그대로이고 다른 사유는 남는다.
+ */
+function completion(result, events, scope = null) {
   const routing = skillRouting(events);
-  const reasons = [...routing.reasons];
+  let reasons = [...routing.reasons];
+  let outsideDenials = 0;
+  if (scope) {
+    const denials = events.findLast(event => event.type === 'result')?.permission_denials;
+    const list = Array.isArray(denials) ? denials : [];
+    let real = scope.cwd;
+    try { real = fs.realpathSync.native(scope.cwd); } catch {}
+    outsideDenials = list.filter(denial => deniedOutside(denial, [scope.cwd, real])).length;
+    // skillRouting 사유 문구와 같은 형식이다. 형식이 바뀌면 하네스 테스트(밖 거부만 있는 실행의 판정)가 실패한다.
+    const denialReason = '권한 거부 ' + list.length + '건';
+    if (scope.scoreOutside && list.length && outsideDenials === list.length) reasons = reasons.filter(reason => reason !== denialReason);
+  }
   if (result.exit !== 0) reasons.push('exit ' + result.exit);
   if (result.timedOut) reasons.push('timeout');
-  return { reasons, costUsd: routing.costUsd };
+  return { reasons, costUsd: routing.costUsd, outsideDenials };
 }
 
 function saveRaw(directory, prefix, result) {
@@ -483,6 +630,7 @@ export async function runScenario({ scenario, attempt, ctx, executable, prefixAr
   await ctx.install(cwd);
   const excluded = excludeNewUntracked(cwd, ctx.gitEnv, beforeInstall);
   const before = snapshotWorkspace(cwd, ctx.gitEnv);
+  const earlier = contentsBefore(cwd, before, scenario.checks.workspace);
   const runtime = path.join(ctx.runtime, 'claude-' + label);
   fs.mkdirSync(runtime, { recursive: true });
   const env = evalEnv(ctx, runtime);
@@ -493,7 +641,7 @@ export async function runScenario({ scenario, attempt, ctx, executable, prefixAr
   saveRaw(runDir, '', result);
   if (result.error) throw new Error('실행 오류: ' + result.error + ' (원본: ' + runDir + ')');
   const events = parseEvents('claude', result.stdout, { allCommands: true });
-  const { reasons, costUsd } = completion(result, events);
+  const { reasons, costUsd, outsideDenials } = completion(result, events, { cwd, scoreOutside: scenario.scoreOutsideDenials === true });
   const after = snapshotWorkspace(cwd, ctx.gitEnv);
   const readAfter = file => { const full = path.join(cwd, ...file.split('/')); return within(cwd, full) && fs.existsSync(full) && fs.statSync(full).isFile() ? fs.readFileSync(full, 'utf8') : null; };
   const changed = [...new Set([...Object.keys(before.files), ...Object.keys(after.files)])].filter(file => before.files[file] !== after.files[file]).sort();
@@ -502,9 +650,9 @@ export async function runScenario({ scenario, attempt, ctx, executable, prefixAr
     changed, newCommits: after.commits.filter(item => !known.has(item.hash)), status: git(cwd, ['status', '--porcelain=v1', '--untracked-files=all'], ctx.gitEnv),
     diff: git(cwd, ['diff', fixture.baseline, '--'], ctx.gitEnv).slice(0, 200000) });
   const init = events.find(event => event.type === 'system' && event.subtype === 'init');
-  const record = { scenario: scenario.id, skill: scenario.skill, attempt, completed: reasons.length === 0, reasons, costUsd, model: init?.model ?? null, checks: [], grade: null, graderCostUsd: null };
+  const record = { scenario: scenario.id, skill: scenario.skill, attempt, completed: reasons.length === 0, reasons, outsideDenials, costUsd, model: init?.model ?? null, checks: [], grade: null, graderCostUsd: null };
   if (record.completed) {
-    record.checks = [...evaluateWorkspace(scenario.checks.workspace, before, after, readAfter), ...evaluateCommands(scenario.checks.forbiddenCommands, events)];
+    record.checks = [...evaluateWorkspace(scenario.checks.workspace, before, after, readAfter, file => earlier.get(file) ?? null), ...evaluateCommands(scenario.checks.forbiddenCommands, events)];
     const transcript = scenario.checks.grader ? transcriptOf(events) : null;
     if (scenario.checks.grader && transcript === null) record.grade = { valid: false, reason: '기록이 채점 한도를 넘어 근거를 빠짐없이 담지 못함' };
     else if (scenario.checks.grader) {
@@ -527,7 +675,7 @@ export async function runScenario({ scenario, attempt, ctx, executable, prefixAr
   }
   record.verdict = verdictOf(record);
   save(path.join(runDir, 'record.json'), record);
-  log(`[${label}] ${record.verdict}${record.completed ? '' : ' (' + reasons.join('; ') + ')'}`);
+  log(`[${label}] ${record.verdict}${record.completed ? '' : ' (' + reasons.join('; ') + ')'}${outsideDenials ? ' [작업 폴더 밖 경로 거부 ' + outsideDenials + '건]' : ''}`);
   return record;
 }
 
@@ -658,7 +806,7 @@ export async function evaluate(options, scenarios, { executable = 'claude', pref
       observedModels: [...new Set(records.map(record => record.model).filter(Boolean))].sort(),
       observedGraderModels: [...new Set(records.map(record => record.graderModel).filter(Boolean))].sort(),
       environment: { claudeVersion, ...ctx.environment, node: process.version, platform: process.platform },
-      ...summarizeBehavior(records), records: records.map(({ scenario, attempt, verdict, reasons }) => ({ scenario, attempt, verdict, reasons })), limits };
+      ...summarizeBehavior(records), records: records.map(({ scenario, attempt, verdict, reasons, outsideDenials }) => ({ scenario, attempt, verdict, reasons, outsideDenials })), limits };
     save(path.join(directory, 'summary.json'), summary);
     succeeded = summary.totals.completed > 0;
     return summary;
