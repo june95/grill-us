@@ -1,6 +1,6 @@
 ---
 name: memory-explain
-description: Find and explain recorded decisions, designs, plans, progress, and completed work from .memory and relevant code or Git evidence. Use for decision lookup by ID, topic or scope, rationale, plan-versus-result comparisons, and explanatory handover requests. Read only; do not change records, code, or Git state.
+description: Find and explain recorded decisions, designs, plans, progress, and completed work from .memory and relevant code or Git evidence. Use for decision lookup by ID, topic or scope, rationale, plan-versus-result comparisons, and explanatory handover requests. Read only; do not change records, code, or Git state. Not for auditing or cleaning up .memory files; use memory-tidy.
 metadata:
   internal: true
 ---

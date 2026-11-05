@@ -96,6 +96,40 @@ full validator124/124, 오류0으로 통과했다. source/public frontmatter10/9
   - 나머지 공개 스킬(grill-me·intake·plan·wiki·page-capture·visualize)은 이번에 다시 재지 않았다.
   - 위 측정의 한계(확률적 발동, Skill 전용 headless, 외부 팩 미측정, Codex 미측정)는 같다.
 
+### 2026-11-05 prj-memory-explain 제외 문구 측정
+
+explain description 끝에 "Not for auditing or cleaning up .memory files; use memory-tidy."를 더한 뒤(0.6.1) `node scripts/measure-skill-routing.mjs --model claude-sonnet-5-5 --runs 3 --skill prj-memory-explain --skill prj-memory-tidy`로 측정했다. 2026-11-04 측정에서 explain이 `.memory` 점검 요청에도 함께 켜진 것을 줄이려는 변경이다. 측정 범위와 비용은 실행 전에 사용자에게 확인받았다.
+
+| 항목 | 실제 확인 범위 |
+| :--- | :--- |
+| 호스트·모델 | Claude Code 2.1.318 headless(`claude -p`), claude-sonnet-5-5 |
+| 설치 | skills CLI 1.7.4로 소유 임시 프로젝트에 public 10개만 project scope 설치, 외부 팩 없음 |
+| 문장 | explain·tidy의 `measure` 한국어 문장 8개(positive 4, negative 4), 문장당 3회, 총 24회 |
+| 실행 구성 | 2026-11-04 측정과 같다(Skill 도구만 허용, 문장은 stdin 전달, 사용자 설정·plugin 설정·MCP·hooks 차단, 상위 에이전트 세션 변수 미전달) |
+| 결과 | 24회 모두 완료. positive 12/12 발동, negative 자기 스킬 오발동 2/12 |
+| 비용 | Claude Code가 보고한 API 요금 환산 $1.33(24회 모두 보고) |
+
+| 문장 | owner | 2026-11-04 | 2026-11-05 |
+| :--- | :--- | :--- | :--- |
+| explain positive "D05 결정이 왜 나왔고 어디에 적용되는지 설명해 줘." | 없음 | explain 3/3 | explain 3/3 |
+| explain positive "지금까지 진행 상황이랑 계획 대비 실제 결과를 비교해서 알려줘." | 없음 | explain 3/3 | explain 3/3 |
+| explain negative "새로운 캐시 정책을 결정해야 해. 질문하면서 정해 줘." | grill-me | explain 1/3, grill-me 3/3 | explain 0/3, grill-me 3/3 |
+| explain negative ".memory 전체를 점검해서 남은 작업 파일 목록을 보여 줘." | tidy | explain 3/3, tidy 3/3 | explain 2/3, tidy 3/3 |
+| tidy positive ".memory에 남은 작업 파일이나 인용되지 않은 파일이 있는지 점검해 줘." | 없음 | tidy 3/3 | tidy 3/3 |
+| tidy positive ".memory 점검 목록에서 내가 승인한 작업 파일만 정리해 줘." | 없음 | tidy 3/3 | tidy 3/3(1회는 호스트 기본 스킬 `update-config`도 켜짐) |
+| tidy negative "이 결정을 선택한 이유를 기록에서 찾아 설명해 줘." | explain | tidy 0/3, explain 3/3 | tidy 0/3, explain 3/3 |
+| tidy negative "현재 Task를 끝내면서 그 Task의 작업 파일도 정리해 줘." | execute | tidy 0/3, execute 3/3 | tidy 0/3, execute 3/3 |
+
+- 판정: 채택. 측정 전에 정한 조건을 모두 충족했다.
+  - 결정적 발동 검사(`tests/skill-routing.test.mjs`)를 통과했다(실패 0, 경고 없음). explain~tidy description 유사도는 0.109에서 0.217로 올랐다.
+  - 24회가 모두 완료됐다.
+  - tidy owner 문장의 explain 오발동이 3/3에서 2/3으로, explain negative 오발동 합계가 4/6에서 2/6으로 줄었다.
+  - explain positive 6/6과 tidy positive 6/6을 유지했다.
+- 한계:
+  - 문장당 3회라 1/3 차이는 우연과 구분하지 못한다. tidy 점검 요청에서 explain은 여전히 3회 중 2회 함께 켜진다.
+  - explain·tidy 밖의 스킬 묶음(예: execute positive에서 explain이 함께 켜지던 2026-11-04 관측)은 다시 재지 않았다.
+  - 위 측정의 한계(확률적 발동, Skill 전용 headless, 외부 팩 미측정, Codex 미측정)는 같다.
+
 ## 관측 실패와 한계
 
 - 최초 Claude 호출은 넓은 Glob 결과가100/110개로 잘려 strict scope parser가 실패로 판정했다. 원 결과를 보존하고 좁은 조회를 명시한 별도6건을 통과시켰다. 실패를 parser 완화로 통과시키지 않았다.
