@@ -33,7 +33,16 @@
 2. 이미 옮긴 것은 다시 옮기지 않는다. 대상 Task의 task.md Progress나 history에 같은 출처 state 경로의 이관 기록이 있으면 그 항목(위치·의도)을 건너뛴다.
 3. Position(Task·Active Stage·Blocker·Next Step)이 task.md와 다르면 Task 보고와 Git 근거로 대조한다. 확인된 값만 task.md에 옮긴다.
 4. Commit Intent가 prepared·failed이면, 그 의도의 Task(Commit Intent Task)에만 아래 순서로 적용한다. 다른 Task에 옮기지 않는다.
-   - 그 Task가 done이거나 Commit Status가 committed·skipped이면 해결된 의도다. 옮기지 않는다.
+   - 그 Task의 task.md Commit Status가 committed·skipped이면 해결된 의도다. 옮기지 않는다(tidy의 옛 state 판정과 같은 기준).
+   - 그 Task가 done인데 Commit Status가 prepared·failed면 기록이 충돌한다. 해결로 보지 않고 옮기지도 않으며 blocked로 둔다.
+   - 그 Task가 done인데 Commit Status 필드가 없으면(과거 형식) 그 Task의 commit 보고·Completion Check와 Git을 대조한다.
+     - committed로 보려면 두 가지가 모두 필요하다.
+       - commit 보고에 SHA가 있고 그 commit의 Plan/Phase/Task가 대상과 같다([Commit Message Identity](#commit-message-identity)). 식별자 일치는 후보를 찾는 조건일 뿐이다.
+       - 내용 대조 근거가 있다. commit 보고에 그 commit의 성공 대조(changed path·A/M/D·mode/blob·tree)가 기록되어 있거나, 옛 의도의 후보 snapshot으로 [Recovery](#recovery)의 내용 대조를 지금 통과해야 한다.
+     - 정책 사유가 있는 커밋 없는 완료(Completion Check)면 skipped로 본다.
+     - committed·skipped로 확인되면 해결된 의도로 처리하고 옮기지 않는다.
+     - 확인 결과와 근거는 history에만 남긴다. 과거 done Task의 task.md는 고치지 않는다. 이 기록이 2단계의 재이관 방지 근거다.
+     - 근거가 부족하거나 서로 다르면 blocked로 둔다.
    - 그 Task에 이미 `work/commit-intent.json`이 있으면 덮어쓰지 않는다. 그 파일과 옛 의도의 Base HEAD·후보·메시지가 같으면 이관이 중간에 끊긴 것이므로 task.md Commit Status와 이관 기록만 맞춘다. 다르면 blocked로 둔다.
    - 둘 다 아니면 옛 의도 내용(연결된 의도 파일이 있으면 그 내용)으로 `work/commit-intent.json`을 만들고 task.md Commit Status를 같은 값으로 맞춘다. 그다음 [Recovery](#recovery)를 따른다.
 5. 옮긴 사실과 출처 state 경로를 task.md Progress와 history에 남긴다. 이 기록이 2단계의 재이관 방지 근거다.

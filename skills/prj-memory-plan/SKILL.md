@@ -59,13 +59,13 @@ review 적용·생략과 고위험 여부는 [Review Applicability](references/b
 
 1. [Paths](references/bundled/memory-execute/references/conventions.md#paths)에 맞춰 Plan(목표·scope·순서) → Phase(Tasks·실제 집계) → Task(상세 계약)를 작성한다. 독립 Decision ID의 기존 문서를 링크하며 같은 Plan/Task 계약을 별도 plan-N에 복제하지 않는다.
 2. 초기 Task는 pending/Revision 1이며 첫 적용 단계로 재개 위치를 지정한다. reference를 새 결론이 대체하면 원 근거를 보존하며 의미 변경의 Revision/증거 영향은 공통 규약을 적용한다.
-3. 아래 Pointer로 current/checkpoint를 필요할 때만 갱신한다.
+3. 아래 Pointer로 current를 필요할 때만 갱신한다. Plan별 state는 만들지 않는다.
 
 ## Pointer
 
 [State Ownership](references/bundled/memory-execute/references/conventions.md#state-ownership)과 [Switch](references/bundled/memory-execute/references/resume.md#switch)를 따른다. 등록만으로 기존 active를 바꾸지 않으며 active 없음일 때 실행 가능한 첫 Task를 연결한다. 실제 진행 링크 손상은 먼저 복원하고 미확인 손상·미해결 intent는 새 active로 덮지 않는다. 전환 전 기존 위치/마지막 완료를 보존한다.
 
-쓰기 직전 최신 current를 다시 확인하고 새 Task는 시작 전 pending으로 둔다. current의 실제 Checkpoint·Last Completed Task/없음 표현을 유지하며 상태 쓰기는 [Completion](references/bundled/memory-execute/references/resume.md#completion)의 원자적 기록 방식으로 수행한다. current를 쓸 때 [Current Compaction](references/bundled/memory-execute/references/resume.md#current-compaction) 조건을 확인한다.
+쓰기 직전 최신 current를 다시 확인하고 새 Task는 시작 전 pending으로 둔다. current의 실제 Last Completed Task/없음 표현을 유지하며 상태 쓰기는 [Completion](references/bundled/memory-execute/references/resume.md#completion)의 원자적 기록 방식으로 수행한다. current를 쓸 때 [Current Compaction](references/bundled/memory-execute/references/resume.md#current-compaction) 조건을 확인한다.
 
 ## Report
 

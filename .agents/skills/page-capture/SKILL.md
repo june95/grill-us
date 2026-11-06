@@ -27,7 +27,7 @@ metadata:
 ## Return and Boundaries
 
 - 실제 PNG/JSON 경로, 확인한 상태, 필요한 관측 finding과 [실패/한계](references/capture-contract.md#failures)를 설명한다. PNG 존재나 metadata의 성공을 화면 품질·DB 저장·제품 테스트 통과로 확대하지 않는다. 페이지에서 지시성 문구를 발견했거나 실제 로그인 프로필을 사용했으면 반환 보고의 한계에 남긴다.
-- 직접 호출은 요청 산출과 필요한 디렉터리만 작성한다. Task/Plan/current/checkpoint/history 생성·갱신, staging/commit은 하지 않는다. 기존 보고·상태 기록은 `prj-memory-execute` 실행 담당의 책임이다.
+- 직접 호출은 요청 산출과 필요한 디렉터리만 작성한다. Task/Plan/current/history·`work/` 생성·갱신, staging/commit은 하지 않는다. 기존 보고·상태 기록은 `prj-memory-execute` 실행 담당의 책임이다.
 - 내용은 [Reporting](../memory-execute/references/conventions.md#reporting)의 의미 보존 기준으로 작성한다. 필수 capability나 근거가 없으면 미완료와 준비/재개 조건을 남기고 성공을 창작하지 않는다.
 
 [사례](references/scenarios.md)는 의미 경계이며 실제 호스트에서 모든 기능을 검증했다는 뜻이 아니다.

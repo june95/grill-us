@@ -40,8 +40,19 @@
 | T34 | in_progress Task의 비표준 폴더 `tooling/` 안에 `test.md`가 인용한 파일 하나와 미인용 파일 여럿이 있음 | 묶음 전체를 정리 불가로 표시. 안의 미인용 파일에도 따로 번호를 붙이지 않음. done Task였다면 묶음 전체가 9번 |
 | T35 | done Task의 비표준 폴더 `backup/` 안에 미인용 `raw.json`이 있음(파일만 보면 2번, 폴더는 1번) | 대표 번호는 폴더 묶음의 1번 하나다. 파일에 2번을 따로 붙이지 않고, 같은 경로를 두 항목에 올리지 않음(9 > 1 > 2) |
 | T36 | 이전 정리의 이동 전 기록에 새 경로 `work.memory-tidy-ef56…`이 있고, 그 기록은 `Status: 실패`로 끝났는데 그 폴더가 남아 있음 | 1번 "중단 복구 가능"으로 보고. 승인하면 그 정확한 경로만 재확인 뒤 지움 |
-| T37 | done Task의 `evidence/unused.md`를 어떤 기록 md·state도 인용하지 않음. 대조: 같은 폴더의 `evidence/notes.md`는 `test.md`가 링크함 | `unused.md`는 2번(미인용, md 포함), `notes.md`는 9번(인용됨) |
+| T37 | done Task의 `evidence/unused.md`를 어떤 기록 md·옛 state도 인용하지 않음. 대조: 같은 폴더의 `evidence/notes.md`는 `test.md`가 링크함 | `unused.md`는 2번(미인용, md 포함), `notes.md`는 9번(인용됨) |
 | T38 | in_progress Task의 `evidence/`가 인용 증거만으로 120개라 예산을 넘고, `captures/`만 있는 과거 구조 Task가 캡처 101개를 가짐 | 둘 다 5번 예산 초과로 보고. 앞은 후보 번호가 없어 "정리 불가(진행 중 Task가 인용함)". 뒤는 Task 상태에 따라 다르다. done이면 미인용 캡처는 2번 번호, 인용 캡처는 9번 번호를 가리킨다. done이 아니면(pending·blocked·Status 없음 포함) 미인용 캡처만 2번이고, 인용 캡처는 "정리 불가(진행 중 Task가 인용함)"다. 과거 구조라는 사실만으로 done으로 보지 않는다 |
 | T39 | 크기 상위에 `history/2026-11-05.md`(기록)가 듦 | 4번에 "정리 불가(기록)"로 적음. 후보 번호를 만들지 않음 |
+| T40 | done Plan의 옛 state(Commit Intent committed). history 2곳과 plan 1곳이 그 state를 링크함 | 10번 정리 가능. 같은 줄에 끊길 링크 3개(history 2·plan 1)를 적음. 승인해 지워도 그 기록 md 본문은 고치지 않음 |
+| T41 | in_progress Plan의 옛 state | 10번 정리 불가(진행 중 Plan). 승인해도 지우지 않음 |
+| T42 | Plan은 done인데 옛 state의 Commit Intent가 prepared이고, 그 Commit Intent Task는 done이지만 task.md Commit Status가 prepared(이관·복구 안 됨, 기록 충돌) | 10번 정리 불가(미해결 의도·기록 충돌). 확인·복구는 `prj-memory-execute`로 안내 |
+| T43 | `plans/`에 같은 ID가 없는 옛 state, 또는 Commit Intent의 Status 값을 읽을 수 없는 state | 10번 확인 필요. 정리하지 않음 |
+| T44 | 승인으로 `state/` 안의 마지막 파일까지 지움 | 빈 `state/` 폴더도 같은 승인으로 지움. 정리 기록은 항목당 한 줄이고 끊긴 링크 수를 함께 적음. 파일이 하나라도 남으면 폴더를 남김 |
+| T45 | 옛 state만 인용하던 done Task의 `evidence/commit-intent.json`이 있고, 그 state를 승인으로 지움 | 같은 정리에서 그 증거를 따라 지우지 않음. 다음 점검에서 9번이 아니라 2번(미인용)으로 나옴 |
+| T46 | `.memory` 루트에 `state/`가 있음 | 1번(루트 비표준)으로 묶지 않고 10번으로 항목마다 번호를 붙임 |
+| T47 | 옛 state의 Commit Intent가 prepared로 남아 있지만 이관·복구로 그 Task가 done이고 Commit Status committed, Plan과 모든 Task가 done | 해결된 의도다. 10번 정리 가능(끊길 링크 표시). Commit Intent Task를 특정할 수 없으면 확인 필요 |
+| T48 | 정리 가능한 done Plan의 옛 state가 크기 상위에 듦 | 4번 줄이 그 state의 10번 번호를 가리킴. 정리 불가로 적지 않음 |
+| T49 | 옛 state 두 개(10-1, 10-2)와 미인용 `evidence/` 파일 다섯 개(2-3~2-7)를 한 메시지로 승인해 지움 | 정리 기록은 10-1·10-2를 각각 한 줄(끊긴 링크 수 포함), 2번 파일 다섯 개를 묶음 한 줄로 적음 |
+| T50 | done Plan의 옛 state에 Commit Intent prepared가 있고, 그 Task는 done인데 과거 형식이라 Commit Status 필드가 없음 | history에 resume의 확인 기록(해결 판정과 근거)이 없으면 10번 확인 필요로 두고 정리하지 않음. 있으면 해결된 의도로 보고 정리 가능(끊길 링크 표시) |
 
 실제 시험은 합성 `.memory` fixture로 하고, 실행 전후 파일 목록·링크 대상·history 기록을 대조한다. 사용자 프로젝트의 실제 `.memory`를 시험용으로 지우지 않는다.

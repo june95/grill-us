@@ -137,10 +137,13 @@
 | C44 | 진행 중인 옛 Plan의 `.memory/state/{plan-id}.md`에 Commit Intent prepared가 있고 Task에는 의도 파일이 없음 | state 내용으로 그 Task의 `work/commit-intent.json`을 만들고 task.md Commit Status를 prepared로 맞춘 뒤 Recovery를 따름. state 파일은 고치지 않고, 옮긴 사실과 출처 경로를 task.md·history에 남김 | 지침 walkthrough |
 | C45 | 새 Plan을 등록하고 Task를 실행해 커밋까지 함 | `.memory/state/`에 새 파일이 생기지 않음. 재개 근거는 current·task.md·`work/commit-intent.json`뿐이고 완료 뒤 의도 파일은 남지 않음 | 지침 walkthrough; 행동 eval `newMemoryFiles` |
 | C46 | 옛 current의 Status에 `Checkpoint: [state](./state/x.md)` 줄이 있고, 그 Plan에 보류한 Task가 있음 | 다음 상태 쓰기 때 Checkpoint 줄을 지우고 보류한 Task 링크 한 줄로 바꿈. 가리키던 state 파일은 남아 있으므로 원문 보존 대상이 아님 | 지침 walkthrough |
-| C47 | 옛 state의 Commit Intent prepared(P01-T01)를 이관해 복구·완료했고 Plan은 진행 중. 다음에 P01-T02를 재개 | 같은 출처의 이관 기록이 T01 task.md·history에 있고 T01이 done이라 해결된 의도로 보고 다시 옮기지 않음. T02에는 의도 파일을 만들지 않음 | 지침 walkthrough |
+| C47 | 옛 state의 Commit Intent prepared(P01-T01)를 이관해 복구·완료했고 Plan은 진행 중. 다음에 P01-T02를 재개 | 같은 출처의 이관 기록이 T01 task.md·history에 있고 T01이 done이고 Commit Status committed라 해결된 의도로 보고 다시 옮기지 않음. T02에는 의도 파일을 만들지 않음 | 지침 walkthrough |
 | C48 | 옛 state 이관 중 `work/commit-intent.json`만 만들고 task.md를 갱신하기 전에 끊김 | 재개 때 파일을 덮어쓰지 않음. 파일과 옛 의도의 Base HEAD·후보·메시지가 같으면 Commit Status·이관 기록만 맞추고, 다르면 blocked | 지침 walkthrough |
 | C49 | 이관한 의도를 복구한 뒤 같은 Task에 새 커밋 의도가 생김(옛 state에는 옛 prepared가 그대로 남음) | 이관 기록이 있으므로 옛 의도를 다시 적용하지 않고 새 의도 파일을 덮어쓰지 않음 | 지침 walkthrough |
 | C50 | commit 보고에 SHA·대조를 기록하고 Commit Status committed, 완료 정리로 `work/`(의도 파일 포함)를 지운 직후 끊김. Task는 아직 done이 아님 | 의도 파일 없이 commit 보고의 SHA·trailer를 Git에서 확인하고, 정리 중단 복구 뒤 done·집계·포인터만 복구. 다시 커밋하지 않음 | 지침 walkthrough |
+| C51 | 진행 중인 옛 Plan의 state에 Commit Intent prepared가 있고, 그 Commit Intent Task는 done인데 task.md Commit Status가 prepared(기록 충돌) | 해결로 보지 않고 이관하지도 않음. blocked로 두고 차이를 기록함. tidy도 이 state를 정리 가능으로 보지 않음 | 지침 walkthrough |
+| C52 | 진행 중인 옛 Plan의 state에 Commit Intent prepared가 있고, 그 Task는 done인데 과거 형식이라 Commit Status 필드가 없음. commit 보고에 SHA가 있고 trailer가 대상과 같으며, 그 보고에 성공 대조(changed path·mode/blob·tree) 기록이 있거나 옛 의도의 후보 snapshot으로 Recovery 내용 대조를 통과함 | committed로 보고 해결된 의도로 처리해 이관하지 않음. 확인 결과와 근거를 history에만 남기고 과거 task.md는 고치지 않음. 다음 Task 재개는 막지 않음 | 지침 walkthrough |
+| C53 | C52와 같은데 다음 중 하나: commit 보고에 SHA가 없음, trailer가 다름, 내용 대조 근거가 없음(보고에 대조 기록이 없고 후보 snapshot도 없음), commit의 changed path나 mode/blob이 후보와 다름 | 해결로 보지 않고 blocked. trailer만으로 성공을 인정하지 않고 차이를 기록함 | 지침 walkthrough |
 
 ## Expected State
 

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "generator": "scripts/build-skills.mjs",
   "sourceSnapshot": {
-    "packaging/grill-us.json": "8d0cac515342bddff1e2a8575c1e870e6085baeac597a9188d68a088ce239fa0",
+    "packaging/grill-us.json": "a5fa39d6af6dad8c1fd952fbfc7ebcb4d54be1d538fc8ffd962dca37a234f4fc",
     ".agents/skills/grill-me/SKILL.md": "799619da6bdf50144c7dde6b18e3855d83ba63ddf2abec343aace57d3c880742",
     ".agents/skills/memory-execute/SKILL.md": "40a56f5ac3770df4584d96c73b1997fa3215f0543a67d7e9cb5a85119734bb82",
     ".agents/skills/memory-execute/references/analysis.md": "e67218b2a26a3e299a216fca39a3e6899e4b14e6ba748503b3f6c62a851a96bd",
@@ -11,26 +11,26 @@
     ".agents/skills/memory-execute/references/guides.md": "c3416edcede23a5f3abc4904092d5b608632cb412985c8ee74e5cf052732c392",
     ".agents/skills/memory-execute/references/implementation.md": "d8ea945c9cf6be0f49e576f8a070b4f62340e7364a8ad805af6fb79097236028",
     ".agents/skills/memory-execute/references/project-profile.md": "14a96d2e0125f0b4967911d9e190a221fdf68c60cd14b81a16006ee3c76f30e8",
-    ".agents/skills/memory-execute/references/resume.md": "86a6fbd43e648fd9fc758fe67569e012c0ebee574d0938da1af925091f340aa8",
+    ".agents/skills/memory-execute/references/resume.md": "72c54a57c64cc14ea26486ff13264690e1b7868824e872f6d4a00c9e4c6bb0c5",
     ".agents/skills/memory-execute/references/review.md": "b7456f2870631325c87debdd89445cd71d0b7988cb0beafd9e2498be50fa459c",
-    ".agents/skills/memory-execute/references/scenarios.md": "84440571a02aea1c3612d6b7652a647258189fe1aa627e41523a56d5d75295af",
+    ".agents/skills/memory-execute/references/scenarios.md": "530a20dd38fef533126f211e559932cdc29987c6a9fcde58ba61a5518688dc25",
     ".agents/skills/memory-execute/references/templates.md": "a14a2a23038900129f071b76e09426372693c724148ae68510aa031f6aa22cbf",
     ".agents/skills/memory-execute/references/testing.md": "a8a37b014ff83cdebc3ba95573e8298f425a239568d4cd6a6042eecd73adff7d",
     ".agents/skills/memory-execute/references/validation-scope.md": "1d0150039aa3fb93430a926935a5d8e3a232182f102b49f07170402334b294aa",
-    ".agents/skills/memory-explain/SKILL.md": "f78e38768988f9c9374a91c362514b567ff13428ddc7491afcdebdcba2f7283d",
-    ".agents/skills/memory-explain/references/scenarios.md": "2f06fa373a14276a759c2e0596ec1ce04eee5e4dbc28965a08f15f7340b1a228",
-    ".agents/skills/memory-intake/SKILL.md": "a89a857d263cc888dd0d7cf9771b672314e0e52003956e96e3297a59656f28e0",
-    ".agents/skills/memory-plan/SKILL.md": "9cd1c3749781aeae5b459ee672d11521e53ad99d5b84d9164b925ab7ec9010bc",
-    ".agents/skills/memory-review/SKILL.md": "cb7b9cacd6a454994c1be91982065fc390d2484e2ea4e37fc9bbb10ee8a4a41b",
-    ".agents/skills/memory-review/references/scenarios.md": "0448f4877bfbd1e3d3c1b1e5d1cf36809423e43a0c33b97713240ee1aa734fac",
-    ".agents/skills/memory-tidy/SKILL.md": "806094f44181dcedce7f4de435fcf8381140eb2c21b695b4c4d40e4886276cf0",
-    ".agents/skills/memory-tidy/references/scenarios.md": "60cd81d106697f9c3e448b0a864d3199d447f369672a4aeb76877960052ca1d8",
-    ".agents/skills/memory-wiki/SKILL.md": "8c1e3485a88c5b5f56dbc75624ee81d8013ba0b9d004f189c4c4f8cb16effbfe",
+    ".agents/skills/memory-explain/SKILL.md": "c046b885643a126ce2ee930984b10d9412727941538bada219847897c22b1e38",
+    ".agents/skills/memory-explain/references/scenarios.md": "096b2fa220736d02436ce50fe3eda363518b0ec69c02cc41208ce636a693c00c",
+    ".agents/skills/memory-intake/SKILL.md": "df7bb9367a114be5ed2bc8fbe49ec14b43df0a51bb79f4d875d044f26cd89c81",
+    ".agents/skills/memory-plan/SKILL.md": "ee35a5c07162ada7133fb5784802ced63939af81552f503f6876337a7b7b8a50",
+    ".agents/skills/memory-review/SKILL.md": "108ebc7df8e9197d9b89135470dcda8d04e9920d644c3f2e8aa67ac591fdc19e",
+    ".agents/skills/memory-review/references/scenarios.md": "245cb813d262428331614c2fc21bc3f74d72e1053d7a1d6b515866d0b33fdab7",
+    ".agents/skills/memory-tidy/SKILL.md": "358c866b513bc108d01ed0d1746e4b31e631030b8e982eea5b4f787af092b77c",
+    ".agents/skills/memory-tidy/references/scenarios.md": "775f8a4155f40942e0246e3abe2092b86a3650d0a282790691d5aae3412281b4",
+    ".agents/skills/memory-wiki/SKILL.md": "046bae3a1431a2bf304aa25d8c8a3ffdac575a5c69f43a9cb2eec77d3aff48e0",
     ".agents/skills/memory-wiki/references/ingest.md": "e75c86cdbe0758618432b203f7ab8d219cc7b7eb1abaa7d399a856789e0dcc8d",
-    ".agents/skills/memory-wiki/references/query.md": "1681270f7bd55e02cb192495b7ac4165f6aab493d388e79bfa54e2062e84e171",
+    ".agents/skills/memory-wiki/references/query.md": "32fac2095f8e929d95a14d9e801d296aa8c62df339fb18c89ae1542ff1bdafe9",
     ".agents/skills/memory-wiki/references/scenarios.md": "68908b91b3eb6634bcdb5804c4cdecd4f6d84cfe66794e95645e4aee1da097e6",
     ".agents/skills/memory-wiki/references/templates.md": "fd3dd3c7036517bbe3450e9eeb15aae250d3c4497d7fc40ffcc596d333b8ff2a",
-    ".agents/skills/page-capture/SKILL.md": "214da42d3a64ba35c242d4d89b07fd801ffc6636ce039c13ea9f8fd14e324ed7",
+    ".agents/skills/page-capture/SKILL.md": "4a1052e3f50704be6a33af6cff8376c18ffe562243e11f8fc1f8fdaa640a9d63",
     ".agents/skills/page-capture/references/capture-contract.md": "f84f6a7ca8ece78c81544dbdc246d2b4859eed77d7665084aff01f2cb52713d4",
     ".agents/skills/page-capture/references/scenarios.md": "7db647f8a0f2926a98f704c66ce8c659788bf9e4d7c954396ade58336c494ff1",
     ".agents/skills/visualize/SKILL.md": "74ed905ab6f35ae6d02abe30e732f0509794d75502ad96a0cf9aad1a2fb8bcf9",
@@ -77,7 +77,7 @@
     },
     {
       "path": "prj-grill-me/references/bundled/memory-execute/references/resume.md",
-      "sha256": "965f8a5a4339f7cd78f634068dbbae586f79233311ec06ee1827eab326aa126c"
+      "sha256": "0a2696be3e8831039e93d9aa7b5a4c11cbf62e43421b18e4ad69d469b6362353"
     },
     {
       "path": "prj-grill-me/references/bundled/memory-execute/references/review.md",
@@ -93,39 +93,39 @@
     },
     {
       "path": "prj-grill-me/references/bundled/memory-explain/guide.md",
-      "sha256": "7d0a8bb99ebd80b56f6fc1bbc70339ce5e994651e40a2ce820c08c90ff8ddef9"
+      "sha256": "802e493aa2c39cf50fa0c10b3af30ffaf58cf140256b07a951fc9d364512cbe7"
     },
     {
       "path": "prj-grill-me/references/bundled/memory-explain/references/scenarios.md",
-      "sha256": "ff0f2a9665f81c3a77f11ebd57fadea35281867e772b94cf20919ee34a8a0189"
+      "sha256": "cafff8707e46a9745556ce5c25531792378196a734aaf1b2ef65f5c77636e695"
     },
     {
       "path": "prj-grill-me/references/bundled/memory-intake/guide.md",
-      "sha256": "8cc4884bb6793c525ea147a292f529e5633c882c70c688a5e2b38e33525e6e32"
+      "sha256": "bfdb09480561806df73e394ec21f4227272b6565df4fb1782b978130301ee531"
     },
     {
       "path": "prj-grill-me/references/bundled/memory-plan/guide.md",
-      "sha256": "71dcdaf6c322991db3dc17f6b02f9a2529d536f52dd65854dc80b6114100057d"
+      "sha256": "3ab55715c1b79156ad0d6b90de5443356a654f14fca08df76034fc1593035cab"
     },
     {
       "path": "prj-grill-me/references/bundled/memory-review/guide.md",
-      "sha256": "ee4638a5571ba9c75868e30aab1e6d8c43a3a344b47f742ef918fc526ab4a780"
+      "sha256": "50d6a15c1c241eb81e6a737e89188ec4b5e736d5da73eb10da42b3a91523481d"
     },
     {
       "path": "prj-grill-me/references/bundled/memory-review/references/scenarios.md",
-      "sha256": "8da710382de753e6e2c8e44c75135fecc4943c336ac9d7c687d959b728350202"
+      "sha256": "8ebaa59bfcc087e34739aae6507e31c840916c589162890f81a23f1926d56cda"
     },
     {
       "path": "prj-grill-me/references/bundled/memory-tidy/guide.md",
-      "sha256": "2cd2815fe6ca8495269fbb48c38320e619cbaaddc98abb1aa0f2d9fb8426d1af"
+      "sha256": "bdd00336eb8f1ef905f4e2445ed2063079f4ce2c3c79db1e87d7c39de72e62ef"
     },
     {
       "path": "prj-grill-me/references/bundled/memory-tidy/references/scenarios.md",
-      "sha256": "f696b84a6078424ebbc861dedc6e5738c1c5ab206f96b1ba317a1b3f07b18f46"
+      "sha256": "024f90b2d9db9f6dbee71043bd2d231e3081634098c65f5cb9efe11f53574407"
     },
     {
       "path": "prj-grill-me/references/bundled/memory-wiki/guide.md",
-      "sha256": "01a08b979369f1ee68a30b9acbe8ed0add7391a1cf7466a20cef60a28dbc8fde"
+      "sha256": "43a8420912de9aac613ac5d8bb04530552aa6e9f2a7b3c3fc90ff0da78192578"
     },
     {
       "path": "prj-grill-me/references/bundled/memory-wiki/references/ingest.md",
@@ -133,7 +133,7 @@
     },
     {
       "path": "prj-grill-me/references/bundled/memory-wiki/references/query.md",
-      "sha256": "b53db15d22f1ec8f0c42e85bc56abd75d8e102f4e1a3c7476d37b9b3b38493ae"
+      "sha256": "83a9facee0a079e59de8c37ce78d5b9e81d39562bdcc5a42060ac057dbee8c1b"
     },
     {
       "path": "prj-grill-me/references/bundled/memory-wiki/references/scenarios.md",
@@ -145,7 +145,7 @@
     },
     {
       "path": "prj-grill-me/references/bundled/page-capture/guide.md",
-      "sha256": "492c67f9dfa6aa2acfd32cb6bdca41bacb8dd491ab524c945438fc1eaeaca8ce"
+      "sha256": "1008e77e96e7a6ef0468e1b5cb64cf4a36f3ad74a8e1c35fc2b92bdce7903243"
     },
     {
       "path": "prj-grill-me/references/bundled/page-capture/references/capture-contract.md",
@@ -213,31 +213,31 @@
     },
     {
       "path": "prj-memory-execute/references/bundled/memory-explain/guide.md",
-      "sha256": "cf57ec4765f3aca51ce3c0cc68aa66b665bceb897bd91db34d96bc6d7a23d067"
+      "sha256": "a4eb3c927fae02f069ba0afb01cb8129c3b632abd69d65a3533a7b681495ca92"
     },
     {
       "path": "prj-memory-execute/references/bundled/memory-explain/references/scenarios.md",
-      "sha256": "0b3941743f870c84b85687d20c95df5c22562a2b9cb41f60213e64772083330d"
+      "sha256": "bb7926781e9b3da849f952fde1f02e24f20ec6e994ee7993ece485b4d48f9eaf"
     },
     {
       "path": "prj-memory-execute/references/bundled/memory-review/guide.md",
-      "sha256": "86b91730d4a8f5a83b3af033f62d131447d5e08eb8abd84a3c03fa91bf44486f"
+      "sha256": "ce732066d16efc72541b966123f64ba3349833c912cf0786b01fd21252f5f6c8"
     },
     {
       "path": "prj-memory-execute/references/bundled/memory-review/references/scenarios.md",
-      "sha256": "d3a1cf1df4cf04d8e3a00114e1b755e488408c57dff0a382df2d70bfb3353a4c"
+      "sha256": "55523f68ca385fbe4ca2318e81df0e8651bf9e58834f8599c0572413f6bbf5ad"
     },
     {
       "path": "prj-memory-execute/references/bundled/memory-tidy/guide.md",
-      "sha256": "099aee029e39eb618def90b7adc66dd8c149d7a90af2a67259cf610b74562b26"
+      "sha256": "760c91cf12e2c5f84eca8b90b7829cb813ec7e22b79817dd11628d4e72e04656"
     },
     {
       "path": "prj-memory-execute/references/bundled/memory-tidy/references/scenarios.md",
-      "sha256": "f696b84a6078424ebbc861dedc6e5738c1c5ab206f96b1ba317a1b3f07b18f46"
+      "sha256": "024f90b2d9db9f6dbee71043bd2d231e3081634098c65f5cb9efe11f53574407"
     },
     {
       "path": "prj-memory-execute/references/bundled/memory-wiki/guide.md",
-      "sha256": "c65f82e2a0592cc1ed9bd72c71c6f177c3a74177864dbd367e3d26ec42a0b73d"
+      "sha256": "d76af603df9457886ce2a6b04320492117bfc94e375ef0dd1468c320d679dced"
     },
     {
       "path": "prj-memory-execute/references/bundled/memory-wiki/references/ingest.md",
@@ -245,7 +245,7 @@
     },
     {
       "path": "prj-memory-execute/references/bundled/memory-wiki/references/query.md",
-      "sha256": "b53db15d22f1ec8f0c42e85bc56abd75d8e102f4e1a3c7476d37b9b3b38493ae"
+      "sha256": "83a9facee0a079e59de8c37ce78d5b9e81d39562bdcc5a42060ac057dbee8c1b"
     },
     {
       "path": "prj-memory-execute/references/bundled/memory-wiki/references/scenarios.md",
@@ -257,7 +257,7 @@
     },
     {
       "path": "prj-memory-execute/references/bundled/page-capture/guide.md",
-      "sha256": "37938244bedbd7835dc194d18cdb5af70ad77dce399a579f34ff37a15855ee60"
+      "sha256": "f24bc41254ea9417564c218c9b5385bf080668ad5939ed665aa3ed4f681890c7"
     },
     {
       "path": "prj-memory-execute/references/bundled/page-capture/references/capture-contract.md",
@@ -337,7 +337,7 @@
     },
     {
       "path": "prj-memory-execute/references/resume.md",
-      "sha256": "bca872e2e3e66dd7d9f7818c8d6991dba37b3a4ba17c301ab2e7a47c6f3a7d77"
+      "sha256": "5b2b32e6305a59c578cf4624ff51f084744daf6c6f16c56fa5333850cffcb179"
     },
     {
       "path": "prj-memory-execute/references/review.md",
@@ -373,7 +373,7 @@
     },
     {
       "path": "prj-memory-explain/references/bundled/memory-execute/references/resume.md",
-      "sha256": "965f8a5a4339f7cd78f634068dbbae586f79233311ec06ee1827eab326aa126c"
+      "sha256": "0a2696be3e8831039e93d9aa7b5a4c11cbf62e43421b18e4ad69d469b6362353"
     },
     {
       "path": "prj-memory-explain/references/bundled/memory-execute/references/review.md",
@@ -389,23 +389,23 @@
     },
     {
       "path": "prj-memory-explain/references/bundled/memory-review/guide.md",
-      "sha256": "ee4638a5571ba9c75868e30aab1e6d8c43a3a344b47f742ef918fc526ab4a780"
+      "sha256": "50d6a15c1c241eb81e6a737e89188ec4b5e736d5da73eb10da42b3a91523481d"
     },
     {
       "path": "prj-memory-explain/references/bundled/memory-review/references/scenarios.md",
-      "sha256": "8da710382de753e6e2c8e44c75135fecc4943c336ac9d7c687d959b728350202"
+      "sha256": "8ebaa59bfcc087e34739aae6507e31c840916c589162890f81a23f1926d56cda"
     },
     {
       "path": "prj-memory-explain/references/bundled/memory-tidy/guide.md",
-      "sha256": "8c934a5eddd8e02dced3162394ac73626d060d17c531e5cae001b27d820e092e"
+      "sha256": "00c89bac40e952ec2fbf08b852babb5d1923ab6acae4801fea3bd73938734acf"
     },
     {
       "path": "prj-memory-explain/references/bundled/memory-tidy/references/scenarios.md",
-      "sha256": "f696b84a6078424ebbc861dedc6e5738c1c5ab206f96b1ba317a1b3f07b18f46"
+      "sha256": "024f90b2d9db9f6dbee71043bd2d231e3081634098c65f5cb9efe11f53574407"
     },
     {
       "path": "prj-memory-explain/references/bundled/memory-wiki/guide.md",
-      "sha256": "01a08b979369f1ee68a30b9acbe8ed0add7391a1cf7466a20cef60a28dbc8fde"
+      "sha256": "43a8420912de9aac613ac5d8bb04530552aa6e9f2a7b3c3fc90ff0da78192578"
     },
     {
       "path": "prj-memory-explain/references/bundled/memory-wiki/references/ingest.md",
@@ -413,7 +413,7 @@
     },
     {
       "path": "prj-memory-explain/references/bundled/memory-wiki/references/query.md",
-      "sha256": "b53db15d22f1ec8f0c42e85bc56abd75d8e102f4e1a3c7476d37b9b3b38493ae"
+      "sha256": "83a9facee0a079e59de8c37ce78d5b9e81d39562bdcc5a42060ac057dbee8c1b"
     },
     {
       "path": "prj-memory-explain/references/bundled/memory-wiki/references/scenarios.md",
@@ -425,7 +425,7 @@
     },
     {
       "path": "prj-memory-explain/references/bundled/page-capture/guide.md",
-      "sha256": "492c67f9dfa6aa2acfd32cb6bdca41bacb8dd491ab524c945438fc1eaeaca8ce"
+      "sha256": "1008e77e96e7a6ef0468e1b5cb64cf4a36f3ad74a8e1c35fc2b92bdce7903243"
     },
     {
       "path": "prj-memory-explain/references/bundled/page-capture/references/capture-contract.md",
@@ -485,11 +485,11 @@
     },
     {
       "path": "prj-memory-explain/references/scenarios.md",
-      "sha256": "3b0eb71edf00e4a585e742f796ffcd5560e7416d150eb8e1ea6894f26d1a7b88"
+      "sha256": "93c2cd02ad6d49ffe5758d921f73cb5efe22e7a625f4d853d3b8ba4c268062ff"
     },
     {
       "path": "prj-memory-explain/SKILL.md",
-      "sha256": "4e3b3fc110b8e34c5c4b679e62216951cccc6049982d82de48212c41f940b3ee"
+      "sha256": "c2cbccf442a9f81cba4154a53f9136ea74246ad3af80908f5c4fd7b0e9974711"
     },
     {
       "path": "prj-memory-intake/references/bundled/grill-me/guide.md",
@@ -525,7 +525,7 @@
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-execute/references/resume.md",
-      "sha256": "965f8a5a4339f7cd78f634068dbbae586f79233311ec06ee1827eab326aa126c"
+      "sha256": "0a2696be3e8831039e93d9aa7b5a4c11cbf62e43421b18e4ad69d469b6362353"
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-execute/references/review.md",
@@ -541,35 +541,35 @@
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-explain/guide.md",
-      "sha256": "7d0a8bb99ebd80b56f6fc1bbc70339ce5e994651e40a2ce820c08c90ff8ddef9"
+      "sha256": "802e493aa2c39cf50fa0c10b3af30ffaf58cf140256b07a951fc9d364512cbe7"
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-explain/references/scenarios.md",
-      "sha256": "ff0f2a9665f81c3a77f11ebd57fadea35281867e772b94cf20919ee34a8a0189"
+      "sha256": "cafff8707e46a9745556ce5c25531792378196a734aaf1b2ef65f5c77636e695"
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-plan/guide.md",
-      "sha256": "5590ed9e3fc2952e085221a10b0c51b59996c20751432b4dfb4e663871aaa6e5"
+      "sha256": "c2e045cf43ec9641c4066e127f7cb1d4043c336fdde6e891da8b5bc0bc2753b9"
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-review/guide.md",
-      "sha256": "ee4638a5571ba9c75868e30aab1e6d8c43a3a344b47f742ef918fc526ab4a780"
+      "sha256": "50d6a15c1c241eb81e6a737e89188ec4b5e736d5da73eb10da42b3a91523481d"
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-review/references/scenarios.md",
-      "sha256": "8da710382de753e6e2c8e44c75135fecc4943c336ac9d7c687d959b728350202"
+      "sha256": "8ebaa59bfcc087e34739aae6507e31c840916c589162890f81a23f1926d56cda"
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-tidy/guide.md",
-      "sha256": "2cd2815fe6ca8495269fbb48c38320e619cbaaddc98abb1aa0f2d9fb8426d1af"
+      "sha256": "bdd00336eb8f1ef905f4e2445ed2063079f4ce2c3c79db1e87d7c39de72e62ef"
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-tidy/references/scenarios.md",
-      "sha256": "f696b84a6078424ebbc861dedc6e5738c1c5ab206f96b1ba317a1b3f07b18f46"
+      "sha256": "024f90b2d9db9f6dbee71043bd2d231e3081634098c65f5cb9efe11f53574407"
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-wiki/guide.md",
-      "sha256": "01a08b979369f1ee68a30b9acbe8ed0add7391a1cf7466a20cef60a28dbc8fde"
+      "sha256": "43a8420912de9aac613ac5d8bb04530552aa6e9f2a7b3c3fc90ff0da78192578"
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-wiki/references/ingest.md",
@@ -577,7 +577,7 @@
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-wiki/references/query.md",
-      "sha256": "b53db15d22f1ec8f0c42e85bc56abd75d8e102f4e1a3c7476d37b9b3b38493ae"
+      "sha256": "83a9facee0a079e59de8c37ce78d5b9e81d39562bdcc5a42060ac057dbee8c1b"
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-wiki/references/scenarios.md",
@@ -589,7 +589,7 @@
     },
     {
       "path": "prj-memory-intake/references/bundled/page-capture/guide.md",
-      "sha256": "492c67f9dfa6aa2acfd32cb6bdca41bacb8dd491ab524c945438fc1eaeaca8ce"
+      "sha256": "1008e77e96e7a6ef0468e1b5cb64cf4a36f3ad74a8e1c35fc2b92bdce7903243"
     },
     {
       "path": "prj-memory-intake/references/bundled/page-capture/references/capture-contract.md",
@@ -649,7 +649,7 @@
     },
     {
       "path": "prj-memory-intake/SKILL.md",
-      "sha256": "6b557d93af36a1fdd3b85b24f75dc6e0368e52a664f884dcb6bd32eab265972b"
+      "sha256": "09654ad0e0d0aed08c9622f085cd5a0fbccc673d77db1ce6b2d16853bf1faf0e"
     },
     {
       "path": "prj-memory-plan/references/bundled/grill-me/guide.md",
@@ -685,7 +685,7 @@
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-execute/references/resume.md",
-      "sha256": "965f8a5a4339f7cd78f634068dbbae586f79233311ec06ee1827eab326aa126c"
+      "sha256": "0a2696be3e8831039e93d9aa7b5a4c11cbf62e43421b18e4ad69d469b6362353"
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-execute/references/review.md",
@@ -701,35 +701,35 @@
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-explain/guide.md",
-      "sha256": "7d0a8bb99ebd80b56f6fc1bbc70339ce5e994651e40a2ce820c08c90ff8ddef9"
+      "sha256": "802e493aa2c39cf50fa0c10b3af30ffaf58cf140256b07a951fc9d364512cbe7"
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-explain/references/scenarios.md",
-      "sha256": "ff0f2a9665f81c3a77f11ebd57fadea35281867e772b94cf20919ee34a8a0189"
+      "sha256": "cafff8707e46a9745556ce5c25531792378196a734aaf1b2ef65f5c77636e695"
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-intake/guide.md",
-      "sha256": "b0e4f64056c05fdb7cd4e0beb3d3fb6dafd34dd24096d08db450037dfd642a22"
+      "sha256": "d40729c0bbfc63b29542f62919baecf720c100037ce13dbd1672eede9f4c6559"
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-review/guide.md",
-      "sha256": "ee4638a5571ba9c75868e30aab1e6d8c43a3a344b47f742ef918fc526ab4a780"
+      "sha256": "50d6a15c1c241eb81e6a737e89188ec4b5e736d5da73eb10da42b3a91523481d"
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-review/references/scenarios.md",
-      "sha256": "8da710382de753e6e2c8e44c75135fecc4943c336ac9d7c687d959b728350202"
+      "sha256": "8ebaa59bfcc087e34739aae6507e31c840916c589162890f81a23f1926d56cda"
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-tidy/guide.md",
-      "sha256": "2cd2815fe6ca8495269fbb48c38320e619cbaaddc98abb1aa0f2d9fb8426d1af"
+      "sha256": "bdd00336eb8f1ef905f4e2445ed2063079f4ce2c3c79db1e87d7c39de72e62ef"
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-tidy/references/scenarios.md",
-      "sha256": "f696b84a6078424ebbc861dedc6e5738c1c5ab206f96b1ba317a1b3f07b18f46"
+      "sha256": "024f90b2d9db9f6dbee71043bd2d231e3081634098c65f5cb9efe11f53574407"
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-wiki/guide.md",
-      "sha256": "01a08b979369f1ee68a30b9acbe8ed0add7391a1cf7466a20cef60a28dbc8fde"
+      "sha256": "43a8420912de9aac613ac5d8bb04530552aa6e9f2a7b3c3fc90ff0da78192578"
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-wiki/references/ingest.md",
@@ -737,7 +737,7 @@
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-wiki/references/query.md",
-      "sha256": "b53db15d22f1ec8f0c42e85bc56abd75d8e102f4e1a3c7476d37b9b3b38493ae"
+      "sha256": "83a9facee0a079e59de8c37ce78d5b9e81d39562bdcc5a42060ac057dbee8c1b"
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-wiki/references/scenarios.md",
@@ -749,7 +749,7 @@
     },
     {
       "path": "prj-memory-plan/references/bundled/page-capture/guide.md",
-      "sha256": "492c67f9dfa6aa2acfd32cb6bdca41bacb8dd491ab524c945438fc1eaeaca8ce"
+      "sha256": "1008e77e96e7a6ef0468e1b5cb64cf4a36f3ad74a8e1c35fc2b92bdce7903243"
     },
     {
       "path": "prj-memory-plan/references/bundled/page-capture/references/capture-contract.md",
@@ -809,7 +809,7 @@
     },
     {
       "path": "prj-memory-plan/SKILL.md",
-      "sha256": "968c09651bcd9b668495e860fc5eb7c0a8c31910ba8ef587e114cb7769890854"
+      "sha256": "1e7566be4a631ff9f7faf5a63a7bb5710e503b78c8559b8a031bcb5d03030e6f"
     },
     {
       "path": "prj-memory-review/references/bundled/memory-execute/references/commit-check.md",
@@ -829,7 +829,7 @@
     },
     {
       "path": "prj-memory-review/references/bundled/memory-execute/references/resume.md",
-      "sha256": "965f8a5a4339f7cd78f634068dbbae586f79233311ec06ee1827eab326aa126c"
+      "sha256": "0a2696be3e8831039e93d9aa7b5a4c11cbf62e43421b18e4ad69d469b6362353"
     },
     {
       "path": "prj-memory-review/references/bundled/memory-execute/references/review.md",
@@ -845,23 +845,23 @@
     },
     {
       "path": "prj-memory-review/references/bundled/memory-explain/guide.md",
-      "sha256": "7d0a8bb99ebd80b56f6fc1bbc70339ce5e994651e40a2ce820c08c90ff8ddef9"
+      "sha256": "802e493aa2c39cf50fa0c10b3af30ffaf58cf140256b07a951fc9d364512cbe7"
     },
     {
       "path": "prj-memory-review/references/bundled/memory-explain/references/scenarios.md",
-      "sha256": "ff0f2a9665f81c3a77f11ebd57fadea35281867e772b94cf20919ee34a8a0189"
+      "sha256": "cafff8707e46a9745556ce5c25531792378196a734aaf1b2ef65f5c77636e695"
     },
     {
       "path": "prj-memory-review/references/bundled/memory-tidy/guide.md",
-      "sha256": "2cd2815fe6ca8495269fbb48c38320e619cbaaddc98abb1aa0f2d9fb8426d1af"
+      "sha256": "bdd00336eb8f1ef905f4e2445ed2063079f4ce2c3c79db1e87d7c39de72e62ef"
     },
     {
       "path": "prj-memory-review/references/bundled/memory-tidy/references/scenarios.md",
-      "sha256": "f696b84a6078424ebbc861dedc6e5738c1c5ab206f96b1ba317a1b3f07b18f46"
+      "sha256": "024f90b2d9db9f6dbee71043bd2d231e3081634098c65f5cb9efe11f53574407"
     },
     {
       "path": "prj-memory-review/references/bundled/memory-wiki/guide.md",
-      "sha256": "01a08b979369f1ee68a30b9acbe8ed0add7391a1cf7466a20cef60a28dbc8fde"
+      "sha256": "43a8420912de9aac613ac5d8bb04530552aa6e9f2a7b3c3fc90ff0da78192578"
     },
     {
       "path": "prj-memory-review/references/bundled/memory-wiki/references/ingest.md",
@@ -869,7 +869,7 @@
     },
     {
       "path": "prj-memory-review/references/bundled/memory-wiki/references/query.md",
-      "sha256": "b53db15d22f1ec8f0c42e85bc56abd75d8e102f4e1a3c7476d37b9b3b38493ae"
+      "sha256": "83a9facee0a079e59de8c37ce78d5b9e81d39562bdcc5a42060ac057dbee8c1b"
     },
     {
       "path": "prj-memory-review/references/bundled/memory-wiki/references/scenarios.md",
@@ -881,7 +881,7 @@
     },
     {
       "path": "prj-memory-review/references/bundled/page-capture/guide.md",
-      "sha256": "492c67f9dfa6aa2acfd32cb6bdca41bacb8dd491ab524c945438fc1eaeaca8ce"
+      "sha256": "1008e77e96e7a6ef0468e1b5cb64cf4a36f3ad74a8e1c35fc2b92bdce7903243"
     },
     {
       "path": "prj-memory-review/references/bundled/page-capture/references/capture-contract.md",
@@ -941,11 +941,11 @@
     },
     {
       "path": "prj-memory-review/references/scenarios.md",
-      "sha256": "7f25d790f5424f2adbd66d6f46511841748b759207fe26c50007f582eb2ab813"
+      "sha256": "e5df16ade7acf100a48e6103ff15676fd13d9d0ffd1517243a37c90a827ae5d6"
     },
     {
       "path": "prj-memory-review/SKILL.md",
-      "sha256": "7ab053153592a73c9cd25f51b4b04d8fdb4a7a55b21c67e845060248eaffa2f1"
+      "sha256": "cd501000ea06a1d787fbc71ca3e1641b49164fdb41f783fb821a32c330c79864"
     },
     {
       "path": "prj-memory-tidy/references/bundled/memory-execute/references/commit-check.md",
@@ -965,7 +965,7 @@
     },
     {
       "path": "prj-memory-tidy/references/bundled/memory-execute/references/resume.md",
-      "sha256": "3105c6d9711aacfc83303ca072194580cde988b588469ed72e4a3a173b5eaab4"
+      "sha256": "cf9cdbf5a7976762ee8f2709069c7593fa9b658ad765fff1cbcdccfb53c2ef28"
     },
     {
       "path": "prj-memory-tidy/references/bundled/memory-execute/references/review.md",
@@ -981,23 +981,23 @@
     },
     {
       "path": "prj-memory-tidy/references/bundled/memory-explain/guide.md",
-      "sha256": "797085e5e9221d9346b0a1c4fcc418621bc98810e54ab07d7c6f41f2a1809d7d"
+      "sha256": "f8414fd943eea1d79f7150e48234f949514a5d35f2f98ca07cad0f70683db1f0"
     },
     {
       "path": "prj-memory-tidy/references/bundled/memory-explain/references/scenarios.md",
-      "sha256": "ff0f2a9665f81c3a77f11ebd57fadea35281867e772b94cf20919ee34a8a0189"
+      "sha256": "cafff8707e46a9745556ce5c25531792378196a734aaf1b2ef65f5c77636e695"
     },
     {
       "path": "prj-memory-tidy/references/bundled/memory-review/guide.md",
-      "sha256": "ee4638a5571ba9c75868e30aab1e6d8c43a3a344b47f742ef918fc526ab4a780"
+      "sha256": "50d6a15c1c241eb81e6a737e89188ec4b5e736d5da73eb10da42b3a91523481d"
     },
     {
       "path": "prj-memory-tidy/references/bundled/memory-review/references/scenarios.md",
-      "sha256": "8da710382de753e6e2c8e44c75135fecc4943c336ac9d7c687d959b728350202"
+      "sha256": "8ebaa59bfcc087e34739aae6507e31c840916c589162890f81a23f1926d56cda"
     },
     {
       "path": "prj-memory-tidy/references/bundled/memory-wiki/guide.md",
-      "sha256": "01a08b979369f1ee68a30b9acbe8ed0add7391a1cf7466a20cef60a28dbc8fde"
+      "sha256": "43a8420912de9aac613ac5d8bb04530552aa6e9f2a7b3c3fc90ff0da78192578"
     },
     {
       "path": "prj-memory-tidy/references/bundled/memory-wiki/references/ingest.md",
@@ -1005,7 +1005,7 @@
     },
     {
       "path": "prj-memory-tidy/references/bundled/memory-wiki/references/query.md",
-      "sha256": "b53db15d22f1ec8f0c42e85bc56abd75d8e102f4e1a3c7476d37b9b3b38493ae"
+      "sha256": "83a9facee0a079e59de8c37ce78d5b9e81d39562bdcc5a42060ac057dbee8c1b"
     },
     {
       "path": "prj-memory-tidy/references/bundled/memory-wiki/references/scenarios.md",
@@ -1017,7 +1017,7 @@
     },
     {
       "path": "prj-memory-tidy/references/bundled/page-capture/guide.md",
-      "sha256": "492c67f9dfa6aa2acfd32cb6bdca41bacb8dd491ab524c945438fc1eaeaca8ce"
+      "sha256": "1008e77e96e7a6ef0468e1b5cb64cf4a36f3ad74a8e1c35fc2b92bdce7903243"
     },
     {
       "path": "prj-memory-tidy/references/bundled/page-capture/references/capture-contract.md",
@@ -1077,11 +1077,11 @@
     },
     {
       "path": "prj-memory-tidy/references/scenarios.md",
-      "sha256": "60cd81d106697f9c3e448b0a864d3199d447f369672a4aeb76877960052ca1d8"
+      "sha256": "775f8a4155f40942e0246e3abe2092b86a3650d0a282790691d5aae3412281b4"
     },
     {
       "path": "prj-memory-tidy/SKILL.md",
-      "sha256": "0dcd3c5ac4894d0191c04fb641db33f873603a074988f10ec74400c9014f9d3c"
+      "sha256": "d5c0bfdb7e9a43eba7ec582df5377e3ca85c44223090bc8218b8967ce36aa1e1"
     },
     {
       "path": "prj-memory-wiki/references/bundled/memory-execute/references/commit-check.md",
@@ -1101,7 +1101,7 @@
     },
     {
       "path": "prj-memory-wiki/references/bundled/memory-execute/references/resume.md",
-      "sha256": "965f8a5a4339f7cd78f634068dbbae586f79233311ec06ee1827eab326aa126c"
+      "sha256": "0a2696be3e8831039e93d9aa7b5a4c11cbf62e43421b18e4ad69d469b6362353"
     },
     {
       "path": "prj-memory-wiki/references/bundled/memory-execute/references/review.md",
@@ -1117,31 +1117,31 @@
     },
     {
       "path": "prj-memory-wiki/references/bundled/memory-explain/guide.md",
-      "sha256": "c0da77707357dc9506122488894b893af9cbc08b6c7cc6a8eb4c09db61066dc9"
+      "sha256": "185102632eb90fe52d79859e946635f8be86c1f7998c3f4f057ffb3dfeec67a7"
     },
     {
       "path": "prj-memory-wiki/references/bundled/memory-explain/references/scenarios.md",
-      "sha256": "ff0f2a9665f81c3a77f11ebd57fadea35281867e772b94cf20919ee34a8a0189"
+      "sha256": "cafff8707e46a9745556ce5c25531792378196a734aaf1b2ef65f5c77636e695"
     },
     {
       "path": "prj-memory-wiki/references/bundled/memory-review/guide.md",
-      "sha256": "ee4638a5571ba9c75868e30aab1e6d8c43a3a344b47f742ef918fc526ab4a780"
+      "sha256": "50d6a15c1c241eb81e6a737e89188ec4b5e736d5da73eb10da42b3a91523481d"
     },
     {
       "path": "prj-memory-wiki/references/bundled/memory-review/references/scenarios.md",
-      "sha256": "8da710382de753e6e2c8e44c75135fecc4943c336ac9d7c687d959b728350202"
+      "sha256": "8ebaa59bfcc087e34739aae6507e31c840916c589162890f81a23f1926d56cda"
     },
     {
       "path": "prj-memory-wiki/references/bundled/memory-tidy/guide.md",
-      "sha256": "2cd2815fe6ca8495269fbb48c38320e619cbaaddc98abb1aa0f2d9fb8426d1af"
+      "sha256": "bdd00336eb8f1ef905f4e2445ed2063079f4ce2c3c79db1e87d7c39de72e62ef"
     },
     {
       "path": "prj-memory-wiki/references/bundled/memory-tidy/references/scenarios.md",
-      "sha256": "f696b84a6078424ebbc861dedc6e5738c1c5ab206f96b1ba317a1b3f07b18f46"
+      "sha256": "024f90b2d9db9f6dbee71043bd2d231e3081634098c65f5cb9efe11f53574407"
     },
     {
       "path": "prj-memory-wiki/references/bundled/page-capture/guide.md",
-      "sha256": "492c67f9dfa6aa2acfd32cb6bdca41bacb8dd491ab524c945438fc1eaeaca8ce"
+      "sha256": "1008e77e96e7a6ef0468e1b5cb64cf4a36f3ad74a8e1c35fc2b92bdce7903243"
     },
     {
       "path": "prj-memory-wiki/references/bundled/page-capture/references/capture-contract.md",
@@ -1205,7 +1205,7 @@
     },
     {
       "path": "prj-memory-wiki/references/query.md",
-      "sha256": "1681270f7bd55e02cb192495b7ac4165f6aab493d388e79bfa54e2062e84e171"
+      "sha256": "32fac2095f8e929d95a14d9e801d296aa8c62df339fb18c89ae1542ff1bdafe9"
     },
     {
       "path": "prj-memory-wiki/references/scenarios.md",
@@ -1217,7 +1217,7 @@
     },
     {
       "path": "prj-memory-wiki/SKILL.md",
-      "sha256": "fd14f8972e32760846023fa2f57489b3635d18ba5cc164cb679cdf6cc2b26223"
+      "sha256": "9714ad5cae05d1517cfe8dd5996234eb5fdcacd05dad8913ecdbb85ca001e352"
     },
     {
       "path": "prj-page-capture/references/bundled/memory-execute/references/commit-check.md",
@@ -1237,7 +1237,7 @@
     },
     {
       "path": "prj-page-capture/references/bundled/memory-execute/references/resume.md",
-      "sha256": "965f8a5a4339f7cd78f634068dbbae586f79233311ec06ee1827eab326aa126c"
+      "sha256": "0a2696be3e8831039e93d9aa7b5a4c11cbf62e43421b18e4ad69d469b6362353"
     },
     {
       "path": "prj-page-capture/references/bundled/memory-execute/references/review.md",
@@ -1253,31 +1253,31 @@
     },
     {
       "path": "prj-page-capture/references/bundled/memory-explain/guide.md",
-      "sha256": "7d0a8bb99ebd80b56f6fc1bbc70339ce5e994651e40a2ce820c08c90ff8ddef9"
+      "sha256": "802e493aa2c39cf50fa0c10b3af30ffaf58cf140256b07a951fc9d364512cbe7"
     },
     {
       "path": "prj-page-capture/references/bundled/memory-explain/references/scenarios.md",
-      "sha256": "ff0f2a9665f81c3a77f11ebd57fadea35281867e772b94cf20919ee34a8a0189"
+      "sha256": "cafff8707e46a9745556ce5c25531792378196a734aaf1b2ef65f5c77636e695"
     },
     {
       "path": "prj-page-capture/references/bundled/memory-review/guide.md",
-      "sha256": "ee4638a5571ba9c75868e30aab1e6d8c43a3a344b47f742ef918fc526ab4a780"
+      "sha256": "50d6a15c1c241eb81e6a737e89188ec4b5e736d5da73eb10da42b3a91523481d"
     },
     {
       "path": "prj-page-capture/references/bundled/memory-review/references/scenarios.md",
-      "sha256": "8da710382de753e6e2c8e44c75135fecc4943c336ac9d7c687d959b728350202"
+      "sha256": "8ebaa59bfcc087e34739aae6507e31c840916c589162890f81a23f1926d56cda"
     },
     {
       "path": "prj-page-capture/references/bundled/memory-tidy/guide.md",
-      "sha256": "2cd2815fe6ca8495269fbb48c38320e619cbaaddc98abb1aa0f2d9fb8426d1af"
+      "sha256": "bdd00336eb8f1ef905f4e2445ed2063079f4ce2c3c79db1e87d7c39de72e62ef"
     },
     {
       "path": "prj-page-capture/references/bundled/memory-tidy/references/scenarios.md",
-      "sha256": "f696b84a6078424ebbc861dedc6e5738c1c5ab206f96b1ba317a1b3f07b18f46"
+      "sha256": "024f90b2d9db9f6dbee71043bd2d231e3081634098c65f5cb9efe11f53574407"
     },
     {
       "path": "prj-page-capture/references/bundled/memory-wiki/guide.md",
-      "sha256": "01a08b979369f1ee68a30b9acbe8ed0add7391a1cf7466a20cef60a28dbc8fde"
+      "sha256": "43a8420912de9aac613ac5d8bb04530552aa6e9f2a7b3c3fc90ff0da78192578"
     },
     {
       "path": "prj-page-capture/references/bundled/memory-wiki/references/ingest.md",
@@ -1285,7 +1285,7 @@
     },
     {
       "path": "prj-page-capture/references/bundled/memory-wiki/references/query.md",
-      "sha256": "b53db15d22f1ec8f0c42e85bc56abd75d8e102f4e1a3c7476d37b9b3b38493ae"
+      "sha256": "83a9facee0a079e59de8c37ce78d5b9e81d39562bdcc5a42060ac057dbee8c1b"
     },
     {
       "path": "prj-page-capture/references/bundled/memory-wiki/references/scenarios.md",
@@ -1353,7 +1353,7 @@
     },
     {
       "path": "prj-page-capture/SKILL.md",
-      "sha256": "013f383b583ad223654b892eaf67e566252ecf1ec3455a5fcd7c029b4ff34baa"
+      "sha256": "7f729b21ec7d41d4c6e4f4993c8a8504e367797d10799fcb68ddcaf90cc91323"
     },
     {
       "path": "prj-visualize/references/animations.md",

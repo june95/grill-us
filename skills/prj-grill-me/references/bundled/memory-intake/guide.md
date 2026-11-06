@@ -37,11 +37,11 @@ description: Register a clear change, bug, or issue as a .memory task without im
 
 ## Activation
 
-[State Ownership](../memory-execute/references/conventions.md#state-ownership)과 [Switch](../memory-execute/references/resume.md#switch)를 적용한다. 기존 active·checkpoint·미해결 intent를 보호하고 활성 없음이면 선행 조건을 충족한 첫 Task만 연결한다.
+[State Ownership](../memory-execute/references/conventions.md#state-ownership)과 [Switch](../memory-execute/references/resume.md#switch)를 적용한다. 기존 active와 미해결 커밋 의도(task.md Commit Status·`work/commit-intent.json`)를 보호하고 활성 없음이면 선행 조건을 충족한 첫 Task만 연결한다.
 
 실제 진행 링크가 손상된 경우 먼저 복원하며, 확인 불충분한 손상을 초기 placeholder로 간주해 새 active로 덮지 않는다.
 
-쓰기 직전 current가 바뀌었는지 다시 확인한다. 전환 전 이전 재개/마지막 완료 근거를 Task·Plan state·history에 보존하며 가짜 링크나 새로운 archive 사본을 만들지 않는다. current를 쓸 때 [Current Compaction](../memory-execute/references/resume.md#current-compaction) 조건을 확인한다.
+쓰기 직전 current가 바뀌었는지 다시 확인한다. 전환 전 이전 재개/마지막 완료 근거를 Task·history에 보존하며 가짜 링크나 새로운 archive 사본을 만들지 않는다. current를 쓸 때 [Current Compaction](../memory-execute/references/resume.md#current-compaction) 조건을 확인한다.
 
 ## Report
 

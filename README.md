@@ -68,7 +68,7 @@ node scripts/validate-skills.mjs
 
 공통 상세 규칙은 [Rule Ownership](.agents/skills/memory-execute/references/conventions.md#rule-ownership)에 연결된 소유 문서 한곳에서 관리합니다. 상태·증거·완료 의미는 공통 규약, Git 절차는 commit-check, 재개·복구는 resume, 형식은 templates, 실제 경로·정본·명령 발견은 project-profile입니다. 각 스킬·단계에는 고유 절차와 핵심 제한 요약을 남깁니다.
 
-요청과 존재하는 Task/결정·공통 규약부터 읽고, 실행·재개에는 현재 checkpoint와 resume을 확인합니다. 이후 선택한 단계 지침과 필요한 템플릿 섹션만 추가합니다. 관련 없는 단계·시나리오 전체를 매번 읽을 필요는 없습니다. 요약으로 실패/단독 실행/사용자 index 같은 경계를 생략하지 않으며, 상태 판정과 실제 근거는 정본에 따라 확인합니다.
+요청과 존재하는 Task/결정·공통 규약부터 읽고, 실행·재개에는 대상 task.md의 재개 지점·Commit Status와 resume을 확인합니다. 이후 선택한 단계 지침과 필요한 템플릿 섹션만 추가합니다. 관련 없는 단계·시나리오 전체를 매번 읽을 필요는 없습니다. 요약으로 실패/단독 실행/사용자 index 같은 경계를 생략하지 않으며, 상태 판정과 실제 근거는 정본에 따라 확인합니다.
 
 ## 사용 예시
 
@@ -101,7 +101,7 @@ prj-memory-explain 이 Plan의 의존 관계를 prj-visualize로 HTML 도식으�
 
 계획은 예정 동작으로, 완료 작업은 당시 구현·검증·커밋 또는 no-commit 근거로 설명합니다. 완료 기록과 현재 코드가 다를 수 있으며, 기록되지 않은 이유나 확인하지 못한 결과는 추측으로 채우지 않습니다. 변경 전후·관련 작업·검증 한계는 근거가 있을 때 포함합니다. [설명 시나리오](.agents/skills/memory-explain/references/scenarios.md)는 정적 검사·수동 대조와 실제 모델 행동 검증의 차이도 안내합니다.
 
-설명만 요청하면 보고·이력·current·checkpoint·제품·Git을 수정하거나 테스트를 실행하지 않습니다. 상태 불일치는 설명하고 복구는 별도 실행 요청으로 연결합니다. HTML은 명시적으로 요청할 때만 [prj-visualize](.agents/skills/visualize/SKILL.md)를 적용하며, 기본 산출물은 저장소 밖에 두어 기존 기록과 Git 상태를 보존합니다.
+설명만 요청하면 보고·이력·current·Task·`work/`·제품·Git을 수정하거나 테스트를 실행하지 않습니다. 상태 불일치는 설명하고 복구는 별도 실행 요청으로 연결합니다. HTML은 명시적으로 요청할 때만 [prj-visualize](.agents/skills/visualize/SKILL.md)를 적용하며, 기본 산출물은 저장소 밖에 두어 기존 기록과 Git 상태를 보존합니다.
 
 ## 전체 실행과 부분 실행
 
@@ -163,7 +163,6 @@ T01부터 T03까지 순서대로 진행해줘
 │       └── T02-next/
 │           └── task.md
 ├── current.md
-├── state/YYYY-MM-DD-feature.md
 ├── history/YYYY-MM-DD.md
 ├── wiki/                              # 명시 수집한 문서 지식(memory-wiki)
 ├── captures/                          # 단독 실행한 UI 캡처 최종본(page-capture)
@@ -171,14 +170,15 @@ T01부터 T03까지 순서대로 진행해줘
 ~~~
 
 - task.md는 상세 계약·workflow·완료 조건의 정본입니다.
-- current는 활성 위치, state는 재개·커밋 의도, Phase/Plan은 실제 Task 상태의 요약입니다.
-- current에는 템플릿 절만 두고 150줄 이하로 유지합니다. 지난 위치와 완료 기록은 history·state·Task 보고에 남기고, 보류 위치와 미해결 커밋 의도만 Status에 링크로 둡니다. 넘치면 다음 상태 쓰기 때 옮길 원문을 history에 먼저 남기고 압축합니다([Current Compaction](.agents/skills/memory-execute/references/resume.md#current-compaction)).
+- current는 활성 위치, task.md는 재개 지점과 Commit Status, Phase/Plan은 실제 Task 상태의 요약입니다. Plan별 state 파일은 만들지 않습니다.
+- current에는 템플릿 절만 두고 150줄 이하로 유지합니다. 지난 위치와 완료 기록은 history·Task 보고에 남기고, 보류 위치와 미해결 커밋 의도만 Status에 Task 링크로 둡니다. 넘치면 다음 상태 쓰기 때 옮길 원문을 history에 먼저 남기고 압축합니다([Current Compaction](.agents/skills/memory-execute/references/resume.md#current-compaction)).
 - 결정 문서는 생성일·주제로 독립 ID를 갖습니다. Plan 생성 전 인터뷰나 기존 Plan의 후속 결정도 파일명을 유지하고 Plan/Task에서 실제 경로를 링크합니다. 여러 Plan이 같은 결정을 참조할 수 있으며, 기존 파일·링크를 옮기거나 합치지 않습니다.
-- current의 Checkpoint는 실제 활성 또는 보존한 Plan state 링크이고, Last Completed Task는 마지막 완료의 Plan/Task·확인한 커밋 또는 no-commit 사유·완료 근거입니다. 활성 Task가 없어도 보존한 state 링크는 남길 수 있습니다. 완료 이력이나 참조할 state가 없으면 없음으로 적습니다.
-- 이전 위치는 기존 Task·보고·Plan별 state로 보존합니다. 성공 커밋 의도를 초기화하기 전에 Task의 커밋 보고와 마지막 성공 정보를 남기며, 미해결 prepared/failed 의도는 덮어쓰지 않습니다. 매 전환 archive 사본을 만들지 않고 기존 사본은 유지합니다.
+- current의 Last Completed Task는 마지막 완료의 Plan/Task·확인한 커밋 또는 no-commit 사유·완료 근거입니다. 완료 이력이 없으면 없음으로 적습니다. current에는 Checkpoint 칸이 없습니다.
+- 커밋 직전에 Task의 `work/commit-intent.json`(Base HEAD·후보·메시지)과 task.md Commit Status를 prepared로 먼저 기록합니다. 성공을 대조하면 commit 보고를 쓰고 완료 정리에서 의도 파일을 지웁니다. 실패·중단 때는 남겨 복구에 쓰며, 미해결 prepared/failed 의도는 덮어쓰지 않습니다. 이전 위치는 기존 Task·보고로 보존하고 매 전환 archive 사본을 만들지 않습니다.
+- 이전 규칙의 `.memory/state/`가 남아 있으면 고치지 않습니다. 실행은 진행 중인 옛 Plan을 재개할 때 읽고, explain은 옛 기록으로 읽습니다. 다 쓴 state는 tidy가 판정해 승인 정리합니다.
 - 임시 스크립트·명령 원본 출력·리뷰 위임 원문·중간 상태·사본·빌드 산출물 같은 작업 파일은 `.memory`에 두지 않고 OS 임시 폴더의 Task 소유 폴더에 둡니다. `.memory`에는 기록과 보고서가 인용한 요약 증거만 남깁니다. 증거는 Task의 `evidence/`(UI 캡처는 `captures/`)에 처음부터 쓰고 합계 100개·20MB 안에 둡니다. 세션을 넘어 이어야 하는 작은 재개 상태만 Task의 `work/`에 둡니다. 상세는 [Working Files](.agents/skills/memory-execute/references/conventions.md#working-files)를 따릅니다.
 - Task를 완료할 때 기록 md(`task.md`, 표준 단계 보고, Workflow 표에 링크된 커스텀 단계 보고)와 인용된 `evidence/`·`captures/` 파일만 남기고, 나머지는 묻지 않고 지웁니다. `work/`와 그 Task의 OS 임시 소유 폴더도 지웁니다. 링크는 따라가지 않고, 지운 것·남긴 것·끊긴 링크는 commit 보고(커밋 없는 완료면 Task의 Completion Check)에 남깁니다. 상세는 [Working File Cleanup](.agents/skills/memory-execute/references/commit-check.md#working-file-cleanup)을 따릅니다.
-- 이미 쌓인 `.memory`는 [prj-memory-tidy](.agents/skills/memory-tidy/SKILL.md)로 점검합니다. 점검은 파일을 쓰지 않고 번호 붙은 목록만 보고하며, 정리는 사용자가 번호·경로로 승인한 항목만 지웁니다. 끝난 Task는 완료 정리와 같은 기준으로 분류해, 보고서가 인용한 증거도 "인용됨(지우면 링크 끊김)" 묶음으로 보여 주고 승인하면 지웁니다. 기록 md는 지우지 않고 링크는 따라가지 않습니다. 비표준 폴더는 가장 위 폴더 단위로 한 번호이며, 정리 기록은 승인 항목당 한 줄입니다.
+- 이미 쌓인 `.memory`는 [prj-memory-tidy](.agents/skills/memory-tidy/SKILL.md)로 점검합니다. 점검은 파일을 쓰지 않고 번호 붙은 목록만 보고하며, 정리는 사용자가 번호·경로로 승인한 항목만 지웁니다. 끝난 Task는 완료 정리와 같은 기준으로 분류해, 보고서가 인용한 증거도 "인용됨(지우면 링크 끊김)" 묶음으로 보여 주고 승인하면 지웁니다. 기록 md는 지우지 않고 링크는 따라가지 않습니다. 비표준 폴더는 가장 위 폴더 단위로 한 번호이며, 정리 기록은 승인 항목당 한 줄입니다. 옛 Plan state는 파일마다 따로 분류해, done Plan이고 미해결 커밋 의도가 없는 것만 끊길 링크와 함께 승인 삭제 후보로 보여 줍니다.
 - memory-explain은 이 기록을 읽어 설명하며 설명 결과를 보고·history로 자동 저장하지 않습니다.
 - 코드·계약·관련 검증 환경 변경 뒤에는 영향을 받은 증거의 최신성을 확인합니다.
 - 제품 테스트와 공유 가이드는 해당 프로젝트의 기존 디렉터리에 둡니다.

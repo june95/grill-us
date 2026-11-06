@@ -27,7 +27,7 @@ description: Review an explicit Task, Phase, file list, diff, or commit range an
 
 ## Boundaries and Workflow Use
 
-직접 호출과 위임 worker 모두 제품·`.memory`·보고/history/current/checkpoint·Git·개인 설정을 쓰지 않는다. 테스트/빌드/설치·코드 수정·staging/commit/push·복구·새 Task 등록·자동 활성화·후속 실행·추가 리뷰어 위임을 하지 않는다. 기존 자료가 없거나 결함을 발견해도 이 경계를 유지하고 필요한 조치만 반환한다. 읽기 도구의 실제 권한 제한 수준을 밝히며 지시문만으로 OS 쓰기 차단이나 모든 부작용 방지를 주장하지 않는다.
+직접 호출과 위임 worker 모두 제품·`.memory`·보고/history/current/Task·`work/`·Git·개인 설정을 쓰지 않는다. 테스트/빌드/설치·코드 수정·staging/commit/push·복구·새 Task 등록·자동 활성화·후속 실행·추가 리뷰어 위임을 하지 않는다. 기존 자료가 없거나 결함을 발견해도 이 경계를 유지하고 필요한 조치만 반환한다. 읽기 도구의 실제 권한 제한 수준을 밝히며 지시문만으로 OS 쓰기 차단이나 모든 부작용 방지를 주장하지 않는다.
 
 `prj-memory-execute`가 위임하면 전달된 scope·Task Revision·diff/snapshot을 기준으로 같은 검토를 두 단계(계약·diff 검토 → 구현 보고 대조)로 한 번 수행해 실행 담당에게 반환한다. 단계별 입력은 실행 담당이 나눠 전달하며, 고위험 Task의 보안 리뷰어로 위임되어도 같은 경계를 따른다. 실행 담당만 공통 [Review Delegation](../memory-execute/references/review.md#review-delegation)에 따라 결과를 대조해 기존 review.md/Task metadata를 기록한다. worker가 다시 위임하거나 기록하지 않는다. `prj-memory-execute --stage review`는 별도 실행 요청이며 기존 보고·상태 기록은 허용하지만 자동 수정·커밋·완료·포인터 전진은 하지 않는다.
 

@@ -16,7 +16,7 @@ description: Find and explain recorded decisions, designs, plans, progress, and 
 ## Resolve Target
 
 1. 명시 대상이 우선이다. 비활성/완료 Task도 그 자료를 읽으며 current로 전환하지 않는다. 중복 T 번호는 Plan/Phase/실제 경로로 구분한다.
-2. 대상이 없으면 대화와 current의 실제 Active Task/Plan을 확인한다. 완료 설명은 [State Ownership](../memory-execute/references/conventions.md#state-ownership)의 Last Completed Task/Checkpoint와 실제 근거를 읽는다. 누락 항목은 확인 가능한 Task/보고로 한정하고 가짜 완료나 state 경로를 만들지 않는다. 결정은 실제 독립 ID 링크로 읽는다.
+2. 대상이 없으면 대화와 current의 실제 Active Task/Plan을 확인한다. 완료 설명은 [State Ownership](../memory-execute/references/conventions.md#state-ownership)의 Last Completed Task와 실제 근거(Task·commit 보고·history)를 읽는다. 누락 항목은 확인 가능한 Task/보고로 한정하고 가짜 완료나 state 경로를 만들지 않는다. 남아 있는 옛 Plan state(`.memory/state/`)와 옛 current의 Checkpoint 줄은 이전 규칙의 기록으로 읽는다. 지금 정본은 task.md·commit 보고·history이고, 둘이 다르면 차이를 함께 설명한다. 결정은 실제 독립 ID 링크로 읽는다.
 3. 모호하면 후보와 질문 하나, 대상/경로가 없으면 누락 사실과 필요한 정보를 알린다. 다른 Plan을 활성화하거나 전체 memory/Git 이력을 불필요하게 조사하지 않는다.
 
 결정을 찾는 요청은 아래 Decision Search를 적용한다. 주제·키워드가 명시됐는데도 current의 활성 Task로 대상을 바꾸지 않는다. 이미 확인한 같은 작업공간·자료를 반복 조사하지 않는다.
@@ -34,7 +34,7 @@ Wiki 자료에 대한 명시 질의는 [prj-memory-wiki](../memory-wiki/guide.md
 3. `rg`가 있으면 해당 디렉터리에 한정한 파일 목록과 literal 검색을 사용한다. ignored/hidden인 로컬 memory도 포함하도록 `rg --files --hidden --no-ignore -- .memory/decisions`, `rg -n -F --hidden --no-ignore -e '검색어' -- .memory/decisions`처럼 사용하며 실제 입력은 shell 인자로 안전하게 전달한다. 목록에서 파일명/ID를 찾고 본문에서 주제·적용 모듈·관련 표현을 좁혀 읽는다. `rg`가 없으면 호스트의 파일 목록·읽기·검색 도구로 같은 범위를 확인하며 설치하거나 별도 parser를 만들지 않는다.
 4. 일치한 줄만으로 판정하지 않고 후보 결정의 제목·선택·이유·적용 조건과 Alternatives, Supersedes/Superseded by 같은 관련 변경/대체 근거·Plan 연결을 읽는다. [Decision Fields](../memory-execute/references/conventions.md#decision-fields)의 현재/구형 제목·필드 호환 읽기를 적용한다. 적용 범위가 없으면 미기록으로 표시하고 전역 적용을 추정하지 않는다.
 5. 후보별로 실제 문서/Decision ID와 DNN, 선택, 기록된 이유, 적용 범위, 재검토 조건(있을 때), 출처 링크를 채팅에 설명한다. 날짜·검색 점수만으로 정본을 고르지 않는다. 명시된 대체 관계가 있으면 그 근거와 적용 조건을 함께 제시하고 상충 결정은 병렬로 구분한다. Supersedes/Superseded by로 연결된 결정은 현재 결정과 대체된 결정을 함께 설명하며, 연결이 한쪽 문서에만 있으면 불일치로 표시한다. 기록된 Alternatives가 있으면 선택 이유와 함께 미선택 대안과 그 근거를 설명하고, 필드가 없는 과거 결정은 미기록으로 말한다. 대상 선택이 실제로 모호할 때만 후보와 질문 하나를 제시한다.
-6. 결과가 없으면 확인한 범위·검색어와 일치 후보 없음을 말한다. 파일/디렉터리 부재·읽기 실패·이유 미기록은 검색 결과 없음과 구분한다. 미확인 범위를 전체 결정 부재로 확대하지 않는다. 검색 결과나 보고서·history/current/checkpoint/결정을 저장하지 않고 테스트·위임·복구·Task 등록도 실행하지 않는다.
+6. 결과가 없으면 확인한 범위·검색어와 일치 후보 없음을 말한다. 파일/디렉터리 부재·읽기 실패·이유 미기록은 검색 결과 없음과 구분한다. 미확인 범위를 전체 결정 부재로 확대하지 않는다. 검색 결과나 보고서·history/current/결정을 저장하지 않고 테스트·위임·복구·Task 등록도 실행하지 않는다.
 
 ## Evidence
 
@@ -75,7 +75,7 @@ Wiki 자료에 대한 명시 질의는 [prj-memory-wiki](../memory-wiki/guide.md
 
 ## Boundaries
 
-설명 호출은 읽기 전용이다. memory/history/current/checkpoint·Revision·제품·Git 쓰기, 새 Task 등록, 테스트 실행, staging/commit/push·복구를 하지 않는다. 발견·차이·권고는 채팅에만 남기며 실제 변경 요청이면 적절한 기존 진입점으로 연결한다. 사용자 working/index와 과거 증거를 보존하고 비밀 원문을 노출하지 않는다.
+설명 호출은 읽기 전용이다. memory/history/current·Task·`work/`·옛 state·Revision·제품·Git 쓰기, 새 Task 등록, 테스트 실행, staging/commit/push·복구를 하지 않는다. 발견·차이·권고는 채팅에만 남기며 실제 변경 요청이면 적절한 기존 진입점으로 연결한다. 사용자 working/index와 과거 증거를 보존하고 비밀 원문을 노출하지 않는다.
 
 `.memory` 전체의 점검(비표준·미인용 파일, 링크, 용량, 증거 예산, current 크기, 미해결 Task 목록, 상태 불일치)과 승인 항목 정리는 [prj-memory-tidy](../../../SKILL.md)가 맡는다. explain은 결정·계획·진행·완료의 설명을 맡는다. `.memory` 전체 점검·정리 요청을 받으면 tidy로 안내하고, 점검 목록 작성이나 정리를 하지 않는다.
 
