@@ -121,6 +121,8 @@ Implementation에는 적용 작업을 적는다. 분석 전용이면 조사 절�
 | commit-check | {판단} | {Git 변경·최종 점검 요청} | {초기 상태} | Completion Check |
 | commit | {판단} | {정책과 실제 변경} | {초기 상태} | {수행 시 commit.md} |
 
+{표준 단계로 담을 수 없는 Task 고유 실행(예: 배포)이면 실행 순서 위치에 커스텀 단계 행을 더하고 Reason / Trigger에 그 이유를 적는다. 이름·보고 규칙은 [Workflow](conventions.md#workflow)를 따른다. 해당하지 않으면 이 안내를 제거한다.}
+
 ## Validation
 
 | Criteria | Command / Method | Cwd | Expected Result |
@@ -149,7 +151,7 @@ Implementation에는 적용 작업을 적는다. 분석 전용이면 조사 절�
 - Blocking Findings: 없음 또는 {해결되지 않은 문제}
 - Remaining Risks: {확인하지 못한 영역}
 - Staging: 아직 수행하지 않음
-- Working File Cleanup: 아직 수행하지 않음 {커밋 없는 완료일 때 [작업 파일 정리](commit-check.md#working-file-cleanup)의 옮기기 전 기록과 결과를 적는다. 커밋한 Task는 commit 보고에 적는다}
+- Working File Cleanup: 아직 수행하지 않음 {커밋 없는 완료일 때 [작업 파일 정리](commit-check.md#working-file-cleanup)의 옮기기 전 기록과 결과(지운 것·남긴 것·끊긴 링크)를 적는다. 커밋한 Task는 commit 보고에 적는다}
 
 ## Progress
 
@@ -341,6 +343,7 @@ Candidate Snapshot 형식은 path·A/M/D·working SHA256·staged mode/blob다. �
 - Blueprint Revision: {검토한 Revision}
 - Checked At: {ISO 8601}
 - Result: {실제 결과·해당 단계 verdict}
+- Evidence Files: {보고서가 인용하는 증거 파일이 있으면 `evidence/…`(UI 캡처는 `captures/…`) 상대 링크. 없으면 이 항목을 제거한다. [Working Files](conventions.md#working-files)}
 
 ## Source Snapshot
 
@@ -368,7 +371,7 @@ Candidate Snapshot 형식은 path·A/M/D·working SHA256·staged mode/blob다. �
 
 {commit 보고에만 아래 항목을 작성한다. 다른 단계에서는 제거한다.}
 
-- Working File Cleanup: {[작업 파일 정리](commit-check.md#working-file-cleanup) 결과: 옮기기 전에 적은 원래 경로·새 경로(식별자), 지운 경로·개수·용량, 남긴 경로와 이유, 승인 대기 목록, 소유 폴더의 배타적 신규 생성 여부. 비밀 가능 값 제외}
+- Working File Cleanup: {[작업 파일 정리](commit-check.md#working-file-cleanup) 결과: 옮기기 전에 적은 원래 경로·새 경로(식별자), 지운 것(분류별 경로·개수·용량), 남긴 경로와 이유, 끊긴 링크(링크가 있던 기록 md·가리키던 경로), 소유 폴더의 배타적 신규 생성 여부. 비밀 가능 값 제외}
 
 {조사 목적 Task에서 검사 결과와 목표 달성이 다를 수 있으면 아래 항목을 작성한다. 해당하지 않으면 제거한다.}
 

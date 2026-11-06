@@ -15,7 +15,7 @@
 
 기본 위치는 실행 맥락에 따라 정한다. 사용자가 위치를 지정하면 그 지정이 우선이다.
 
-- Task 안: `prj-memory-execute` 실행 담당이 Task 단계(test 등)에서 그 Task를 지정해 호출하면 그 Task 폴더의 `captures/`에 쓴다. Task 증거이므로 [증거 예산](../../memory-execute/references/conventions.md#working-files)에 들어간다.
+- Task 안: `prj-memory-execute` 실행 담당이 Task 단계(test 등)에서 그 Task를 지정해 호출하면 그 Task 폴더의 `captures/`에 쓴다. Task 증거이므로 `evidence/`와 합친 [증거 예산](../../memory-execute/references/conventions.md#working-files)에 들어가며, 보고서가 인용하지 않은 캡처는 Task 완료 때 지워진다.
 - 단독 실행: 사용자가 직접 요청하면 확인한 사용자 project root의 `.memory/captures/`에 쓴다. 활성 Task가 있어도 current로 Task를 추정하지 않는다.
 - 최종본만 남긴다:
   - 기본 위치에는 요청에 답하는 최종본만 둔다.

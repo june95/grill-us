@@ -53,7 +53,7 @@ T01부터 T03까지 순서대로 진행해줘
 3. 승인 범위 결함은 수정 단계로 돌아가 해결하고 영향받은 증거를 갱신한다. 조사 전용의 대상 실패는 [Investigation Outcomes](references/conventions.md#investigation-outcomes)로 보존하며 자동 수정/후속 등록하지 않는다.
 4. 범위 안 조정은 기록하고, 중요한 새 동작/계약 선택은 [Change Boundaries](references/conventions.md#change-boundaries)를 따른다. 환경·설계 blocker는 원인·재개 행동을 남기고 멈춘다. 사용자가 없는 실행에서 확인이 필요하면 [Unattended Runs](references/conventions.md#unattended-runs)를 따른다.
 5. [Quality Gate](references/commit-check.md#quality-gate)로 AC·근거·최종 품질을 판정한다. ready는 done이 아니다. Task 범위 변경과 사용자 정책에 따라 [Staging](references/commit-check.md#staging), [Commit Intent](references/commit-check.md#commit-intent) 또는 [No Commit](references/commit-check.md#no-commit)을 처리한다.
-6. 성공 commit/명시 none/Task 변경 없음 정책을 실제로 확인한 뒤 [작업 파일 정리](references/commit-check.md#working-file-cleanup) → Task done → Phase/Plan 집계 → current를 갱신한다. 정리 실패·승인 대기는 기록하고 done을 막지 않는다. 커밋이 실패하면 현재 Task에 머무른다.
+6. 성공 commit/명시 none/Task 변경 없음 정책을 실제로 확인한 뒤 [작업 파일 정리](references/commit-check.md#working-file-cleanup) → Task done → Phase/Plan 집계 → current를 갱신한다. 정리는 묻지 않고 하며, 정리 실패·남긴 항목·끊긴 링크는 기록하고 done을 막지 않는다. 커밋이 실패하면 현재 Task에 머무른다.
 7. 한 Task에서 끝내며 연속 요청만 그 범위로 진행한다. 다음 Task는 실제 시작 전 pending, 마지막 Task 후 Active Task/Stage는 없음이다. 다른 pending Plan을 임의로 시작하지 않는다.
 
 ## Stage Mode

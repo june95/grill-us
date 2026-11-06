@@ -116,7 +116,14 @@
       - 형식을 바꿔 옮긴 값은 줄이 같지 않아 세지 않는다(채점 몫). 링크·특수 항목은 `.memory` 새 파일 검사가 본다. 실행 전 `source`를 읽을 수 없으면 실패다.
     - 작업 파일 시나리오(`execute-working-files`):
       - `allow`는 규약 Workflow 표의 단계 보고 이름(`task`·`reference`·`implementation`·`test`·`commit` 등의 `.md`)과 phase·plan·decision·state·history(날짜 이름)·current·project다.
-      - `evidence`는 Task 폴더 바로 아래 파일이다(결정 D02의 인용 요약 증거).
+      - `evidence`는 Task 폴더의 `evidence/`·`captures/` 아래 파일이다(Working Files의 인용 요약 증거). 인용될 때만 허용한다.
+        - 인용: 그 Task 폴더 바로 아래 `.md`가 Task 기준 경로(`evidence/a/summary.json`, 앞의 `./` 허용)를 적거나, 같은 Plan state(`.memory/state/{plan}.md`)가 state 기준 `../phases/{plan}/{phase}/{task}/…` 또는 저장소 기준 `.memory/phases/…` 경로를 적는다. 다른 위치 안의 `phases/…`(`../archive/phases/…`, 절대 경로)는 인용이 아니다.
+        - 경로 없이 이름만 적은 인용(앞에 `/`·`\`가 없는 이름)은 그 Task의 후보 중 그 이름이 하나뿐일 때만 인정한다. 다른 하위 경로·다른 Task 경로(`../T02-x/evidence/…`)·절대 경로의 마지막 이름과 다른 Plan state의 인용은 인용이 아니다.
+      - Task 폴더(`T01-{slug}` 형식) 바로 아래 md는 기록 이름(`allow`)일 때만 허용한다.
+        - 알려진 제한: Workflow 표 Evidence 열이 가리키는 커스텀 단계 보고는 정본(Working Files)상 기록 md지만, 이 결정적 검사는 인정하지 않는다.
+        - 이유: 그런 보고를 인정하려면 `task.md`의 Markdown 구조(fence·주석·들여쓰기·제목·표)를 해석해야 하고, 경계 사례마다 거짓 통과가 생긴다. fixture에는 커스텀 단계가 없다.
+        - 그런 보고를 만든 실행은 `newMemoryFiles`의 `unexpected`로 나온다. 결과를 읽을 때 이 제한을 감안한다.
+      - Task 폴더 바로 아래의 md가 아닌 파일, 위 조건에 맞지 않는 md, `work/` 아래 파일은 실패다.
       - `scoreOutsideDenials: true`다. 규칙대로 OS 임시 폴더를 찾거나 쓰려다 거부된 실행도 판정한다.
       - `copiedLines`는 fixture 로그(240줄)에 상한 5줄이다. 대표 표본 몇 줄은 통과하고, 로그 전체를 옮기면 실패다.
       - 채점 항목은 두 개다. 증거 후보가 요약뿐인지, 형식을 바꿔 옮긴 것을 포함해 로그의 줄별 값을 5줄 넘게 옮기지 않았는지를 본다.

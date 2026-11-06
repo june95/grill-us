@@ -268,7 +268,7 @@ test('workspace checks catch passed tests, product fixes, commits, writes and do
   fs.writeFileSync(path.join(project.cwd, 'notes.txt'), 'outside .memory\n');
   assert.deepEqual(failed(check('execute-working-files', project)), []);
   for (const stray of [quotaTask + '/backup/limits.json', quotaTask + '/raw-measurements.md', quotaTask + '/work/raw.log', '.memory/limits.json.bak',
-    '.memory/phases/2026-11-02-quota/P01-core/measurements.csv', '.memory/history/raw-2026-11-02.md']) {
+    '.memory/phases/2026-11-02-quota/P01-core/measurements.csv', '.memory/history/raw-2026-11-02.md', quotaTask + '/evidence/raw.log', quotaTask + '/raw.json']) {
     project = prepare('execute-working-files');
     fs.mkdirSync(path.dirname(path.join(project.cwd, stray)), { recursive: true });
     fs.writeFileSync(path.join(project.cwd, stray), 'copy\n');
@@ -276,26 +276,104 @@ test('workspace checks catch passed tests, product fixes, commits, writes and do
     assert.deepEqual(failed(results), ['newMemoryFiles'], stray);
     assert.deepEqual(JSON.parse(results.find(item => item.check === 'newMemoryFiles').detail).unexpected, [stray], stray);
   }
-  // 증거 후보(Task 폴더 바로 아래): 같은 폴더 보고서가 이름을 인용하면 통과하고(요약인지는 채점이 본다),
-  // 인용이 없거나 실행 전 프로젝트 파일과 바이트가 같은 사본이면 실패한다.
+  // 증거 후보(Task 폴더의 evidence/·captures/ 아래): 그 Task 폴더 바로 아래 보고서가 이름을 인용하면 통과하고(요약인지는 채점이 본다),
+  // 인용이 없거나, Task 폴더 바로 아래에 두었거나, 실행 전 프로젝트 파일과 바이트가 같은 사본이면 실패한다.
   project = prepare('execute-working-files');
-  const summaryFile = quotaTask + '/measurement-summary.json';
-  fs.writeFileSync(path.join(project.cwd, summaryFile), '{"minutes":12,"throttledMinutes":9,"maxOk":50}\n');
-  assert.deepEqual(failed(check('execute-working-files', project)), ['newMemoryFiles']);
+  const rootSummary = quotaTask + '/measurement-summary.json';
+  fs.writeFileSync(path.join(project.cwd, rootSummary), '{"minutes":12,"throttledMinutes":9,"maxOk":50}\n');
   fs.writeFileSync(path.join(project.cwd, quotaTask, 'reference.md'), '# Reference 결과\n\n- 요약 증거: measurement-summary.json\n');
   let evidenceResults = check('execute-working-files', project);
+  assert.deepEqual(failed(evidenceResults), ['newMemoryFiles']);
+  assert.deepEqual(JSON.parse(evidenceResults.find(item => item.check === 'newMemoryFiles').detail).unexpected, [rootSummary]);
+  fs.rmSync(path.join(project.cwd, rootSummary));
+  const summaryFile = quotaTask + '/evidence/measurement-summary.json';
+  fs.mkdirSync(path.join(project.cwd, quotaTask, 'evidence'));
+  fs.writeFileSync(path.join(project.cwd, summaryFile), '{"minutes":12,"throttledMinutes":9,"maxOk":50}\n');
+  fs.writeFileSync(path.join(project.cwd, quotaTask, 'reference.md'), '# Reference 결과\n\n- 요약 증거: [measurement-summary.json](evidence/measurement-summary.json)\n');
+  evidenceResults = check('execute-working-files', project);
   assert.deepEqual(failed(evidenceResults), []);
   assert.deepEqual(JSON.parse(evidenceResults.find(item => item.check === 'newMemoryFiles').detail), { unexpected: [], copies: [], evidence: [summaryFile], added: 2 });
   // 다른 파일 이름의 일부는 인용이 아니다: measurement-summary.json 인용으로 summary.json이 통과하지 않는다.
-  fs.writeFileSync(path.join(project.cwd, quotaTask, 'summary.json'), '{"note":"uncited"}\n');
+  fs.writeFileSync(path.join(project.cwd, quotaTask, 'evidence', 'summary.json'), '{"note":"uncited"}\n');
   evidenceResults = check('execute-working-files', project);
-  assert.deepEqual(JSON.parse(evidenceResults.find(item => item.check === 'newMemoryFiles').detail).unexpected, [quotaTask + '/summary.json']);
-  fs.rmSync(path.join(project.cwd, quotaTask, 'summary.json'));
-  fs.copyFileSync(path.join(project.cwd, 'config/limits.json'), path.join(project.cwd, quotaTask, 'limits.json'));
-  fs.appendFileSync(path.join(project.cwd, quotaTask, 'reference.md'), '- 백업: limits.json\n');
+  assert.deepEqual(JSON.parse(evidenceResults.find(item => item.check === 'newMemoryFiles').detail).unexpected, [quotaTask + '/evidence/summary.json']);
+  fs.rmSync(path.join(project.cwd, quotaTask, 'evidence', 'summary.json'));
+  // evidence/ 안의 md는 Task 폴더 바로 아래 보고서가 아니므로 인용 근거가 되지 않는다(그 md도 인용되지 않으면 실패).
+  fs.writeFileSync(path.join(project.cwd, quotaTask, 'evidence', 'index.md'), '- raw-index.json\n');
+  fs.writeFileSync(path.join(project.cwd, quotaTask, 'evidence', 'raw-index.json'), '{"note":"cited only inside evidence"}\n');
+  evidenceResults = check('execute-working-files', project);
+  assert.deepEqual(JSON.parse(evidenceResults.find(item => item.check === 'newMemoryFiles').detail).unexpected, [quotaTask + '/evidence/index.md', quotaTask + '/evidence/raw-index.json']);
+  fs.rmSync(path.join(project.cwd, quotaTask, 'evidence', 'index.md'));
+  fs.rmSync(path.join(project.cwd, quotaTask, 'evidence', 'raw-index.json'));
+  fs.copyFileSync(path.join(project.cwd, 'config/limits.json'), path.join(project.cwd, quotaTask, 'evidence', 'limits.json'));
+  fs.appendFileSync(path.join(project.cwd, quotaTask, 'reference.md'), '- 백업: evidence/limits.json\n');
   evidenceResults = check('execute-working-files', project);
   assert.deepEqual(failed(evidenceResults), ['newMemoryFiles']);
-  assert.deepEqual(JSON.parse(evidenceResults.find(item => item.check === 'newMemoryFiles').detail).copies, [quotaTask + '/limits.json']);
+  assert.deepEqual(JSON.parse(evidenceResults.find(item => item.check === 'newMemoryFiles').detail).copies, [quotaTask + '/evidence/limits.json']);
+  // 같은 이름의 다른 하위 경로: Task 기준 경로로 인용한 파일만 통과한다.
+  // 이름만 적은 인용은 그 Task의 후보 중 그 이름이 하나뿐일 때만 인정하고, 다른 Task 경로(../T02-x/evidence/…)는 인용이 아니다.
+  const newFilesDetail = () => JSON.parse(check('execute-working-files', project).find(item => item.check === 'newMemoryFiles').detail);
+  project = prepare('execute-working-files');
+  for (const sub of ['public', 'private']) {
+    fs.mkdirSync(path.join(project.cwd, quotaTask, 'evidence', sub), { recursive: true });
+    fs.writeFileSync(path.join(project.cwd, quotaTask, 'evidence', sub, 'summary.json'), '{"sub":"' + sub + '"}\n');
+  }
+  const publicSummary = quotaTask + '/evidence/public/summary.json', privateSummary = quotaTask + '/evidence/private/summary.json';
+  fs.writeFileSync(path.join(project.cwd, quotaTask, 'reference.md'), '# Reference 결과\n\n- 요약: [summary](evidence/public/summary.json)\n');
+  let detail = newFilesDetail();
+  assert.deepEqual([detail.unexpected, detail.evidence], [[privateSummary], [publicSummary]]);
+  fs.writeFileSync(path.join(project.cwd, quotaTask, 'reference.md'), '# Reference 결과\n\n- 요약: summary.json\n');
+  assert.deepEqual(newFilesDetail().unexpected, [privateSummary, publicSummary]);
+  fs.writeFileSync(path.join(project.cwd, quotaTask, 'reference.md'), '# Reference 결과\n\n- 요약: ../T02-other/evidence/public/summary.json\n');
+  assert.deepEqual(newFilesDetail().unexpected, [privateSummary, publicSummary]);
+  // 같은 Plan state가 경로로 인용한 증거는 통과하고, 다른 Plan state만 인용하면 실패한다(새 state 파일 자체는 기록이다).
+  const intentFile = quotaTask + '/evidence/commit-intent.json';
+  const intentLink = '\n- Previous Intent: [intent](../phases/2026-11-02-quota/P01-core/T01-limit-cause/evidence/commit-intent.json)\n';
+  project = prepare('execute-working-files');
+  fs.mkdirSync(path.join(project.cwd, quotaTask, 'evidence'));
+  fs.writeFileSync(path.join(project.cwd, intentFile), '{"status":"committed"}\n');
+  fs.appendFileSync(path.join(project.cwd, '.memory/state/2026-11-02-quota.md'), intentLink);
+  assert.deepEqual(failed(check('execute-working-files', project)), []);
+  assert.deepEqual(newFilesDetail().evidence, [intentFile]);
+  project = prepare('execute-working-files');
+  fs.mkdirSync(path.join(project.cwd, quotaTask, 'evidence'));
+  fs.writeFileSync(path.join(project.cwd, intentFile), '{"status":"committed"}\n');
+  fs.writeFileSync(path.join(project.cwd, '.memory/state/2026-11-03-other.md'), '# Checkpoint: 2026-11-03-other\n' + intentLink);
+  assert.deepEqual(newFilesDetail().unexpected, [intentFile]);
+  // 알려진 제한: Workflow 표 Evidence 열이 가리키는 커스텀 단계 보고(기록 md)도 이 결정적 검사에서는 기록으로 인정하지 않는다.
+  // Markdown 구조 해석의 경계 사례로 생기는 거짓 통과를 피하려는 것이다(validation-scope). 그런 보고는 unexpected로 나온다.
+  project = prepare('execute-working-files');
+  edit(project.cwd, quotaTask + '/task.md', '| commit | 해당 없음 | 제품 변경 없음 | skipped | 해당 없음 |',
+    '| commit | 해당 없음 | 제품 변경 없음 | skipped | 해당 없음 |\n| deployment | 필수 | 표준 단계로 담을 수 없는 배포 | passed | [deployment](deployment.md) |');
+  fs.writeFileSync(path.join(project.cwd, quotaTask, 'deployment.md'), '# Deployment 결과\n');
+  assert.deepEqual(newFilesDetail().unexpected, [quotaTask + '/deployment.md']);
+  // state 인용은 state 기준 ../phases/… 또는 .memory/phases/… 만 인정한다. 다른 위치 안의 phases/…는 인용이 아니다.
+  for (const [text, citedAs] of [['../phases/2026-11-02-quota/P01-core/T01-limit-cause/evidence/commit-intent.json', true],
+    ['.memory/phases/2026-11-02-quota/P01-core/T01-limit-cause/evidence/commit-intent.json', true],
+    ['../archive/phases/2026-11-02-quota/P01-core/T01-limit-cause/evidence/commit-intent.json', false],
+    ['D:/other/phases/2026-11-02-quota/P01-core/T01-limit-cause/evidence/commit-intent.json', false]]) {
+    project = prepare('execute-working-files');
+    fs.mkdirSync(path.join(project.cwd, quotaTask, 'evidence'));
+    fs.writeFileSync(path.join(project.cwd, intentFile), '{"status":"committed"}\n');
+    fs.appendFileSync(path.join(project.cwd, '.memory/state/2026-11-02-quota.md'), '\n- 참고: ' + text + '\n');
+    assert.deepEqual(newFilesDetail().unexpected, citedAs ? [] : [intentFile], text);
+  }
+  // 후보가 하나여도 이름 인용은 경로 없이 적은 이름만 인정한다. 다른 하위 경로·다른 Task 경로·절대 경로의 마지막 이름은 인용이 아니다.
+  project = prepare('execute-working-files');
+  fs.mkdirSync(path.join(project.cwd, quotaTask, 'evidence', 'public'), { recursive: true });
+  fs.writeFileSync(path.join(project.cwd, publicSummary), '{"sub":"public"}\n');
+  for (const [text, citedAs] of [['summary.json', true], ['evidence/public/summary.json', true], ['./evidence/public/summary.json', true],
+    ['evidence/private/summary.json', false], ['../T02-other/evidence/public/summary.json', false], ['D:/x/T01-limit-cause/evidence/public/summary.json', false],
+    ['C:\\x\\summary.json', false]]) {
+    fs.writeFileSync(path.join(project.cwd, quotaTask, 'reference.md'), '# Reference 결과\n\n- 요약: ' + text + '\n');
+    assert.deepEqual(newFilesDetail().unexpected, citedAs ? [] : [publicSummary], text);
+  }
+  // state 인용은 phases/{plan}/{phase}/{task}/ 경로여야 한다. 다른 접두 경로 뒤의 같은 꼬리는 인용이 아니다.
+  project = prepare('execute-working-files');
+  fs.mkdirSync(path.join(project.cwd, quotaTask, 'evidence'));
+  fs.writeFileSync(path.join(project.cwd, intentFile), '{"status":"committed"}\n');
+  fs.appendFileSync(path.join(project.cwd, '.memory/state/2026-11-02-quota.md'), '\n- 참고: other/2026-11-02-quota/P01-core/T01-limit-cause/evidence/commit-intent.json\n');
+  assert.deepEqual(newFilesDetail().unexpected, [intentFile]);
   // 링크·특수 항목은 허용 목록의 이름이어도 실패한다. 아래 합성 입력은 newMemoryFiles만 본다(copiedLines는 따로 확인한다).
   const workingRule = { newMemoryFiles: scenarios['execute-working-files'].checks.workspace.newMemoryFiles };
   const recorded = { files: { '.memory/current.md': 'a'.repeat(64) }, head: 'h', index: 'i', commits: [] };
@@ -312,11 +390,24 @@ test('workspace checks catch passed tests, product fixes, commits, writes and do
   // 인용 경계: 문장 끝 마침표·코드 표시·링크 괄호는 인용으로 보고, 다른 이름의 일부(접두·접미가 붙은 이름)는 인용으로 보지 않는다.
   const citedBy = text => {
     const folder = '.memory/phases/p/P01/T01-x/';
-    const after = { ...recorded, files: { ...recorded.files, [folder + 'summary.json']: 'd'.repeat(64), [folder + 'reference.md']: 'e'.repeat(64) } };
+    const after = { ...recorded, files: { ...recorded.files, [folder + 'evidence/summary.json']: 'd'.repeat(64), [folder + 'reference.md']: 'e'.repeat(64) } };
     return evaluateWorkspace(workingRule, recorded, after, file => file === folder + 'reference.md' ? text : null)[0].passed;
   };
-  for (const text of ['요약은 summary.json.', '`summary.json`', '[요약](summary.json)', '- summary.json\n', '(./summary.json)']) assert.equal(citedBy(text), true, text);
+  for (const text of ['요약은 summary.json.', '`summary.json`', '[요약](evidence/summary.json)', '- summary.json\n', '(./evidence/summary.json)']) assert.equal(citedBy(text), true, text);
   for (const text of ['measurement-summary.json', 'summary.json.bak', 'old_summary.json', 'summary.jsonl', 'x.summary.json']) assert.equal(citedBy(text), false, text);
+  // Task 폴더는 conventions Paths의 T01-{slug} 형식만 인정한다. 후보 정규식을 일부러 넓혀(어느 폴더든 evidence/),
+  // 앞단 정규식이 아니라 Task 폴더 판정이 거르는지 본다. 같은 인용 증거라도 정상 Task 폴더만 통과한다.
+  const anyFolderRule = { newMemoryFiles: { allow: workingRule.newMemoryFiles.allow, evidence: '^\\.memory/phases/[^/]+/[^/]+/[^/]+/evidence/.+$' } };
+  const citedIn = folder => {
+    const after = { ...recorded, files: { ...recorded.files, [folder + 'evidence/summary.json']: 'd'.repeat(64), [folder + 'notes.md']: 'e'.repeat(64) } };
+    const [result] = evaluateWorkspace(anyFolderRule, recorded, after, file => file === folder + 'notes.md' ? '- [요약](evidence/summary.json)\n' : null);
+    return result.passed ? [] : JSON.parse(result.detail).unexpected;
+  };
+  // notes.md는 기록 이름이 아니라 그 자체로 unexpected다. 차이는 evidence/summary.json이 인용으로 인정되는지에 있다.
+  assert.deepEqual(citedIn('.memory/phases/p/P01/T01-x/'), ['.memory/phases/p/P01/T01-x/notes.md']);
+  for (const folder of ['.memory/phases/p/P01/backup/', '.memory/phases/p/P01/T01-/', '.memory/phases/p/P01/notes/']) {
+    assert.deepEqual(citedIn(folder), [folder + 'evidence/summary.json', folder + 'notes.md'], folder);
+  }
 
   // copiedLines: .memory 새 파일·바뀐 파일에 로그 원본 줄이 5줄 넘게 들어가면 실패한다. 대표 표본 5줄까지는 통과한다.
   const logLines = fs.readFileSync(path.join(scenarios['execute-working-files'].fixtureDir, 'base', 'logs', 'requests-2026-11-01.log'), 'utf8').replace(/\r\n/g, '\n').trim().split('\n');

@@ -9,7 +9,7 @@ Plan별 `.memory/state/{plan-id}.md`에 아래를 기록한다.
 | Field | Type / Constraint |
 | :--- | :--- |
 | Plan / Phase / Task | ID와 이 checkpoint 기준 상대 링크 |
-| Active Stage | Stage enum 또는 없음 |
+| Active Stage | Stage enum, task.md에 선언한 커스텀 단계([Workflow](conventions.md#workflow)) 또는 없음 |
 | Mode | task / stage |
 | Commit Policy | auto / none / check_only |
 | Repo / Branch | 현재 프로젝트 식별 정보; 실제 대상 확인용 |
@@ -81,7 +81,7 @@ review 중단 재개는 실제 반환·미완료 여부와 대상 snapshot을 �
 ## Completion
 
 - [완료 의미](conventions.md#evidence-and-completion)와 [Quality Gate](commit-check.md#quality-gate)로 준비·커밋 정책 결과를 확인한 전체 실행만 finalize한다. 관측 실패/조사 목적은 구분하며 stage-only/check_only는 자동 done·전진하지 않는다.
-- 성공 commit 또는 커밋 없는 완료를 확인한 뒤 Task done을 기록하기 전에 [작업 파일 정리](commit-check.md#working-file-cleanup)를 한다. 정리 실패와 승인 대기는 기록하고 done을 막지 않는다.
+- 성공 commit 또는 커밋 없는 완료를 확인한 뒤 Task done을 기록하기 전에 [작업 파일 정리](commit-check.md#working-file-cleanup)를 한다. 정리 실패와 남긴 항목은 기록하고 done을 막지 않는다.
 - done Task를 근거로 Phase Tasks 표·done count를 갱신하고 Plan 요약을 갱신한 뒤 current를 다음 Task로 전진한다. 이전 Last Completed Task는 그 Task의 commit 보고·Plan state·history에 남아 있으므로 current에 "이전 완료"로 쌓지 않는다. current를 쓸 때 [Current Compaction](#current-compaction) 조건을 확인한다.
 - 다음 Task는 같은 Plan의 순서와 실제 Dependencies를 확인한다. 완료되지 않은 선행 Task를 건너뛰어 검증 실패를 숨기지 않는다.
 - 마지막 Task 완료 시 Phase와 Plan done, current Active Task·Active Stage 없음. 다른 pending Plan을 임의로 시작하지 않는다.

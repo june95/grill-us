@@ -370,13 +370,29 @@ export function evaluateWorkspace(workspace = {}, before, after, readAfter, read
   if (workspace.newMemoryFiles) {
     // 실행 전에 없던 .memory 아래 항목을 판정한다.
     // - 링크·특수 항목과, 실행 전 .memory 밖 파일과 바이트가 같은 사본은 위치·이름과 무관하게 실패다.
-    // - 기록(allow)은 이름으로 허용한다.
-    // - 증거 후보(evidence)는 같은 폴더의 보고서(.md)가 파일 이름을 인용할 때만 허용한다. 내용이 요약인지는 채점이 본다.
+    // - 기록(allow)은 이름으로 허용한다. task.md Workflow 표 Evidence 열이 가리키는 커스텀 단계 보고(기록 md)는
+    //   이 결정적 검사에서 인정하지 않는다(알려진 제한, validation-scope 참고). Markdown 구조 해석의 경계 사례로 생기는
+    //   거짓 통과를 피하려는 것이며, 그런 보고를 만든 실행은 unexpected로 나온다.
+    // - 증거 후보(evidence)는 인용될 때만 허용한다. 내용이 요약인지는 채점이 본다. 인용은 다음 중 하나다.
+    //   - 그 후보가 든 Task 폴더 바로 아래 md가 Task 기준 경로(앞의 ./ 허용)를 적음
+    //   - 같은 md가 경로 없이 파일 이름만 적었고(앞에 / 없음), 그 Task의 후보 중 그 이름이 하나뿐임
+    //   - 같은 Plan의 state(.memory/state/{plan}.md)가 ../phases/{plan}/{phase}/{task}/… 또는 .memory/phases/… 경로를 적음
+    //   Task 폴더를 정할 수 없으면 실패다.
     // - 그 밖은 실패다.
     const { allow, evidence } = workspace.newMemoryFiles;
     const records = allow.map(fullPath);
     const candidate = evidence ? fullPath(evidence) : null;
     const regular = value => /^[0-9a-f]{64}$/.test(value);
+    const escape = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Task 폴더는 conventions Paths의 `T01-{slug}` 형식만 인정한다.
+    const taskOf = file => /^\.memory\/phases\/[^/]+\/[^/]+\/T[0-9]+-[^/]+\//.exec(file)?.[0] ?? null;
+    // Task 기준 경로 인용. 다른 경로의 일부(앞에 / 또는 이름 문자, 예: ../T02/evidence/x)는 인용이 아니다.
+    const pathMention = rel => new RegExp('(?<![A-Za-z0-9._/\\\\-])(?:\\./)?' + escape(rel) + '(?![A-Za-z0-9_/-]|\\.[A-Za-z0-9])');
+    // 경로 없이 이름만 적은 인용. 경로의 마지막 구성요소(앞에 / 또는 \)는 이름 인용이 아니다.
+    const bareMention = name => new RegExp('(?<![A-Za-z0-9._/\\\\-])' + escape(name) + '(?![A-Za-z0-9_/-]|\\.[A-Za-z0-9])');
+    // state 인용. state 파일 기준 상대 경로(../phases/…) 또는 저장소 기준 경로(.memory/phases/…)만 인정한다.
+    // 다른 위치 안의 phases/…(../archive/phases/…, D:/other/phases/…)는 가리키는 파일이 다르므로 인용이 아니다.
+    const statePathMention = segment => new RegExp('(?<![A-Za-z0-9._/\\\\-])(?:\\.\\./|\\.memory/)phases/' + escape(segment) + '(?![A-Za-z0-9_/-]|\\.[A-Za-z0-9])');
     const outside = new Set(Object.entries(before.files).filter(([file, value]) => !file.startsWith('.memory/') && regular(value)).map(([, value]) => value));
     const added = Object.keys(after.files).filter(file => file.startsWith('.memory/') && !Object.hasOwn(before.files, file)).sort();
     const unexpected = [], copies = [], cited = [];
@@ -384,11 +400,15 @@ export function evaluateWorkspace(workspace = {}, before, after, readAfter, read
       if (!regular(after.files[file])) { unexpected.push(file); continue; }
       if (outside.has(after.files[file])) { copies.push(file); continue; }
       if (records.some(pattern => pattern.test(file))) continue;
-      if (candidate?.test(file)) {
-        const folder = file.slice(0, file.lastIndexOf('/') + 1), name = file.slice(folder.length);
-        const reports = Object.keys(after.files).filter(other => other !== file && other.startsWith(folder) && other.endsWith('.md') && !other.slice(folder.length).includes('/'));
-        const mention = mentions(name);
-        if (reports.some(report => mention.test(readAfter(report) ?? ''))) { cited.push(file); continue; }
+      const taskFolder = candidate?.test(file) ? taskOf(file) : null;
+      if (taskFolder) {
+        const rel = file.slice(taskFolder.length), name = rel.slice(rel.lastIndexOf('/') + 1);
+        const reports = Object.keys(after.files).filter(other => other !== file && other.startsWith(taskFolder) && other.endsWith('.md') && !other.slice(taskFolder.length).includes('/'));
+        const sameName = Object.keys(after.files).filter(other => other.startsWith(taskFolder) && candidate.test(other) && other.slice(other.lastIndexOf('/') + 1) === name).length;
+        const byPath = pathMention(rel), byName = sameName === 1 ? bareMention(name) : null;
+        const byState = statePathMention(taskFolder.slice('.memory/phases/'.length) + rel);
+        const state = readAfter('.memory/state/' + taskFolder.split('/')[2] + '.md') ?? '';
+        if (byState.test(state) || reports.some(report => { const text = readAfter(report) ?? ''; return byPath.test(text) || Boolean(byName?.test(text)); })) { cited.push(file); continue; }
       }
       unexpected.push(file);
     }

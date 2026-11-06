@@ -905,6 +905,27 @@ test('plan rejects a known foreign pending Phase even if its own Phase is listed
   assert(errors(out).some(d => /Plan의 Phase 소속/.test(d.message)));
 });
 
+test('Active Stage accepts a custom stage only when the active task declares it in Workflow', t => {
+  const root = memoryFixture(t);
+  const activeStageError = () => errors(checkMemory(root)).some(d => /Active Stage 값/.test(d.message));
+  const customNameError = () => errors(checkMemory(root)).some(d => /커스텀 단계 이름/.test(d.message));
+  // 선언하지 않은 커스텀 단계는 거부한다.
+  changeDocument(root, 'examples/current.md', s => s.replace('- implementation (구조 설명을 위한 값)', '- deployment'));
+  assert.equal(activeStageError(), true);
+  // 활성 Task의 Workflow 표에 선언하면 허용한다.
+  changeDocument(root, exampleTaskRelative, s => s.replace(/^(\| commit \|.*)$/m, '$1\n| deployment | 필수 | 표준 단계로 담을 수 없는 배포 실행 | pending | 수행 시 deployment.md |'));
+  assert.equal(activeStageError(), false);
+  assert.equal(customNameError(), false);
+  // 다른 Task(T02)에만 선언한 단계는 활성 Task의 선언이 아니다.
+  const otherRoot = memoryFixture(t);
+  changeDocument(otherRoot, 'examples/current.md', s => s.replace('- implementation (구조 설명을 위한 값)', '- deployment'));
+  changeDocument(otherRoot, 'examples/phases/2026-08-22-product-api/P01-core-crud/T02-crud-handler/task.md', s => s.replace(/^(\| commit \|.*)$/m, '$1\n| deployment | 필수 | 배포 | pending | 수행 시 deployment.md |'));
+  assert(errors(checkMemory(otherRoot)).some(d => /Active Stage 값/.test(d.message)));
+  // 커스텀 단계 이름이 소문자 kebab-case가 아니면 거부한다.
+  changeDocument(root, exampleTaskRelative, s => s.replace('| deployment | 필수', '| Deploy_Step | 필수'));
+  assert.equal(customNameError(), true);
+});
+
 test('invalid or stale Active Stage is rejected when no task is active', t => {
   for (const [mutate, expected] of [
     [s => s.replace('- implementation (구조 설명을 위한 값)', '- unknown-stage'), /Active Stage 값/],

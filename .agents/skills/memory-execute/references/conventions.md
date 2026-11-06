@@ -9,7 +9,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | 공통 규칙 | 상세 소유자 | 소비자가 남길 요약 |
 | :--- | :--- | :--- |
 | ID·로컬 경로·상태·활성 위치 | [Paths](#paths), [Task Fields](#task-fields), [State Ownership](#state-ownership) | 실제 대상과 현재/마지막 완료를 구분, 사용자 위치 보존 |
-| 작업 파일·증거 예산·완료 시 정리 | [Working Files](#working-files), [Working File Cleanup](commit-check.md#working-file-cleanup) | 작업 파일은 `.memory` 밖 OS 임시 폴더, 재개 상태만 `work/`, 요약 증거와 Task당 예산, `.memory` 안 코드 실행·링크·인증 정보 금지, 완료 때 소유분 자동·나머지 승인 정리와 링크 미추적 |
+| 작업 파일·증거 예산·완료 시 정리 | [Working Files](#working-files), [Working File Cleanup](commit-check.md#working-file-cleanup) | 작업 파일은 `.memory` 밖 OS 임시 폴더, 재개 상태만 `work/`, 인용 증거는 `evidence/`·`captures/`와 그 합계 예산, `.memory` 안 코드 실행·링크·인증 정보 금지, 완료 때 기록 md와 인용 증거 외에는 묻지 않고 삭제, 링크 미추적 |
 | 등록·분할·확정 선택 | [Registration and Planning](#registration-and-planning), [Change Boundaries](#change-boundaries) | 계획/등록 구현 금지, 미결정만 질문, 충돌 선택은 한 번 지적 |
 | 단계 선택·단독 실행 경계 | [Workflow](#workflow), [Stage Isolation](#stage-isolation) | 요청한 단계만 수행, 자동 완료/전진 금지 |
 | 증거·완료·조사 결과·환경 영향 | [Evidence and Completion](#evidence-and-completion), [Investigation Outcomes](#investigation-outcomes), [Environment Evidence](#environment-evidence) | 실패/stale 보존, 실행하지 못한 검사는 통과 아님, 검사 추가·변경은 위반·정상 대조, 검사 결과와 목적 판정 구분 |
@@ -40,6 +40,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | Phase 현황 | `.memory/phases/{plan-id}/{phase-id}/phase.md` |
 | Task 청사진 정본 | `.memory/phases/{plan-id}/{phase-id}/{task-folder}/task.md` |
 | 실행한 단계 결과 | 해당 Task 폴더의 단계별 보고서 |
+| 보고서가 인용하는 Task 증거 | 해당 Task 폴더의 `evidence/`, UI 캡처는 `captures/` — [Working Files](#working-files) |
 | 전역 활성 위치 | `.memory/current.md` |
 | Plan별 재개·커밋 의도 | `.memory/state/{plan-id}.md` |
 | 일일 이력 | `.memory/history/YYYY-MM-DD.md` |
@@ -68,14 +69,14 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 
 | 대상 | 위치 | 처리 |
 | :--- | :--- | :--- |
-| 작업 파일 | OS 임시 폴더 바로 아래의 Task 소유 폴더. 호스트가 세션 전용 scratch를 주면 그곳도 쓸 수 있다(소유 표시와 자동 정리는 OS 임시 소유 폴더에만 적용) | 만든 경로를 그 Task의 단계 보고에 적고, Task 완료 때 [작업 파일 정리](commit-check.md#working-file-cleanup)의 조건에 따라 지운다 |
-| 세션을 넘겨 이어야 하는 작은 재개 상태 | 해당 Task 폴더의 `work/` 하나 | 진행 표시·남은 항목 목록처럼 재개에 필요한 것만 둔다. 코드·원본 출력·사본은 두지 않고, Task 완료 때 [작업 파일 정리](commit-check.md#working-file-cleanup)의 조건에 따라 통째로 지운다 |
-| 보고서가 인용하는 증거 | 해당 Task 폴더 | 요약·건수·지표·SHA256과 대표 표본 몇 개만 둔다. 아래 증거 예산을 지킨다 |
+| 작업 파일 | OS 임시 폴더 바로 아래의 Task 소유 폴더. 호스트가 세션 전용 scratch를 주면 그곳도 쓸 수 있다(소유 표시와 자동 정리는 OS 임시 소유 폴더에만 적용) | 만든 경로를 그 Task의 단계 보고에 적고, Task 완료 때 [작업 파일 정리](commit-check.md#working-file-cleanup)로 묻지 않고 지운다(소유 인정 조건이 맞을 때) |
+| 세션을 넘겨 이어야 하는 작은 재개 상태 | 해당 Task 폴더의 `work/` 하나 | 진행 표시·남은 항목 목록처럼 재개에 필요한 것만 둔다. 코드·원본 출력·사본은 두지 않고, Task 완료 때 [작업 파일 정리](commit-check.md#working-file-cleanup)로 묻지 않고 통째로 지운다 |
+| 보고서가 인용하는 증거 | 해당 Task 폴더의 `evidence/`. Task 안에서 찍은 UI 캡처는 `captures/` | 처음부터 여기에 쓰고 보고서는 `evidence/…`로 링크한다. 요약·건수·지표·SHA256과 대표 표본 몇 개만 둔다. 아래 증거 예산을 지킨다. 완료 때 인용되지 않은 파일은 지운다 |
 | 계속 보관해야 하는 원본 | 사용자가 정한 위치 | 위치를 사용자에게 묻고, 보고서에는 경로와 SHA256만 남긴다 |
 
 - 소유 표시:
   - 폴더는 OS 임시 폴더 바로 아래에 새로 만든다. 이미 있는 폴더를 재사용하지 않는다. 이름은 `prj-memory-{plan-id}-{task-id}-` 접두어와 임의 접미어다.
-  - 폴더는 현재 사용자만 읽고 쓸 수 있게 만든다(POSIX는 0700, Windows는 사용자 프로필 아래 TEMP처럼 사용자 전용 위치). 이를 보장할 수 없으면 비밀이 담길 수 있는 원본(인증 출력, 리뷰·모델 응답 원문, 환경 정보)은 저장하지 않고 요약만 남긴다. 그런 폴더는 [작업 파일 정리](commit-check.md#working-file-cleanup)의 권한 조건을 만족하지 않으므로 완료 때 자동으로 지우지 않는다.
+  - 폴더는 현재 사용자만 읽고 쓸 수 있게 만든다(POSIX는 0700, Windows는 사용자 프로필 아래 TEMP처럼 사용자 전용 위치). 이를 보장할 수 없으면 비밀이 담길 수 있는 원본(인증 출력, 리뷰·모델 응답 원문, 환경 정보)은 저장하지 않고 요약만 남긴다.
   - 그 안에 `.prj-memory-owner.json`을 둔다. 필드는 project(사용자 프로젝트 root의 실제 절대 경로), path(이 폴더의 실제 절대 경로), plan, phase, task, createdAt, purpose, nonce(예측할 수 없는 임의 값)다.
   - 만든 경로와 nonce를 그 Task의 단계 보고에 기록한다. 만든 직후 확인할 수 있으면 파일 시스템 식별자(POSIX dev·inode, Windows 볼륨 일련번호·파일 ID)도 함께 기록한다.
   - 소유로 인정하는 조건은 모두 맞아야 한다:
@@ -90,9 +91,24 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
   - 활동이 끝나기 전에 스스로 지운다.
   - 이 절은 쓰기 권한을 새로 주지 않는다. 읽기 전용 스킬의 무쓰기 경계는 그대로다.
 - `.memory` 루트에는 [Paths](#paths) 표의 항목만 둔다: `current.md`, `project.md`, `decisions/`, `plans/`, `phases/`, `state/`, `history/`, `wiki/`, `captures/`.
-- Task 폴더에는 `task.md`, 단계 보고(`*.md`), 보고서가 인용하는 작은 증거(snapshot·commit intent·메시지 파일 포함), `captures/`, `work/`만 둔다.
+- Task 폴더에는 기록 md, `evidence/`, `captures/`, `work/`만 둔다.
+  - 기록 md: Task 폴더 바로 아래의 다음 파일이다.
+    - `task.md`와 [Workflow](#workflow) 표준 단계의 보고: `reference.md`, `design-guide-update.md`, `implementation.md`, `review.md`, `review-action.md`, `test.md`, `guide-update.md`, `final-review.md`, `commit.md`
+    - `task.md` Workflow 표의 Evidence 열이 상대 링크로 가리키는 md(선언한 커스텀 단계의 보고 포함)
+    - 하위 폴더 안의 md는 기록 md가 아니다.
+  - `evidence/`: 보고서가 인용하는 작은 증거(snapshot·intent·메시지 파일 등)다. 안에 둔 md도 증거로 다룬다.
+  - `captures/`: Task 안에서 찍은 UI 캡처 최종본이다([prj-page-capture](../../page-capture/SKILL.md) 계약).
+  - `work/`: 진행 중에만 두는 재개 상태다.
+- 인용: 이 Task 폴더의 기록 md 또는 이 Plan의 state(`.memory/state/{plan-id}.md`)가 상대 링크나 경로로 가리키는 파일이다.
+  - md가 아닌 파일(JSON 색인 등) 안에만 이름이 있으면 인용이 아니다.
+  - 다른 파일 이름의 일부로만 나오면 인용이 아니다.
+- md 형식이어도 다음은 기록 md가 아니므로 Task 폴더에 두지 않는다.
+  - 리뷰·모델 위임의 지시문·응답 원문: 작업 파일(OS 임시 또는 세션 scratch)이다.
+  - 재개 상태: `work/` 또는 Plan state에 둔다.
+  - commit-check 결과: `task.md`의 Completion Check에 적는다.
+- Task 완료 때 기록 md와 인용된 `evidence/`·`captures/` 파일 외에는 묻지 않고 지운다([작업 파일 정리](commit-check.md#working-file-cleanup)). 인용 파일을 `evidence/`·`captures/` 밖에 두면 완료 때 지워지고 그 링크는 끊긴다.
 - 증거 예산:
-  - Task 폴더에서 보고서(`*.md`)와 `work/`를 뺀 파일은 합계 100개·20MB 안에 둔다.
+  - `evidence/`와 `captures/`의 파일은 합계 100개·20MB 안에 둔다.
   - 넘을 것 같으면 요약으로 바꾸거나, 원본을 보관할 위치를 사용자에게 묻는다.
 - 대량 결과(항목별 결과 파일, 반복 실행 출력 등)는 건수·지표·SHA256·대표 표본 몇 개로 요약해 보고서에 남기고, 원본은 작업 파일로 다룬다. 원 근거·실패 증거를 보존하라는 규칙은 이 요약과 표본으로 지킨다. 실패 판단에 필요한 오류 줄은 보고서에 인용한다.
 - 코드는 `.memory` 밖에서만 실행한다. `.memory` 안에 스크립트를 두고 실행하거나, 실행 부산물(`__pycache__` 등)이 `.memory`에 생기게 하지 않는다.
@@ -148,7 +164,7 @@ Wiki는 명시한 로컬 Markdown·텍스트의 출처 보존·누적 주제·�
 | Dependencies | Task ID 또는 Task 링크 목록 | 없는 경우 `[]`; 선행 Task 완료 확인 |
 | Project Guide Alignment | `Compliant / Approved Design Change / Blocked` | 승인된 설계 변경에는 승인 근거와 영향 정본 기록 |
 | Commit Policy | `auto / none / check_only` | 기본 auto; 사용자의 명시적 지시 우선 |
-| Stage | 아래 Stage enum | workflow에 단계별 1행 |
+| Stage | 아래 Stage enum 또는 Workflow 표에 선언한 커스텀 단계([Workflow](#workflow)) | workflow에 단계별 1행 |
 | Applicability | `필수 / 필요 시 / 해당 없음` | 적용 이유와 실제 발동 조건 기록 |
 | Execution Status | `pending / running / passed / skipped / failed / blocked / stale` | 수행 결과와 적용 여부는 별개 |
 | Reason / Trigger | string | 생략 근거·조건·판단 변경 이유 |
@@ -157,7 +173,7 @@ Wiki는 명시한 로컬 Markdown·텍스트의 출처 보존·누적 주제·�
 | Covered Files | repo-relative path 목록 | 실제 검토·검증 대상만; unrelated 파일 포함 금지 |
 | Source Snapshot | path별 SHA256·missing·deleted 목록 | 내용 변경 감지; `.memory` 진행 파일 제외 |
 | Checked At | ISO 8601 timestamp 또는 없음 | 실제 수행 시각 |
-| Resume Stage | Stage enum 또는 없음 | 다음 실제 수행 단계 |
+| Resume Stage | Stage enum, 선언한 커스텀 단계 또는 없음 | 다음 실제 수행 단계 |
 | Blocker | string 또는 없음 | 해결되지 않은 원인과 다음 행동 |
 
 Revision은 계약의 버전이다. 단순 문구 정리, stage 상태·보고 기록·커밋 해시 갱신은 계약 변경이 아니면 증가시키지 않는다. scope 또는 검증 의무를 바꿨다면 Revision을 증가시키고 영향을 받는 증거를 다시 확인한다.
@@ -241,6 +257,12 @@ reference → design-guide-update → implementation → review → review-actio
 
 workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` 열을 사용한다.
 
+커스텀 단계: 표준 단계로 담을 수 없는 Task 고유 실행(예: 배포)은 Workflow 표에 행을 더해 선언한다.
+- 이름은 소문자 kebab-case이고 표준 Stage와 겹치지 않는다.
+- 결과 보고는 Task 폴더 바로 아래 `{stage}.md`다. Evidence 열에 링크하면 기록 md가 된다([Working Files](#working-files)).
+- 실행 순서는 표의 행 순서다. Applicability·Status·Evidence 규칙은 표준 단계와 같다. Active Stage·Resume Stage에 그 이름을 쓸 수 있다.
+- 계획할 때 Reason / Trigger에 표준 단계로 담을 수 없는 이유를 적는다. 표에 선언하지 않은 단계의 보고는 기록 md가 아니다.
+
 - 계획 단계에서 AI가 Applicability를 판단하고 이유를 적는다. 필요 시에는 발동 조건을 적는다. 실행 중 새 근거로 판단이 바뀌면 기록하고 사용자의 지시를 우선한다.
 - 해당 없음은 이유를 적은 skipped로 초기화한다. 필수와 필요 시는 실행 전 pending이다.
 - 필요 시는 실제 조건을 확인해 수행하거나 skipped와 사유로 정리한다. 조건 미평가 상태를 완료로 간주하지 않는다.
@@ -264,6 +286,7 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 | design-guide-update/guide-update | 요청 모드의 정본/사용 안내 | 제품 구현 |
 | commit-check | 품질·후보·현재 index 읽기와 판정 | 코드 수정·staging·commit |
 | commit | 유효한 선행 판정에 따른 후보 staging·intent·실제 commit | 부족한 증거를 만드는 전체 workflow |
+| 선언한 커스텀 단계 | task.md의 그 행이 정한 작업과 `{stage}.md` 보고 | 다른 단계·커밋·완료·전진 |
 
 작업 파일 정리는 전체 Task 실행의 완료 처리에서만 한다([Working File Cleanup](commit-check.md#working-file-cleanup)). 단독 단계는 만든 작업 파일 경로를 보고에 남기고 지우지 않는다.
 

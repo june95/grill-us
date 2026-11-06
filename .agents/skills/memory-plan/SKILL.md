@@ -51,7 +51,7 @@ metadata:
 
 ## Workflow Selection
 
-AI가 [Workflow](../memory-execute/references/conventions.md#workflow)의 필수/필요 시/해당 없음과 이유를 선택한다. 승인된 공유 계약 변경은 design-guide-update를 의존 구현 전에 배치한다. 위험·AC에 맞는 review/test와 실제 영향의 guide/refactor만 적용하며 단순 문구 변경은 필요한 대체 근거로 검증할 수 있다.
+AI가 [Workflow](../memory-execute/references/conventions.md#workflow)의 필수/필요 시/해당 없음과 이유를 선택한다. 표준 단계로 담을 수 없는 Task 고유 실행(예: 배포)만 같은 표에 커스텀 단계 행으로 선언하고, Reason / Trigger에 표준 단계로 담을 수 없는 이유를 적는다. 선언하지 않은 단계의 보고는 기록이 아니어서 완료 때 지워진다. 승인된 공유 계약 변경은 design-guide-update를 의존 구현 전에 배치한다. 위험·AC에 맞는 review/test와 실제 영향의 guide/refactor만 적용하며 단순 문구 변경은 필요한 대체 근거로 검증할 수 있다.
 
 생략으로 AC를 입증할 수 없으면 필요한 검증을 유지한다. 아직 실행할 버전/hash/결과를 미리 채우지 않고 [Environment Evidence](../memory-execute/references/conventions.md#environment-evidence)의 관련 확인 범위만 계획한다. 공유 변경에는 commit-check가 필요하며, 커밋 유무와 무관하게 전체 완료의 공통 품질·정책 판정을 남긴다.
 

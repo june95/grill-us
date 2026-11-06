@@ -387,6 +387,8 @@ const taskStatuses = new Set(['pending', 'in_progress', 'blocked', 'done']);
 const commitPolicies = new Set(['auto', 'none', 'check_only']);
 const workflowStages = new Set(['reference', 'design-guide-update', 'implementation', 'review', 'review-action',
   'test', 'guide-update', 'refactor', 'commit-check', 'commit']);
+/** Workflow 표에 선언하는 커스텀 단계 이름 형식(conventions Workflow): 소문자 kebab-case. */
+const customStageName = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 const minimumTaskSections = ['Metadata', 'Status', 'Goal', 'Decision Summary', 'Scope', 'Constraints', 'Dependencies',
   'Guide Alignment', 'Implementation', 'Acceptance Criteria', 'Workflow', 'Validation',
   'Commit Message', 'Completion Check', 'Progress', 'Change Log'];
@@ -580,12 +582,19 @@ export function checkMemoryExamples(root, files) {
     if (!taskStatuses.has(status)) issue(file, doc.sections.get('Status')?.line || 1, 'Task Status enum 오류');
     if (/버그|bug/i.test(metadata.get('Type') || '') && !doc.sections.has('Bug Investigation')) issue(file, 1, '버그 Task의 Bug Investigation 없음');
     checkFields(file, doc.sections.get('Progress'), contract.progress, true);
-    checkTable(file, doc.sections.get('Workflow'), contract.workflowColumns);
+    const workflow = checkTable(file, doc.sections.get('Workflow'), contract.workflowColumns);
+    // 표준 밖 Stage 행은 선언한 커스텀 단계다. 이름 형식만 검사하고, Active Stage 검사에 쓰도록 모은다.
+    const stages = new Set();
+    for (const row of workflow?.rows || []) {
+      const stage = row.cells[0];
+      if (!workflowStages.has(stage) && !customStageName.test(stage || '')) issue(file, row.line, 'Workflow 커스텀 단계 이름은 소문자 kebab-case여야 함');
+      stages.add(stage);
+    }
     checkTable(file, doc.sections.get('Validation'), contract.validationColumns);
     const rel = normalized(file).split('/');
     if (metadata.get('Plan ID') !== rel[2] || metadata.get('Phase ID') !== rel[3] ||
       metadata.get('Task ID') !== rel[3]?.split('-')[0] + '-' + rel[4]?.split('-')[0]) issue(file, 1, '경로와 Plan/Phase/Task metadata 불일치');
-    tasks.set(file, { metadata, status });
+    tasks.set(file, { metadata, status, stages });
   }
   const phases = new Map();
   function summaryFields(file, doc, required) {
@@ -654,7 +663,11 @@ export function checkMemoryExamples(root, files) {
     requireSections(currentFile, current, contract.currentSections);
     const status = checkFields(currentFile, current.sections.get('Status'), contract.currentFields);
     const activeStage = current.sections.get('Active Stage')?.body.match(/^\s*-\s+(\S+)/m)?.[1];
-    if (activeStage !== '없음' && !workflowStages.has(activeStage)) issue(currentFile, current.sections.get('Active Stage')?.line || 1, 'Active Stage 값은 기존 stage 또는 없음이어야 함');
+    // 커스텀 단계는 활성 Task의 Workflow 표에 선언했을 때만 Active Stage로 쓸 수 있다.
+    const activeLink = current.sections.get('Active Task')?.body.match(/\]\(([^)#]+)(?:#[^)]*)?\)/);
+    const activeTask = activeLink && tasks.get(path.resolve(path.dirname(currentFile), activeLink[1]));
+    const declaredStage = Boolean(activeTask?.stages?.has(activeStage) && customStageName.test(activeStage || ''));
+    if (activeStage !== '없음' && !workflowStages.has(activeStage) && !declaredStage) issue(currentFile, current.sections.get('Active Stage')?.line || 1, 'Active Stage 값은 기존 stage, 활성 Task Workflow에 선언한 커스텀 단계 또는 없음이어야 함');
     if (!commitPolicies.has(status.get('Commit Policy')?.split(/\s/)[0])) issue(currentFile, current.sections.get('Status')?.line || 1, 'Current Commit Policy enum 오류');
     const checkpoint = status.get('Checkpoint') || '';
     if (!/^(?:없음\b|없음[ \u2014]|.*\]\([^)]+\))/.test(checkpoint)) issue(currentFile, current.sections.get('Status')?.line || 1, 'Checkpoint는 실제 링크 또는 없음이어야 함');
