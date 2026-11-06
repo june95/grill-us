@@ -178,7 +178,7 @@ T01부터 T03까지 순서대로 진행해줘
 - 이전 위치는 기존 Task·보고·Plan별 state로 보존합니다. 성공 커밋 의도를 초기화하기 전에 Task의 커밋 보고와 마지막 성공 정보를 남기며, 미해결 prepared/failed 의도는 덮어쓰지 않습니다. 매 전환 archive 사본을 만들지 않고 기존 사본은 유지합니다.
 - 임시 스크립트·명령 원본 출력·리뷰 위임 원문·중간 상태·사본·빌드 산출물 같은 작업 파일은 `.memory`에 두지 않고 OS 임시 폴더의 Task 소유 폴더에 둡니다. `.memory`에는 기록과 보고서가 인용한 요약 증거만 남깁니다. 증거는 Task의 `evidence/`(UI 캡처는 `captures/`)에 처음부터 쓰고 합계 100개·20MB 안에 둡니다. 세션을 넘어 이어야 하는 작은 재개 상태만 Task의 `work/`에 둡니다. 상세는 [Working Files](.agents/skills/memory-execute/references/conventions.md#working-files)를 따릅니다.
 - Task를 완료할 때 기록 md(`task.md`, 표준 단계 보고, Workflow 표에 링크된 커스텀 단계 보고)와 인용된 `evidence/`·`captures/` 파일만 남기고, 나머지는 묻지 않고 지웁니다. `work/`와 그 Task의 OS 임시 소유 폴더도 지웁니다. 링크는 따라가지 않고, 지운 것·남긴 것·끊긴 링크는 commit 보고(커밋 없는 완료면 Task의 Completion Check)에 남깁니다. 상세는 [Working File Cleanup](.agents/skills/memory-execute/references/commit-check.md#working-file-cleanup)을 따릅니다.
-- 이미 쌓인 `.memory`는 [prj-memory-tidy](.agents/skills/memory-tidy/SKILL.md)로 점검합니다. 점검은 파일을 쓰지 않고 번호 붙은 목록만 보고하며, 정리는 사용자가 번호·경로로 승인한 항목만 지웁니다. 기록 파일은 지우지 않고 링크는 따라가지 않습니다.
+- 이미 쌓인 `.memory`는 [prj-memory-tidy](.agents/skills/memory-tidy/SKILL.md)로 점검합니다. 점검은 파일을 쓰지 않고 번호 붙은 목록만 보고하며, 정리는 사용자가 번호·경로로 승인한 항목만 지웁니다. 끝난 Task는 완료 정리와 같은 기준으로 분류해, 보고서가 인용한 증거도 "인용됨(지우면 링크 끊김)" 묶음으로 보여 주고 승인하면 지웁니다. 기록 md는 지우지 않고 링크는 따라가지 않습니다. 비표준 폴더는 가장 위 폴더 단위로 한 번호이며, 정리 기록은 승인 항목당 한 줄입니다.
 - memory-explain은 이 기록을 읽어 설명하며 설명 결과를 보고·history로 자동 저장하지 않습니다.
 - 코드·계약·관련 검증 환경 변경 뒤에는 영향을 받은 증거의 최신성을 확인합니다.
 - 제품 테스트와 공유 가이드는 해당 프로젝트의 기존 디렉터리에 둡니다.
