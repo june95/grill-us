@@ -144,6 +144,9 @@
 | C51 | 진행 중인 옛 Plan의 state에 Commit Intent prepared가 있고, 그 Commit Intent Task는 done인데 task.md Commit Status가 prepared(기록 충돌) | 해결로 보지 않고 이관하지도 않음. blocked로 두고 차이를 기록함. tidy도 이 state를 정리 가능으로 보지 않음 | 지침 walkthrough |
 | C52 | 진행 중인 옛 Plan의 state에 Commit Intent prepared가 있고, 그 Task는 done인데 과거 형식이라 Commit Status 필드가 없음. commit 보고에 SHA가 있고 trailer가 대상과 같으며, 그 보고에 성공 대조(changed path·mode/blob·tree) 기록이 있거나 옛 의도의 후보 snapshot으로 Recovery 내용 대조를 통과함 | committed로 보고 해결된 의도로 처리해 이관하지 않음. 확인 결과와 근거를 history에만 남기고 과거 task.md는 고치지 않음. 다음 Task 재개는 막지 않음 | 지침 walkthrough |
 | C53 | C52와 같은데 다음 중 하나: commit 보고에 SHA가 없음, trailer가 다름, 내용 대조 근거가 없음(보고에 대조 기록이 없고 후보 snapshot도 없음), commit의 changed path나 mode/blob이 후보와 다름 | 해결로 보지 않고 blocked. trailer만으로 성공을 인정하지 않고 차이를 기록함 | 지침 walkthrough |
+| C54 | Windows에서 작업 폴더가 필요하고 `[System.IO.Path]::GetTempPath()`가 사용자 임시 폴더(`…\AppData\Local\Temp\`)를 줌 | 그 바로 아래에 `prj-memory-{plan-id}-{task-id}-…` 소유 폴더를 만들고 경로·nonce를 단계 보고에 적음. `%SystemRoot%`로 위치를 조합하지 않음 | 지침 walkthrough |
+| C55 | 사용자 임시 폴더를 얻지 못하거나 얻은 경로가 `%SystemRoot%\Temp`·`%SystemRoot%\SystemTemp`처럼 Windows 디렉터리 아래 | OS 임시 소유 폴더를 만들지 않음. 호스트 세션 scratch가 있으면 그곳, 없으면 작업 파일 없이 요약만 남기고 이유를 단계 보고에 적음. scratch가 현재 사용자 전용인지 보장할 수 없으면 리뷰 응답 원문 같은 비밀이 담길 수 있는 원본은 scratch에도 저장하지 않고 요약만 남김 | 지침 walkthrough |
+| C56 | 완료 정리 때 이 Task 단계 보고에 적힌 소유 폴더가 `C:\Windows\Temp` 아래에 있음(이 규칙 전에 만든 폴더), 표시 파일·nonce는 맞음 | OS 임시 폴더 정의 밖이라 소유가 아님. 옮기거나 지우지 않고 경로·이유를 정리 기록에 적고 사용자가 직접 지우도록 안내함. 완료는 막지 않음 | 지침 walkthrough |
 
 ## Expected State
 

@@ -2,18 +2,18 @@
   "formatVersion": 1,
   "generator": "scripts/build-skills.mjs",
   "sourceSnapshot": {
-    "packaging/grill-us.json": "a5fa39d6af6dad8c1fd952fbfc7ebcb4d54be1d538fc8ffd962dca37a234f4fc",
+    "packaging/grill-us.json": "5ec5f6f2c4a542fc1e106672bc8ad0862b25a4a52b123a00b6ac43ccecfa0341",
     ".agents/skills/grill-me/SKILL.md": "799619da6bdf50144c7dde6b18e3855d83ba63ddf2abec343aace57d3c880742",
     ".agents/skills/memory-execute/SKILL.md": "40a56f5ac3770df4584d96c73b1997fa3215f0543a67d7e9cb5a85119734bb82",
     ".agents/skills/memory-execute/references/analysis.md": "e67218b2a26a3e299a216fca39a3e6899e4b14e6ba748503b3f6c62a851a96bd",
-    ".agents/skills/memory-execute/references/commit-check.md": "aafb454b3a082da1c70226396dc5d77155d06ff529e376d7804b15f8bd04b3b1",
-    ".agents/skills/memory-execute/references/conventions.md": "5fff0c540615c6ffe9cde425b40d704cf67bb22a1d47a333f8886d5f29c01a83",
+    ".agents/skills/memory-execute/references/commit-check.md": "a6ff0faddf151bf7ec7ae801d33bf527909f8a922c4f371f1a1f36161727e097",
+    ".agents/skills/memory-execute/references/conventions.md": "626f256dcf1a2a9e453a54dcbc963ad3a82f5b079eb13dd87a40a323258d25a1",
     ".agents/skills/memory-execute/references/guides.md": "c3416edcede23a5f3abc4904092d5b608632cb412985c8ee74e5cf052732c392",
     ".agents/skills/memory-execute/references/implementation.md": "d8ea945c9cf6be0f49e576f8a070b4f62340e7364a8ad805af6fb79097236028",
     ".agents/skills/memory-execute/references/project-profile.md": "14a96d2e0125f0b4967911d9e190a221fdf68c60cd14b81a16006ee3c76f30e8",
     ".agents/skills/memory-execute/references/resume.md": "72c54a57c64cc14ea26486ff13264690e1b7868824e872f6d4a00c9e4c6bb0c5",
     ".agents/skills/memory-execute/references/review.md": "b7456f2870631325c87debdd89445cd71d0b7988cb0beafd9e2498be50fa459c",
-    ".agents/skills/memory-execute/references/scenarios.md": "530a20dd38fef533126f211e559932cdc29987c6a9fcde58ba61a5518688dc25",
+    ".agents/skills/memory-execute/references/scenarios.md": "b2b9e816fe197e771cd6407e280a5a84d580da6e31c51758a9fb8eeda9493550",
     ".agents/skills/memory-execute/references/templates.md": "a14a2a23038900129f071b76e09426372693c724148ae68510aa031f6aa22cbf",
     ".agents/skills/memory-execute/references/testing.md": "a8a37b014ff83cdebc3ba95573e8298f425a239568d4cd6a6042eecd73adff7d",
     ".agents/skills/memory-execute/references/validation-scope.md": "1d0150039aa3fb93430a926935a5d8e3a232182f102b49f07170402334b294aa",
@@ -23,8 +23,8 @@
     ".agents/skills/memory-plan/SKILL.md": "ee35a5c07162ada7133fb5784802ced63939af81552f503f6876337a7b7b8a50",
     ".agents/skills/memory-review/SKILL.md": "108ebc7df8e9197d9b89135470dcda8d04e9920d644c3f2e8aa67ac591fdc19e",
     ".agents/skills/memory-review/references/scenarios.md": "245cb813d262428331614c2fc21bc3f74d72e1053d7a1d6b515866d0b33fdab7",
-    ".agents/skills/memory-tidy/SKILL.md": "358c866b513bc108d01ed0d1746e4b31e631030b8e982eea5b4f787af092b77c",
-    ".agents/skills/memory-tidy/references/scenarios.md": "775f8a4155f40942e0246e3abe2092b86a3650d0a282790691d5aae3412281b4",
+    ".agents/skills/memory-tidy/SKILL.md": "467695d96a30455b1e96b1e9d7e013d35c2a04ef7b1c43ba26651e3af6a09e0f",
+    ".agents/skills/memory-tidy/references/scenarios.md": "e84c46fff696fa98951902e38091d52f00d6de35312ff18b38dd2daf5454a296",
     ".agents/skills/memory-wiki/SKILL.md": "046bae3a1431a2bf304aa25d8c8a3ffdac575a5c69f43a9cb2eec77d3aff48e0",
     ".agents/skills/memory-wiki/references/ingest.md": "e75c86cdbe0758618432b203f7ab8d219cc7b7eb1abaa7d399a856789e0dcc8d",
     ".agents/skills/memory-wiki/references/query.md": "32fac2095f8e929d95a14d9e801d296aa8c62df339fb18c89ae1542ff1bdafe9",
@@ -57,11 +57,11 @@
     },
     {
       "path": "prj-grill-me/references/bundled/memory-execute/references/commit-check.md",
-      "sha256": "3144b32f58cd96654b881a77b04b8e4a5986785d889a51e9b0054328670c1a67"
+      "sha256": "b66de13c8959b059178bffb319ef41afa449e97825b9714fb29df936b6d587be"
     },
     {
       "path": "prj-grill-me/references/bundled/memory-execute/references/conventions.md",
-      "sha256": "a09d6319919f217ff02e7f28fb58cb370324bb1b9db118abe97ebb65128f8549"
+      "sha256": "867df6868dbd0baf6462786357ddfd264071b616680fcdf3b5c3c3a33213dac3"
     },
     {
       "path": "prj-grill-me/references/bundled/memory-execute/references/guides.md",
@@ -117,11 +117,11 @@
     },
     {
       "path": "prj-grill-me/references/bundled/memory-tidy/guide.md",
-      "sha256": "bdd00336eb8f1ef905f4e2445ed2063079f4ce2c3c79db1e87d7c39de72e62ef"
+      "sha256": "613b9f9fe65b99f378bbfb8968d434da8adfa23fb09b981287348b196f9c9afd"
     },
     {
       "path": "prj-grill-me/references/bundled/memory-tidy/references/scenarios.md",
-      "sha256": "024f90b2d9db9f6dbee71043bd2d231e3081634098c65f5cb9efe11f53574407"
+      "sha256": "75e4b3b9dce1f330e27a1bbae0c368443c1127b08419bd851acda2d3ae814f9f"
     },
     {
       "path": "prj-grill-me/references/bundled/memory-wiki/guide.md",
@@ -229,11 +229,11 @@
     },
     {
       "path": "prj-memory-execute/references/bundled/memory-tidy/guide.md",
-      "sha256": "760c91cf12e2c5f84eca8b90b7829cb813ec7e22b79817dd11628d4e72e04656"
+      "sha256": "6fc09e8ce6f228c66051df1ecbaf488a7309605979b7ac70c5a7c27c6016cb2c"
     },
     {
       "path": "prj-memory-execute/references/bundled/memory-tidy/references/scenarios.md",
-      "sha256": "024f90b2d9db9f6dbee71043bd2d231e3081634098c65f5cb9efe11f53574407"
+      "sha256": "75e4b3b9dce1f330e27a1bbae0c368443c1127b08419bd851acda2d3ae814f9f"
     },
     {
       "path": "prj-memory-execute/references/bundled/memory-wiki/guide.md",
@@ -317,11 +317,11 @@
     },
     {
       "path": "prj-memory-execute/references/commit-check.md",
-      "sha256": "5cd99cbec5b2b987616b4d0d0ca2d2be64ca4caf65ba9273526f23bb435684d7"
+      "sha256": "0c03be6b5e99bf8473e38b29b8ef7a0df853a1ac0251fa81a379e968e94661f0"
     },
     {
       "path": "prj-memory-execute/references/conventions.md",
-      "sha256": "3e5b22619c56936ca5864f6ce4418a8cfd8ab67c1eb20a221f62e296e28c61fc"
+      "sha256": "0897f6af36f2c79d67fe221e2ca959ed8671e110cb726721f448e0b6f5f88e05"
     },
     {
       "path": "prj-memory-execute/references/guides.md",
@@ -357,11 +357,11 @@
     },
     {
       "path": "prj-memory-explain/references/bundled/memory-execute/references/commit-check.md",
-      "sha256": "3144b32f58cd96654b881a77b04b8e4a5986785d889a51e9b0054328670c1a67"
+      "sha256": "b66de13c8959b059178bffb319ef41afa449e97825b9714fb29df936b6d587be"
     },
     {
       "path": "prj-memory-explain/references/bundled/memory-execute/references/conventions.md",
-      "sha256": "f1f2faabf5f899ce9b683878f5211c54df770133d75ecf586299b73a89824ab8"
+      "sha256": "18487f9dec4a3f3367887ae00c1a1a72543d32a7525fb9e3f1662ab4c2a74c7c"
     },
     {
       "path": "prj-memory-explain/references/bundled/memory-execute/references/implementation.md",
@@ -397,11 +397,11 @@
     },
     {
       "path": "prj-memory-explain/references/bundled/memory-tidy/guide.md",
-      "sha256": "00c89bac40e952ec2fbf08b852babb5d1923ab6acae4801fea3bd73938734acf"
+      "sha256": "7b18707dac3fb2ba676cf9a5f6f6aace8bbc43a1f01070a34f583db42127b207"
     },
     {
       "path": "prj-memory-explain/references/bundled/memory-tidy/references/scenarios.md",
-      "sha256": "024f90b2d9db9f6dbee71043bd2d231e3081634098c65f5cb9efe11f53574407"
+      "sha256": "75e4b3b9dce1f330e27a1bbae0c368443c1127b08419bd851acda2d3ae814f9f"
     },
     {
       "path": "prj-memory-explain/references/bundled/memory-wiki/guide.md",
@@ -505,11 +505,11 @@
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-execute/references/commit-check.md",
-      "sha256": "3144b32f58cd96654b881a77b04b8e4a5986785d889a51e9b0054328670c1a67"
+      "sha256": "b66de13c8959b059178bffb319ef41afa449e97825b9714fb29df936b6d587be"
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-execute/references/conventions.md",
-      "sha256": "a09d6319919f217ff02e7f28fb58cb370324bb1b9db118abe97ebb65128f8549"
+      "sha256": "867df6868dbd0baf6462786357ddfd264071b616680fcdf3b5c3c3a33213dac3"
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-execute/references/guides.md",
@@ -561,11 +561,11 @@
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-tidy/guide.md",
-      "sha256": "bdd00336eb8f1ef905f4e2445ed2063079f4ce2c3c79db1e87d7c39de72e62ef"
+      "sha256": "613b9f9fe65b99f378bbfb8968d434da8adfa23fb09b981287348b196f9c9afd"
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-tidy/references/scenarios.md",
-      "sha256": "024f90b2d9db9f6dbee71043bd2d231e3081634098c65f5cb9efe11f53574407"
+      "sha256": "75e4b3b9dce1f330e27a1bbae0c368443c1127b08419bd851acda2d3ae814f9f"
     },
     {
       "path": "prj-memory-intake/references/bundled/memory-wiki/guide.md",
@@ -665,11 +665,11 @@
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-execute/references/commit-check.md",
-      "sha256": "3144b32f58cd96654b881a77b04b8e4a5986785d889a51e9b0054328670c1a67"
+      "sha256": "b66de13c8959b059178bffb319ef41afa449e97825b9714fb29df936b6d587be"
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-execute/references/conventions.md",
-      "sha256": "a09d6319919f217ff02e7f28fb58cb370324bb1b9db118abe97ebb65128f8549"
+      "sha256": "867df6868dbd0baf6462786357ddfd264071b616680fcdf3b5c3c3a33213dac3"
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-execute/references/guides.md",
@@ -721,11 +721,11 @@
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-tidy/guide.md",
-      "sha256": "bdd00336eb8f1ef905f4e2445ed2063079f4ce2c3c79db1e87d7c39de72e62ef"
+      "sha256": "613b9f9fe65b99f378bbfb8968d434da8adfa23fb09b981287348b196f9c9afd"
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-tidy/references/scenarios.md",
-      "sha256": "024f90b2d9db9f6dbee71043bd2d231e3081634098c65f5cb9efe11f53574407"
+      "sha256": "75e4b3b9dce1f330e27a1bbae0c368443c1127b08419bd851acda2d3ae814f9f"
     },
     {
       "path": "prj-memory-plan/references/bundled/memory-wiki/guide.md",
@@ -813,11 +813,11 @@
     },
     {
       "path": "prj-memory-review/references/bundled/memory-execute/references/commit-check.md",
-      "sha256": "3144b32f58cd96654b881a77b04b8e4a5986785d889a51e9b0054328670c1a67"
+      "sha256": "b66de13c8959b059178bffb319ef41afa449e97825b9714fb29df936b6d587be"
     },
     {
       "path": "prj-memory-review/references/bundled/memory-execute/references/conventions.md",
-      "sha256": "e359332afb3819056a9fd7e31b7598ba12607460cf11db0a3d823eaea24ab7ab"
+      "sha256": "4128fa0acdd055122d2d1573a15f5b3c88f85078d865c6dd000aa90ad8c6ed7a"
     },
     {
       "path": "prj-memory-review/references/bundled/memory-execute/references/implementation.md",
@@ -853,11 +853,11 @@
     },
     {
       "path": "prj-memory-review/references/bundled/memory-tidy/guide.md",
-      "sha256": "bdd00336eb8f1ef905f4e2445ed2063079f4ce2c3c79db1e87d7c39de72e62ef"
+      "sha256": "613b9f9fe65b99f378bbfb8968d434da8adfa23fb09b981287348b196f9c9afd"
     },
     {
       "path": "prj-memory-review/references/bundled/memory-tidy/references/scenarios.md",
-      "sha256": "024f90b2d9db9f6dbee71043bd2d231e3081634098c65f5cb9efe11f53574407"
+      "sha256": "75e4b3b9dce1f330e27a1bbae0c368443c1127b08419bd851acda2d3ae814f9f"
     },
     {
       "path": "prj-memory-review/references/bundled/memory-wiki/guide.md",
@@ -949,11 +949,11 @@
     },
     {
       "path": "prj-memory-tidy/references/bundled/memory-execute/references/commit-check.md",
-      "sha256": "d656cc8a3397e69a273c8bc049dbc0d58b8cd3088326a8834a6d132a36450a02"
+      "sha256": "515d5f2af8228c8eb7b2ea0057cdcae68c1aabfab2db5d83be6221c539370f90"
     },
     {
       "path": "prj-memory-tidy/references/bundled/memory-execute/references/conventions.md",
-      "sha256": "bf50ae7c67aed1eef87510710c5a4e1b457cdad16c9db9581c08f1b0a1e3ac47"
+      "sha256": "6d1fe50a2b806e36cbc89f92e3a8f66bf3ef039927c701d23cd50469dfaa4656"
     },
     {
       "path": "prj-memory-tidy/references/bundled/memory-execute/references/implementation.md",
@@ -1077,19 +1077,19 @@
     },
     {
       "path": "prj-memory-tidy/references/scenarios.md",
-      "sha256": "775f8a4155f40942e0246e3abe2092b86a3650d0a282790691d5aae3412281b4"
+      "sha256": "e84c46fff696fa98951902e38091d52f00d6de35312ff18b38dd2daf5454a296"
     },
     {
       "path": "prj-memory-tidy/SKILL.md",
-      "sha256": "d5c0bfdb7e9a43eba7ec582df5377e3ca85c44223090bc8218b8967ce36aa1e1"
+      "sha256": "0d0980cf659f458123efcd81ee64739e202afc80938667a4c9f2c974c67bfab1"
     },
     {
       "path": "prj-memory-wiki/references/bundled/memory-execute/references/commit-check.md",
-      "sha256": "3144b32f58cd96654b881a77b04b8e4a5986785d889a51e9b0054328670c1a67"
+      "sha256": "b66de13c8959b059178bffb319ef41afa449e97825b9714fb29df936b6d587be"
     },
     {
       "path": "prj-memory-wiki/references/bundled/memory-execute/references/conventions.md",
-      "sha256": "6313ac8b0cd1099f84e95045e132eee596724090adf9cf66db13fb015f5fa31e"
+      "sha256": "e7d26e5e8d34571aae683182e7b9ece81e1df2ede4c0877f4e222d5c10682391"
     },
     {
       "path": "prj-memory-wiki/references/bundled/memory-execute/references/implementation.md",
@@ -1133,11 +1133,11 @@
     },
     {
       "path": "prj-memory-wiki/references/bundled/memory-tidy/guide.md",
-      "sha256": "bdd00336eb8f1ef905f4e2445ed2063079f4ce2c3c79db1e87d7c39de72e62ef"
+      "sha256": "613b9f9fe65b99f378bbfb8968d434da8adfa23fb09b981287348b196f9c9afd"
     },
     {
       "path": "prj-memory-wiki/references/bundled/memory-tidy/references/scenarios.md",
-      "sha256": "024f90b2d9db9f6dbee71043bd2d231e3081634098c65f5cb9efe11f53574407"
+      "sha256": "75e4b3b9dce1f330e27a1bbae0c368443c1127b08419bd851acda2d3ae814f9f"
     },
     {
       "path": "prj-memory-wiki/references/bundled/page-capture/guide.md",
@@ -1221,11 +1221,11 @@
     },
     {
       "path": "prj-page-capture/references/bundled/memory-execute/references/commit-check.md",
-      "sha256": "3144b32f58cd96654b881a77b04b8e4a5986785d889a51e9b0054328670c1a67"
+      "sha256": "b66de13c8959b059178bffb319ef41afa449e97825b9714fb29df936b6d587be"
     },
     {
       "path": "prj-page-capture/references/bundled/memory-execute/references/conventions.md",
-      "sha256": "c52040e189f7a42c0594d4aca100b0d8e7e41f1906a17a030042072e1ffc6727"
+      "sha256": "1669dface1dd17289a7b4bc28e6d9f6239637a4670d884756c675811c82d0038"
     },
     {
       "path": "prj-page-capture/references/bundled/memory-execute/references/implementation.md",
@@ -1269,11 +1269,11 @@
     },
     {
       "path": "prj-page-capture/references/bundled/memory-tidy/guide.md",
-      "sha256": "bdd00336eb8f1ef905f4e2445ed2063079f4ce2c3c79db1e87d7c39de72e62ef"
+      "sha256": "613b9f9fe65b99f378bbfb8968d434da8adfa23fb09b981287348b196f9c9afd"
     },
     {
       "path": "prj-page-capture/references/bundled/memory-tidy/references/scenarios.md",
-      "sha256": "024f90b2d9db9f6dbee71043bd2d231e3081634098c65f5cb9efe11f53574407"
+      "sha256": "75e4b3b9dce1f330e27a1bbae0c368443c1127b08419bd851acda2d3ae814f9f"
     },
     {
       "path": "prj-page-capture/references/bundled/memory-wiki/guide.md",
