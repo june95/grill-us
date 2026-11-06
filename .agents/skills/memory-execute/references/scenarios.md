@@ -147,6 +147,10 @@
 | C54 | Windows에서 작업 폴더가 필요하고 `[System.IO.Path]::GetTempPath()`가 사용자 임시 폴더(`…\AppData\Local\Temp\`)를 줌 | 그 바로 아래에 `prj-memory-{plan-id}-{task-id}-…` 소유 폴더를 만들고 경로·nonce를 단계 보고에 적음. `%SystemRoot%`로 위치를 조합하지 않음 | 지침 walkthrough |
 | C55 | 사용자 임시 폴더를 얻지 못하거나 얻은 경로가 `%SystemRoot%\Temp`·`%SystemRoot%\SystemTemp`처럼 Windows 디렉터리 아래 | OS 임시 소유 폴더를 만들지 않음. 호스트 세션 scratch가 있으면 그곳, 없으면 작업 파일 없이 요약만 남기고 이유를 단계 보고에 적음. scratch가 현재 사용자 전용인지 보장할 수 없으면 리뷰 응답 원문 같은 비밀이 담길 수 있는 원본은 scratch에도 저장하지 않고 요약만 남김 | 지침 walkthrough |
 | C56 | 완료 정리 때 이 Task 단계 보고에 적힌 소유 폴더가 `C:\Windows\Temp` 아래에 있음(이 규칙 전에 만든 폴더), 표시 파일·nonce는 맞음 | OS 임시 폴더 정의 밖이라 소유가 아님. 옮기거나 지우지 않고 경로·이유를 정리 기록에 적고 사용자가 직접 지우도록 안내함. 완료는 막지 않음 | 지침 walkthrough |
+| C57 | 완료 정리 때 `work/`에 읽기 전용 파일이 있어 강제 옵션 없이 지워지지 않음 | 속성을 바꾸거나 `-Force`로 다시 지우지 않음. 그 파일과 `work/`(옮긴 이름)를 남기고 경로·이유(읽기 전용)를 정리 기록에 적음. 완료는 막지 않음 | 지침 walkthrough |
+| C58 | 완료 정리 명령이 실행 환경에서 "blocked by policy"로 거절됨 | 다른 삭제 명령·도구나 권한 변경으로 다시 시도하지 않음. 거절 메시지 요약과 남은 경로를 정리 기록에 적고 남은 항목을 tidy로 안내함. 완료는 막지 않음 | 지침 walkthrough |
+| C59 | 숨김 항목까지 세려고 이동·삭제 명령 안에 `Get-ChildItem -Force`를 넣으려 함 | 넣지 않음. 숨김 항목은 이동·삭제가 없는 별도 조회 명령으로 확인하고, 그 조회가 거절되거나 확인할 수 없으면 그 폴더를 지우지 않고 보고함 | 지침 walkthrough |
+| C60 | Task 없는 활동(예: grill-me 인터뷰)이 끝날 때 자기 작업 폴더를 지우는 명령이 "blocked by policy"로 거절되고, 읽기 전용 파일도 하나 있음 | 다른 삭제 명령·도구, 강제 옵션, 속성·권한 변경으로 다시 시도하지 않음. 남긴 경로와 이유(거절 요약, 읽기 전용)를 그 활동의 history 기록이나 채팅 보고에 적음 | 지침 walkthrough |
 
 ## Expected State
 

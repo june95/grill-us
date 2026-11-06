@@ -102,7 +102,10 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 - Task 없는 활동: 인터뷰, 등록 전 조사, wiki 수집, 점검처럼 Task가 없는 활동은 Task ID를 만들지 않는다.
   - 접두어는 `prj-memory-{activity}-`이고, activity는 스킬 이름과 날짜다(예: `grill-me-20261104`).
   - 표시 파일에는 plan·phase·task 대신 activity를 적고, 경로와 nonce는 그 활동의 history 기록이나 채팅 보고에 남긴다.
-  - 활동이 끝나기 전에 스스로 지운다.
+  - 활동이 끝나기 전에 스스로 지운다. [작업 파일 정리](commit-check.md#working-file-cleanup)의 다음 두 부분을 따른다.
+    - 항목을 지우는 방식(링크 미추적, 강제 옵션 금지)
+    - 지우지 않고 보고만 하는 경우(강제 옵션 없이 지워지지 않는 항목, 실행 환경의 거절 뒤 재시도 금지 등)
+  - 남긴 경로와 이유는 그 활동의 history 기록이나 채팅 보고에 적는다.
   - 이 절은 쓰기 권한을 새로 주지 않는다. 읽기 전용 스킬의 무쓰기 경계는 그대로다.
 - `.memory` 루트에는 [Paths](#paths) 표의 항목만 둔다: `current.md`, `project.md`, `decisions/`, `plans/`, `phases/`, `history/`, `wiki/`, `captures/`. 남아 있는 옛 `state/`는 [Paths](#paths) 아래 설명을 따른다.
 - Task 폴더에는 기록 md, `evidence/`, `captures/`, `work/`만 둔다.
