@@ -131,6 +131,7 @@
 | C38 | Plan state의 Commit Intent(Previous Intent)가 `evidence/commit-intent.json`을 링크하고, Task 보고서는 링크하지 않음 | state가 인용하므로 남김 | 지침 walkthrough |
 | C39 | 응답할 사용자가 없는 실행에서 Task를 완료함 | 같은 정리를 묻지 않고 수행하고 기록. 질문·승인 대기 없음 | 지침 walkthrough |
 | C40 | 표시 파일의 project가 다른 프로젝트인 OS 임시 `prj-memory-*` 폴더 | 이 Task 소유가 아니므로 지우지 않고 보고만 함(묻지 않음) | 지침 walkthrough |
+| C41 | 조사 Task가 240줄 로그의 측정 근거를 남김. 조건(requests=100)에 맞는 분이 9개이고, 실패한 검사의 오류 줄이 3줄 있음 | `.memory`에는 건수·지표·범위(예: 차단 205분, 최대 100건/분, requests=100인 분 9개·11:30~12:25)와 대표 표본 5줄 이하만 남김. 9분의 시각을 목록으로 나열하지 않고, 표나 목록으로 바꿔 옮긴 값도 표본으로 셈. 실패 판단에 필요한 오류 줄 3줄은 상한과 별도로 인용함 | 지침 walkthrough |
 
 ## Expected State
 
