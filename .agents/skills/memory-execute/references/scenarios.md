@@ -9,7 +9,7 @@
 | S01 | 대상 파일·변경 문구·완료 확인이 명확 | intake 등록 | 완결된 T 청사진; 질문·제품 구현 없음 | 명확한 요청+코드 근거; decisions 파일 형식상 강제 안 함 | 지침 walkthrough |
 | S02 | 권한/API 의미 선택 미확정 | 중요한 분기 인터뷰 | 한 질문·2~3옵션·추천안; executable Task 확정 보류 | 추천안을 사용자 선택으로 기록하지 않음 | 지침 walkthrough |
 | S03 | expected 동작은 명확, 버그 원인 불명 | 코드 조사·필요 재현 확인 | 원인을 코드에서 좁힘; 실제 누락 정보만 질문 | 원인 불명과 제품 결정 불명을 구분 | 지침 walkthrough |
-| S04 | 기존 Plan과 같은 목표, 다른 T active | 해당 Phase append | 새 T pending, 기존 current·checkpoint Position 유지 | 목표·scope·Source 비교, 기존 번호 유지 | 지침 walkthrough |
+| S04 | 기존 Plan과 같은 목표, 다른 T active | 해당 Phase append | 새 T pending, 기존 current와 활성 Task 유지 | 목표·scope·Source 비교, 기존 번호 유지 | 지침 walkthrough |
 | S05 | 독립 목표, 다른 Plan active | 새 Plan 등록 | new Plan pending, active 위치 유지 | 파일 일부 중복만으로 목표를 합치지 않음 | 지침 walkthrough |
 | S06 | 사용자 우선 처리 지시 | 등록·전환 | old Task 재개 정보 저장 후 new pointer; 즉시 구현 없음 | old 상태 먼저 보존, 새 작업 deps 확인 | 지침 walkthrough |
 | S07 | 같은 Source·scope의 미완료 T | 중복 등록 | existing T 재사용, 중복 ID·폴더 없음 | done 결과가 여전히 충족되면 기록 안내; 재발·새 수정은 과거 보존+새 T | 지침 walkthrough |
@@ -18,7 +18,7 @@
 | S10 | passed 뒤 covered 코드·계약 변경 | evidence 재평가 | 영향 evidence stale, 관련 단계만 재검증 | Revision·파일 snapshot 비교, 동일 내용 HEAD 변경만으로 무효화 안 함 | 지침 walkthrough |
 | S11 | review/test/commit-check만 요청 | 지정 stage | 전체 workflow·commit·전진 자동 실행 없음 | review 제품 수정 없음; 단독 test에서 새 테스트 추가 시 review stale·재리뷰 대상만 기록; check staging도 없음 | 지침 walkthrough |
 | S12 | prepared intent 후 commit command 실패 | 실제 실패 처리 | intent failed, Task 미완료, 현재 pointer 유지 | 실패를 성공으로 미리 기록하지 않음 | 지침 walkthrough; 실제 실패 주입은 별도 안전한 임시 repo가 필요한 경우만 |
-| S13 | commit 성공, checkpoint prepared | 성공 확인·복구 | 새 실행 전에 trailer+tree 확인, finalize만 복구 | staged mode/blob와 실제 tree 비교; working hash와 Git 정규화 구분 | 지침 walkthrough; 실제 commit evidence는 실제 도구 확인 |
+| S13 | commit 성공, task.md Commit Status prepared와 `work/commit-intent.json` prepared | 성공 확인·복구 | 새 실행 전에 trailer+tree 확인, finalize만 복구 | staged mode/blob와 실제 tree 비교; working hash와 Git 정규화 구분 | 지침 walkthrough; 실제 commit evidence는 실제 도구 확인 |
 | S14 | 특정 docs·앱 디렉터리 없음 | 프로젝트 탐색 | 실제 정본·manifest·suite 사용 | 예시 경로 부재만으로 blocker 생성 안 함 | 지침 walkthrough |
 | S15 | unrelated staged 파일 또는 same-file WIP | 후보 선별 | 사용자 작업 보존, 안전한 분리 불가하면 blocker | 전체 index commit·임의 unstage·되돌리기 없음 | 지침 walkthrough |
 | S16 | memory ignore, 과거 tracked current | 승인된 local 전환 | 내용 추가 없음, index D만 허용·local 파일 보존 | force-add 금지, 삭제 상태·로컬 존재 확인 | 실제 도구 확인 가능한 경계+walkthrough |
@@ -39,7 +39,7 @@
 | S31 | 버그의 기대 권한/동작 정책에 중요한 미결정 | intake → grill-me | 부족한 분기 한 질문과 2~3개 추천 포함 선택지; 실행 청사진 확정 보류 | 원인 조사 부족과 제품 결정 부족을 구분 | 지침 walkthrough |
 | S32 | 기능·문서 Task 또는 과거 done Task | 조건부 형식 적용 확인 | nonbug에는 Bug Investigation 빈 표 없음; 과거 done 증거 불변 | Type/실제 scope로 판단, 소급 마이그레이션/Revision 일괄 증가 없음 | 지침 walkthrough |
 | S33 | current가 150줄을 넘고, 템플릿 밖 절에 완료 기록과 메모가 섞임 | 다음 상태 쓰기(current 압축) | 원문을 history에 먼저 보존 → 압축 기록(전후 줄 수·SHA256) → 원자적 교체 → 확인 기록. current는 템플릿 절만 | 기존 history·state 수정 없음, archive 없음, 위치·상태 변경 없음 | 지침 walkthrough |
-| S34 | 보류 위치의 보류 사유·재개 조건이 current에만 있고 Plan state에는 위치만 있음 | current 압축 3단계 | 보류 사유·재개 조건 원문을 history에 먼저 보존하고 Status 링크 줄에 그 기록도 연결. 보존을 확인하지 못하면 줄이지 않음 | 링크로 줄이는 내용도 원문 보존 대상 | 지침 walkthrough |
+| S34 | 보류 위치의 보류 사유·재개 조건이 current에만 있고 보류한 Task의 task.md에는 위치만 있음 | current 압축 3단계 | 보류 사유·재개 조건 원문을 history에 먼저 보존하고 Status 링크 줄에 그 기록도 연결. 보존을 확인하지 못하면 줄이지 않음 | 링크로 줄이는 내용도 원문 보존 대상 | 지침 walkthrough |
 | S35 | 템플릿 밖 내용에 완료가 근거로 확인되지 않은 위치가 있음 | current 압축 2단계 | 완료 기록으로 옮기지 않고 보류 위치로 Status 링크, 확인할 일을 Next Step에 적음 | 미확인 위치를 완료로 분류하지 않음 | 지침 walkthrough |
 | S36 | 압축 기록은 있고 교체 확인이 없음, current SHA256이 기록의 교체할 내용 값과 같음 | 다음 current 쓰기 전 확인 | 확인 기록만 덧붙임. 크기 조건보다 먼저 확인 | 교체 완료를 SHA256으로 확인 | 지침 walkthrough |
 | S37 | 같은 상황에서 current SHA256이 교체할 내용 값과 다름 | 다음 current 쓰기 전 확인 | 교체 여부 확인 불가로 기록(현재 SHA256, 교체 전 값과 같은지). 완료나 미교체로 단정하지 않고 지금 current로 조건과 원문 보존부터 다시. 이미 추가한 원문은 다시 추가하지 않음 | 불확실한 결과를 완료나 미교체로 기록하지 않음 | 지침 walkthrough |
@@ -128,10 +128,19 @@
 | C35 | `task.md` Workflow 표에 커스텀 단계 `deployment` 행이 있고 Evidence 열이 `deployment.md`를 링크함 | 기록 md라 남김 | 지침 walkthrough |
 | C36 | Workflow 링크가 없는 `review-request.md`·`execution-checkpoint.md`가 Task 폴더 바로 아래에 있음 | 기록 md가 아니므로 묻지 않고 지움. 기록 md가 링크했다면 끊긴 링크로 기록 | 지침 walkthrough |
 | C37 | `evidence/`에 `test.md`가 인용한 `summary.json`과, `evidence-hashes.json` 안에만 이름이 있는 `raw.json`이 있음 | `summary.json`은 남기고 `raw.json`은 지움. md가 아닌 색인 안의 이름은 인용이 아님 | 지침 walkthrough |
-| C38 | Plan state의 Commit Intent(Previous Intent)가 `evidence/commit-intent.json`을 링크하고, Task 보고서는 링크하지 않음 | state가 인용하므로 남김 | 지침 walkthrough |
+| C38 | 남아 있는 옛 Plan state의 Commit Intent(Previous Intent)가 `evidence/commit-intent.json`을 링크하고, Task 보고서는 링크하지 않음 | 옛 state가 인용하므로 남김 | 지침 walkthrough |
 | C39 | 응답할 사용자가 없는 실행에서 Task를 완료함 | 같은 정리를 묻지 않고 수행하고 기록. 질문·승인 대기 없음 | 지침 walkthrough |
 | C40 | 표시 파일의 project가 다른 프로젝트인 OS 임시 `prj-memory-*` 폴더 | 이 Task 소유가 아니므로 지우지 않고 보고만 함(묻지 않음) | 지침 walkthrough |
 | C41 | 조사 Task가 240줄 로그의 측정 근거를 남김. 조건(requests=100)에 맞는 분이 9개이고, 실패한 검사의 오류 줄이 3줄 있음 | `.memory`에는 건수·지표·범위(예: 차단 205분, 최대 100건/분, requests=100인 분 9개·11:30~12:25)와 대표 표본 5줄 이하만 남김. 9분의 시각을 목록으로 나열하지 않고, 표나 목록으로 바꿔 옮긴 값도 표본으로 셈. 실패 판단에 필요한 오류 줄 3줄은 상한과 별도로 인용함 | 지침 walkthrough |
+| C42 | 커밋은 성공했고 commit 보고를 쓰기 전에 세션이 끊김. task.md Commit Status prepared, `work/commit-intent.json` prepared | Git 대조(trailer·changed path·A/M/D·mode/blob·tree)를 통과하면 의도 파일에 committed와 SHA, commit 보고, task.md committed 순서로 기록하고 완료 정리에서 `work/`를 지움. 다시 커밋하지 않음 | 지침 walkthrough |
+| C43 | `git commit`이 hook 오류로 실패함 | 의도 파일 `status: failed`와 `failure`, task.md failed를 기록. Task는 미완료이고 `work/`를 지우지 않으며 current를 전진하지 않음 | 지침 walkthrough |
+| C44 | 진행 중인 옛 Plan의 `.memory/state/{plan-id}.md`에 Commit Intent prepared가 있고 Task에는 의도 파일이 없음 | state 내용으로 그 Task의 `work/commit-intent.json`을 만들고 task.md Commit Status를 prepared로 맞춘 뒤 Recovery를 따름. state 파일은 고치지 않고, 옮긴 사실과 출처 경로를 task.md·history에 남김 | 지침 walkthrough |
+| C45 | 새 Plan을 등록하고 Task를 실행해 커밋까지 함 | `.memory/state/`에 새 파일이 생기지 않음. 재개 근거는 current·task.md·`work/commit-intent.json`뿐이고 완료 뒤 의도 파일은 남지 않음 | 지침 walkthrough; 행동 eval `newMemoryFiles` |
+| C46 | 옛 current의 Status에 `Checkpoint: [state](./state/x.md)` 줄이 있고, 그 Plan에 보류한 Task가 있음 | 다음 상태 쓰기 때 Checkpoint 줄을 지우고 보류한 Task 링크 한 줄로 바꿈. 가리키던 state 파일은 남아 있으므로 원문 보존 대상이 아님 | 지침 walkthrough |
+| C47 | 옛 state의 Commit Intent prepared(P01-T01)를 이관해 복구·완료했고 Plan은 진행 중. 다음에 P01-T02를 재개 | 같은 출처의 이관 기록이 T01 task.md·history에 있고 T01이 done이라 해결된 의도로 보고 다시 옮기지 않음. T02에는 의도 파일을 만들지 않음 | 지침 walkthrough |
+| C48 | 옛 state 이관 중 `work/commit-intent.json`만 만들고 task.md를 갱신하기 전에 끊김 | 재개 때 파일을 덮어쓰지 않음. 파일과 옛 의도의 Base HEAD·후보·메시지가 같으면 Commit Status·이관 기록만 맞추고, 다르면 blocked | 지침 walkthrough |
+| C49 | 이관한 의도를 복구한 뒤 같은 Task에 새 커밋 의도가 생김(옛 state에는 옛 prepared가 그대로 남음) | 이관 기록이 있으므로 옛 의도를 다시 적용하지 않고 새 의도 파일을 덮어쓰지 않음 | 지침 walkthrough |
+| C50 | commit 보고에 SHA·대조를 기록하고 Commit Status committed, 완료 정리로 `work/`(의도 파일 포함)를 지운 직후 끊김. Task는 아직 done이 아님 | 의도 파일 없이 commit 보고의 SHA·trailer를 Git에서 확인하고, 정리 중단 복구 뒤 done·집계·포인터만 복구. 다시 커밋하지 않음 | 지침 walkthrough |
 
 ## Expected State
 

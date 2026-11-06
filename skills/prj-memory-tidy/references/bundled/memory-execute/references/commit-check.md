@@ -55,13 +55,36 @@ staged 내용을 확인한 뒤 commit 전에 아래 명령으로 staged diff를 
 
 ## Commit Intent
 
-ready 판정과 staged 내용 확인 후, [resume.md](resume.md)의 checkpoint에 prepared intent를 먼저 기록한다.
+ready 판정과 staged 내용 확인 후, 커밋하기 전에 다음 두 가지를 먼저 기록한다.
 
-- 정확한 Plan/Phase/Task, Base HEAD, 명시 후보 경로·added/modified/deleted 상태·working-tree hash·staged Git mode/blob ID, 전체 Commit Message, 전환 index deletion 목록을 기록한다.
+1. 그 Task의 `work/commit-intent.json`(아래 필드, `status: prepared`)
+2. task.md Progress의 Commit Status `prepared`
+
+`work/commit-intent.json`은 고정 경로로 찾는다. task.md·보고서에서 링크하지 않는다. 완료 정리 때 지워지기 때문이다.
+
+| Field | Type / Constraint |
+| :--- | :--- |
+| `status` | `prepared / committed / failed` |
+| `plan`, `phase`, `task` | Plan ID, 전체 Phase ID, metadata Task ID |
+| `baseHead` | 커밋 직전 HEAD SHA |
+| `preparedAt` | ISO 8601 |
+| `candidates` | 배열. 항목: `path`(repo-relative), `status`(`A / M / D`), `workingSHA256`, `stagedMode`, `stagedBlob`, `stage`(0). 삭제(D)는 `workingSHA256`·`stagedMode`·`stagedBlob`이 null |
+| `migrationIndexDeletions` | 배열. 승인된 index 추적 해제 경로와 로컬 보존 근거 |
+| `commitMessage` | 실제 메시지 전문. 마지막 블록에 Plan/Phase/Task trailer |
+| `commitMessageSHA256` | 메시지 SHA256 |
+| `commitHash` | 확인한 성공 SHA 또는 null |
+| `failure` | failed일 때 시각·실제 오류 요약, 아니면 null |
+
+- 정확한 Plan/Phase/Task, Base HEAD, 명시 후보 경로·added/modified/deleted 상태·working-tree hash·staged Git mode/blob ID, 전체 Commit Message, 전환 index deletion 목록을 위 필드로 기록한다.
+- Task마다 파일이 따로 있다. 새 Task는 파일 없음(none)에서 시작한다. 미해결 prepared·failed 파일은 덮어쓰지 않는다([Recovery](resume.md#recovery)).
 - 새 Commit Message는 설명 본문 뒤 마지막 블록에 Plan/Phase/Task trailer를 각각 한 번 둔다. Plan은 Plan ID, Phase는 전체 Phase ID(예: `P01-core`), Task는 metadata Task ID(예: `P01-T01`)와 정확히 일치해야 한다. Task 폴더명 `T01-slug`를 새 trailer 값으로 쓰지 않는다. `git interpret-trailers --parse`로 실제 메시지의 세 값을 확인한다.
 - 커밋 결과가 나오기 전에 report에 committed를 쓰지 않는다. 준비 기록은 prepared다.
-- 성공하면 SHA와 실제 변경을 확인하고 intent/report를 committed로 갱신한다. 이어 Task done, Phase 집계, Plan 상태, current를 동기화한다.
-- 실패하면 failed와 실제 오류·재개 행동을 기록하고 Task는 미완료로 둔다. current를 다음 Task로 옮기지 않는다.
+- 성공하면 SHA와 실제 변경을 확인한다. 다음 순서로 기록한다.
+  1. `work/commit-intent.json`에 `status: committed`와 `commitHash`
+  2. commit 보고(`commit.md`): SHA·parent·메시지·trailer·tree 대조·Secret Check·정리 결과
+  3. task.md Commit Status `committed`
+  4. [작업 파일 정리](#working-file-cleanup)에서 `work/`와 함께 의도 파일을 지운다. 이어 Task done, Phase 집계, Plan 상태, current를 동기화한다.
+- 실패하면 `work/commit-intent.json`에 `status: failed`와 `failure`를, task.md Commit Status에 `failed`를 기록한다. 실제 오류·재개 행동을 남기고 Task는 미완료로 둔다. `work/`를 지우지 않고, current를 다음 Task로 옮기지 않는다.
 - 성공 후 상태 기록이 끊겼다면 [메시지 호환 규칙](resume.md#commit-message-identity)으로 대상 식별자를 확인하고 commit 파일·내용을 함께 검증해 복구한다. 과거 본문 중간 식별자와 Task 폴더명은 복구에만 허용한다. hash 또는 메시지 식별자만 보고 성공을 추측하지 않는다.
 - stage-only commit은 유효한 선행 점검을 요구하며 성공하더라도 포인터 finalize는 별도 전체 실행에서 수행한다.
 
@@ -79,6 +102,7 @@ Task를 완료 처리할 때 이 Task 폴더와 이 Task의 OS 임시 소유 폴
 - 시점: 전체 Task 실행에서 성공 commit을 확인했거나 커밋 없는 완료를 판정한 뒤, Task done을 기록하기 전에 한다.
   - 단독 단계와 check_only에서는 정리하지 않는다([Stage Isolation](conventions.md#stage-isolation)).
   - 응답할 사용자가 없는 실행에서도 같은 정리를 한다.
+  - `work/commit-intent.json`이 있는데 `status`가 committed가 아니면(prepared·failed·읽을 수 없음) 정리하지 않는다. 미해결 의도로 보고 [Recovery](resume.md#recovery)부터 한다.
 - 남기는 것: 기록 md, `evidence/`·`captures/` 안의 인용된 파일.
 - 묻지 않고 지우는 것:
   - 이 Task 폴더 안에서 남기는 것을 뺀 모든 항목이다.

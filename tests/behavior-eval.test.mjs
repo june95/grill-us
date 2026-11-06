@@ -143,10 +143,12 @@ test('workspace checks catch passed tests, product fixes, commits, writes and do
   const root = scratch(t);
   const ctx = gitContext(root);
   const scenarios = Object.fromEntries(loadScenarios().map(item => [item.id, item]));
-  const prepare = id => {
+  // setup은 실행 전부터 있던 파일(예: 이전 규칙의 옛 Plan state)을 스냅샷 전에 만든다.
+  const prepare = (id, setup) => {
     const cwd = path.join(root, 'projects', id + '-' + Math.random().toString(16).slice(2, 8));
     fs.mkdirSync(cwd);
     const fixture = prepareFixture(scenarios[id], cwd, ctx.gitEnv, ctx.hooksDir);
+    if (setup) setup(cwd);
     const before = snapshotWorkspace(cwd, ctx.gitEnv);
     // 하네스처럼 실행 전 스냅샷 직후의 내용을 잡아 둔다(copiedLines가 실행 전부터 있던 줄을 빼는 데 쓴다).
     return { cwd, fixture, before, earlier: contentsBefore(cwd, before, scenarios[id].checks.workspace) };
@@ -268,7 +270,8 @@ test('workspace checks catch passed tests, product fixes, commits, writes and do
   fs.writeFileSync(path.join(project.cwd, 'notes.txt'), 'outside .memory\n');
   assert.deepEqual(failed(check('execute-working-files', project)), []);
   for (const stray of [quotaTask + '/backup/limits.json', quotaTask + '/raw-measurements.md', quotaTask + '/work/raw.log', '.memory/limits.json.bak',
-    '.memory/phases/2026-11-02-quota/P01-core/measurements.csv', '.memory/history/raw-2026-11-02.md', quotaTask + '/evidence/raw.log', quotaTask + '/raw.json']) {
+    '.memory/phases/2026-11-02-quota/P01-core/measurements.csv', '.memory/history/raw-2026-11-02.md', quotaTask + '/evidence/raw.log', quotaTask + '/raw.json',
+    '.memory/state/2026-11-02-quota.md']) {
     project = prepare('execute-working-files');
     fs.mkdirSync(path.dirname(path.join(project.cwd, stray)), { recursive: true });
     fs.writeFileSync(path.join(project.cwd, stray), 'copy\n');
@@ -326,16 +329,22 @@ test('workspace checks catch passed tests, product fixes, commits, writes and do
   assert.deepEqual(newFilesDetail().unexpected, [privateSummary, publicSummary]);
   fs.writeFileSync(path.join(project.cwd, quotaTask, 'reference.md'), '# Reference 결과\n\n- 요약: ../T02-other/evidence/public/summary.json\n');
   assert.deepEqual(newFilesDetail().unexpected, [privateSummary, publicSummary]);
-  // 같은 Plan state가 경로로 인용한 증거는 통과하고, 다른 Plan state만 인용하면 실패한다(새 state 파일 자체는 기록이다).
+  // 실행 전부터 있던 옛 Plan state(이전 규칙의 기록)가 경로로 인용한 증거는 통과하고, 다른 Plan의 옛 state만 인용하면 실패한다.
+  // 새 state 파일은 위 stray 목록처럼 실패다(Plan별 state 없음).
+  const legacyState = cwd => {
+    fs.mkdirSync(path.join(cwd, '.memory/state'), { recursive: true });
+    fs.writeFileSync(path.join(cwd, '.memory/state/2026-11-02-quota.md'), '# Checkpoint: 2026-11-02-quota\n');
+    fs.writeFileSync(path.join(cwd, '.memory/state/2026-11-03-other.md'), '# Checkpoint: 2026-11-03-other\n');
+  };
   const intentFile = quotaTask + '/evidence/commit-intent.json';
   const intentLink = '\n- Previous Intent: [intent](../phases/2026-11-02-quota/P01-core/T01-limit-cause/evidence/commit-intent.json)\n';
-  project = prepare('execute-working-files');
+  project = prepare('execute-working-files', legacyState);
   fs.mkdirSync(path.join(project.cwd, quotaTask, 'evidence'));
   fs.writeFileSync(path.join(project.cwd, intentFile), '{"status":"committed"}\n');
   fs.appendFileSync(path.join(project.cwd, '.memory/state/2026-11-02-quota.md'), intentLink);
   assert.deepEqual(failed(check('execute-working-files', project)), []);
   assert.deepEqual(newFilesDetail().evidence, [intentFile]);
-  project = prepare('execute-working-files');
+  project = prepare('execute-working-files', legacyState);
   fs.mkdirSync(path.join(project.cwd, quotaTask, 'evidence'));
   fs.writeFileSync(path.join(project.cwd, intentFile), '{"status":"committed"}\n');
   fs.writeFileSync(path.join(project.cwd, '.memory/state/2026-11-03-other.md'), '# Checkpoint: 2026-11-03-other\n' + intentLink);
@@ -347,12 +356,12 @@ test('workspace checks catch passed tests, product fixes, commits, writes and do
     '| commit | 해당 없음 | 제품 변경 없음 | skipped | 해당 없음 |\n| deployment | 필수 | 표준 단계로 담을 수 없는 배포 | passed | [deployment](deployment.md) |');
   fs.writeFileSync(path.join(project.cwd, quotaTask, 'deployment.md'), '# Deployment 결과\n');
   assert.deepEqual(newFilesDetail().unexpected, [quotaTask + '/deployment.md']);
-  // state 인용은 state 기준 ../phases/… 또는 .memory/phases/… 만 인정한다. 다른 위치 안의 phases/…는 인용이 아니다.
+  // 옛 state 인용은 state 기준 ../phases/… 또는 .memory/phases/… 만 인정한다. 다른 위치 안의 phases/…는 인용이 아니다.
   for (const [text, citedAs] of [['../phases/2026-11-02-quota/P01-core/T01-limit-cause/evidence/commit-intent.json', true],
     ['.memory/phases/2026-11-02-quota/P01-core/T01-limit-cause/evidence/commit-intent.json', true],
     ['../archive/phases/2026-11-02-quota/P01-core/T01-limit-cause/evidence/commit-intent.json', false],
     ['D:/other/phases/2026-11-02-quota/P01-core/T01-limit-cause/evidence/commit-intent.json', false]]) {
-    project = prepare('execute-working-files');
+    project = prepare('execute-working-files', legacyState);
     fs.mkdirSync(path.join(project.cwd, quotaTask, 'evidence'));
     fs.writeFileSync(path.join(project.cwd, intentFile), '{"status":"committed"}\n');
     fs.appendFileSync(path.join(project.cwd, '.memory/state/2026-11-02-quota.md'), '\n- 참고: ' + text + '\n');
@@ -368,8 +377,8 @@ test('workspace checks catch passed tests, product fixes, commits, writes and do
     fs.writeFileSync(path.join(project.cwd, quotaTask, 'reference.md'), '# Reference 결과\n\n- 요약: ' + text + '\n');
     assert.deepEqual(newFilesDetail().unexpected, citedAs ? [] : [publicSummary], text);
   }
-  // state 인용은 phases/{plan}/{phase}/{task}/ 경로여야 한다. 다른 접두 경로 뒤의 같은 꼬리는 인용이 아니다.
-  project = prepare('execute-working-files');
+  // 옛 state 인용은 phases/{plan}/{phase}/{task}/ 경로여야 한다. 다른 접두 경로 뒤의 같은 꼬리는 인용이 아니다.
+  project = prepare('execute-working-files', legacyState);
   fs.mkdirSync(path.join(project.cwd, quotaTask, 'evidence'));
   fs.writeFileSync(path.join(project.cwd, intentFile), '{"status":"committed"}\n');
   fs.appendFileSync(path.join(project.cwd, '.memory/state/2026-11-02-quota.md'), '\n- 참고: other/2026-11-02-quota/P01-core/T01-limit-cause/evidence/commit-intent.json\n');

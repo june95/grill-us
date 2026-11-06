@@ -654,7 +654,8 @@ test('template contract is extracted from canonical headings, fields and columns
   const contract = extractTaskTemplateContract(fs.readFileSync(path.join(root, templateRelative), 'utf8'));
   assert(contract.metadata.includes('Blueprint Revision'));
   assert.deepEqual(contract.validationColumns, ['Criteria', 'Command / Method', 'Cwd', 'Expected Result']);
-  assert(contract.currentFields.includes('Checkpoint'));
+  assert(contract.currentFields.includes('Commit Policy'));
+  assert(!contract.currentFields.includes('Checkpoint'));
   assert(contract.lastFields.includes('Commit'));
 });
 
@@ -753,7 +754,8 @@ test('damaged template cannot silently weaken example validation', t => {
     s => s.replace('- Type: {추론한 작업 유형}', '- Type: {추론한 작업 유형}\n- Type: duplicate'),
     s => s.replace('| Criteria | Command / Method |', '| Other | Command / Method |'),
     s => s.replace('## Last Completed Task', '## Removed Last Task'),
-    s => s.replace('## Phases\n', '## Phases\n\n## Phases\n')
+    s => s.replace('## Phases\n', '## Phases\n\n## Phases\n'),
+    s => s.replace(/(- Blocker: 없음\r?\n- Commit Policy: auto\r?\n)(\r?\n## Last Completed Task)/, '$1- Checkpoint: 없음\n$2')
   ]) {
     const root = memoryFixture(t);
     changeDocument(root, templateRelative, mutate);
@@ -767,8 +769,8 @@ test('damaged template cannot silently weaken example validation', t => {
 test('current missing fields, bogus completion and task status drift fail', t => {
   for (const [mutate, expected] of [
     [s => s.replace('## Last Completed Task', '## Missing Last'), /필수 heading 없음: Last Completed Task/],
-    [s => s.replace(/^- Checkpoint: .+\n/m, ''), /필수 필드 없음.*Checkpoint/],
-    [s => s.replace('- Checkpoint: 없음', '- Checkpoint: missing-state'), /Checkpoint는/],
+    [s => s.replace('- Commit Policy: auto (예시)', '- Commit Policy: auto (예시)\n- Checkpoint: 없음'), /Checkpoint 칸을 두지 않음/],
+    [s => s.replace('- Commit Policy: auto (예시)', '- Commit Policy: auto (예시)\n- Checkpoint: [보존 state](../state.md)'), /Checkpoint 칸을 두지 않음/],
     [s => s.replace('- Task Status: pending', '- Task Status: done'), /Current Task Status/],
     [s => s.replace(/없음 — 구현·검증·커밋 또는 no-commit 완료 이력이 없는 예시다\./, '- Plan: test\n- Task: P01-T01\n- Commit: pending\n- Evidence: none'), /마지막 완료 Commit/]
   ]) {
@@ -778,13 +780,12 @@ test('current missing fields, bogus completion and task status drift fail', t =>
   }
 });
 
-test('no-active current can retain a real checkpoint and explicit no-commit completion', t => {
+test('no-active current can record an explicit no-commit completion', t => {
   const root = memoryFixture(t);
   changeDocument(root, 'examples/current.md', s => s
     .replace(/\[T01 Product\/Variant 스키마\]\([^)]+\)/, '없음')
     .replace('- Task Status: pending', '- Task Status: 없음')
     .replace('- implementation (구조 설명을 위한 값)', '- 없음')
-    .replace(/^- Checkpoint: .+$/m, '- Checkpoint: [보존 state](../state.md)')
     .replace('없음 — 구현·검증·커밋 또는 no-commit 완료 이력이 없는 예시다.',
       '- Plan: 2026-08-22-product-api\n- Task: P01-T01\n- Commit: no-commit — 로컬 조사 보고만 작성\n- Evidence: [Task](./phases/2026-08-22-product-api/P01-core-crud/T01-product-schema/task.md)'));
   assert.deepEqual(errors(checkMemory(root)), []);

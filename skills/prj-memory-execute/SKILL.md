@@ -24,7 +24,7 @@ T01부터 T03까지 순서대로 진행해줘
 ## Resolve Task
 
 1. 명시 Task 경로가 우선, 없으면 current의 실제 Active Task를 읽는다. 누락/가짜 링크/활성 Task 없음이면 임의로 Task를 만들지 않고 등록·계획 요청을 안내한다.
-2. Task·Revision·Dependencies·승인·기존 working/index·checkpoint/intent를 확인한다. 프로젝트가 불명확할 때만 [Discovery](references/project-profile.md#discovery)를 추가로 읽는다.
+2. Task·Revision·Dependencies·승인·기존 working/index와 task.md Commit Status(prepared·failed면 `work/commit-intent.json`)를 확인한다. 프로젝트가 불명확할 때만 [Discovery](references/project-profile.md#discovery)를 추가로 읽는다.
 3. 이미 done이면 실제 성공 근거를 확인하고 반복 구현/커밋하지 않는다. 명시 사후 단계는 검토할 버전을 확인하며 새 scope는 별도 등록으로 연결한다.
 4. 우선 처리 전환은 [Switch](references/resume.md#switch), 비활성 Task의 단독 단계는 [Stage Isolation](references/conventions.md#stage-isolation)을 따른다. 과거 완료와 활성 위치를 보존한다.
 

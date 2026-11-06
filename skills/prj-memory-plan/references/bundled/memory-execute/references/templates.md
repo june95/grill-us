@@ -158,7 +158,7 @@ Implementation에는 적용 작업을 적는다. 분석 전용이면 조사 절�
 - [ ] 구현 또는 조사 목표 완료
 - [ ] 적용 검증 완료
 - [ ] 공통 품질·완료 정책 판정 완료 (커밋 필요 여부 포함)
-- Commit Status: pending
+- Commit Status: pending {pending / prepared / committed / failed / skipped. prepared·failed면 이 Task의 `work/commit-intent.json`이 있다. 링크하지 않는다}
 - Commit Hash: 없음
 - Resume Stage: {첫 적용 단계}
 - Blocker: 없음
@@ -259,7 +259,6 @@ active Plan/Phase는 in_progress로 표시할 수 있어도 Task가 실제 시�
 - Task Status: pending
 - Blocker: 없음
 - Commit Policy: auto
-- Checkpoint: {실제 Plan별 state 링크 또는 없음}
 
 ## Last Completed Task
 
@@ -277,55 +276,15 @@ active Plan/Phase는 in_progress로 표시할 수 있어도 Task가 실제 시�
 
 활성 Task가 없으면 Active Task·Active Stage에 `없음`을 적고 가짜 링크를 만들지 않는다. Plan 완료 시 완료한 Plan 링크와 완료 상태는 보존할 수 있다. 다른 Plan 자동 전환은 하지 않는다.
 
-각 항목의 의미·보존은 [State Ownership](conventions.md#state-ownership)을 따른다. 활성 Task 없음과 보존 state 링크는 구분하고, 완료 이력이 없으면 Last Completed Task는 없음이다. no-commit은 SHA 대신 사유·실제 완료 근거를 연결한다.
+각 항목의 의미·보존은 [State Ownership](conventions.md#state-ownership)을 따른다. 활성 Task 없음과 보류한 Task 링크는 구분하고, 완료 이력이 없으면 Last Completed Task는 없음이다. Status에 Checkpoint 칸을 두지 않는다(Plan별 state 없음). no-commit은 SHA 대신 사유·실제 완료 근거를 연결한다.
 
 current에는 위 절만 두고 150줄 이하로 유지한다.
 - Status에는 위 필드와, 활성 작업에 바로 필요한 한 줄 항목(Plan 상태·집계, 적용 중인 사용자 지시·정책)만 둔다.
-- 보류 위치(다른 Plan의 재개 위치)나 미해결 commit intent가 있으면 Status에 그 Plan state 링크를 한 줄씩 둔다. 새 절을 만들지 않는다.
-- 지난 위치·완료 기록·전환 메모는 current에 쌓지 않고 history·Plan별 state·Task 보고에 남긴다.
+- 보류 위치(다른 Plan의 재개 위치)나 미해결 commit intent가 있으면 Status에 그 Task 링크를 한 줄씩 둔다. 새 절을 만들지 않는다.
+- 지난 위치·완료 기록·전환 메모는 current에 쌓지 않고 history·Task 보고에 남긴다.
 - 150줄을 넘거나 템플릿 밖 절·항목이 있으면 다음 상태 쓰기 때 [current 압축](resume.md#current-compaction)을 한다.
 
-## Checkpoint
-
-기록 위치는 `.memory/state/{plan-id}.md`이며 링크는 이 파일 위치 기준으로 작성한다. [resume.md](resume.md)의 복구 조건을 따른다.
-
-```markdown
-# Checkpoint: YYYY-MM-DD-feature
-
-## Position
-
-- Plan: {ID와 상대 링크}
-- Phase: {ID와 상대 링크}
-- Task: {ID와 상대 링크}
-- Active Stage: {Stage 또는 없음}
-- Mode: task
-- Commit Policy: auto
-- Repo: {현재 프로젝트 식별 경로}
-- Branch: {현재 branch 또는 detached}
-- Blocker: 없음
-- Next Step: {구체적 행동}
-
-## Commit Intent
-
-- Status: none
-- Task: {이번 커밋 의도의 정확한 Task ID 또는 없음}
-- Base HEAD: 없음
-- Candidate Paths: []
-- Candidate Snapshot: []
-- Commit Message: 없음
-- Commit Hash: 없음
-- Migration Index Deletions: []
-
-## Last Completed Commit
-
-- Task: 없음
-- Commit Hash: 없음
-- Result: 없음
-```
-
-현재 의도와 직전 성공은 [Checkpoint Fields](resume.md#checkpoint-fields)로 구분·보존한다. 미해결 의도는 덮어쓰지 않으며 archive 사본을 자동 생성하지 않는다.
-
-Candidate Snapshot 형식은 path·A/M/D·working SHA256·staged mode/blob다. 실제 entry/삭제·승인된 memory 추적 해제의 확인 절차는 [Staging](commit-check.md#staging) 및 [Recovery](resume.md#recovery)를 따른다.
+커밋 의도는 Task의 `work/commit-intent.json`에 둔다. 필드·기록 순서는 [Commit Intent](commit-check.md#commit-intent), 재개는 [Commit Intent File](resume.md#commit-intent-file)을 따른다. 후보 snapshot 형식은 path·A/M/D·working SHA256·staged mode/blob다. 실제 entry/삭제·승인된 memory 추적 해제의 확인 절차는 [Staging](commit-check.md#staging) 및 [Recovery](resume.md#recovery)를 따른다.
 
 ## Stage Report
 
@@ -399,4 +358,4 @@ Candidate Snapshot 형식은 path·A/M/D·working SHA256·staged mode/blob다. �
 {완료 또는 구체적 재개 단계}
 ```
 
-`.memory` 기본 로컬 관리에서 성공 commit hash는 커밋 후 Task/checkpoint/report에 기록할 수 있다. 공유 예외로 커밋에 포함되는 audit 문서에는 자기 커밋 hash를 미리 넣거나 이를 위해 계속 amend하지 않는다.
+`.memory` 기본 로컬 관리에서 성공 commit hash는 커밋 후 Task·의도 파일·report에 기록할 수 있다. 공유 예외로 커밋에 포함되는 audit 문서에는 자기 커밋 hash를 미리 넣거나 이를 위해 계속 amend하지 않는다.

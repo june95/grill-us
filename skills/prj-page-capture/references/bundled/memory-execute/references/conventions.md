@@ -29,7 +29,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | current 크기·압축 | [State Ownership](#state-ownership), [Current Compaction](resume.md#current-compaction) | 템플릿 절만, 150줄 이하, 원문을 history에 먼저 보존한 뒤 압축 |
 | 기존 `.memory` 점검·정리 | [prj-memory-tidy](../../memory-tidy/guide.md) | 점검은 무쓰기, 정리는 명시 승인 항목만, 기록은 지우지 않음 |
 
-기본 읽기는 요청·존재하는 대상 Task/결정과 이 공통 규약이다. 실행·재개에는 현재 checkpoint와 resume을 확인하고, 선택한 단계의 지침만 추가한다. 형식 작성에는 해당 templates 섹션, 경로/정본/명령이 불명확하면 project-profile, 최종 품질·커밋에는 commit-check를 읽는다. 관련 없는 단계·시나리오 전체를 매번 로드하지 않으며 이미 확인한 같은 내용은 재사용한다.
+기본 읽기는 요청·존재하는 대상 Task/결정과 이 공통 규약이다. 실행·재개에는 대상 task.md의 재개 지점·Commit Status와 resume을 확인하고, 선택한 단계의 지침만 추가한다. 형식 작성에는 해당 templates 섹션, 경로/정본/명령이 불명확하면 project-profile, 최종 품질·커밋에는 commit-check를 읽는다. 관련 없는 단계·시나리오 전체를 매번 로드하지 않으며 이미 확인한 같은 내용은 재사용한다.
 
 ## Paths
 
@@ -42,7 +42,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | 실행한 단계 결과 | 해당 Task 폴더의 단계별 보고서 |
 | 보고서가 인용하는 Task 증거 | 해당 Task 폴더의 `evidence/`, UI 캡처는 `captures/` — [Working Files](#working-files) |
 | 전역 활성 위치 | `.memory/current.md` |
-| Plan별 재개·커밋 의도 | `.memory/state/{plan-id}.md` |
+| Task 재개 지점·커밋 상태 | 해당 Task의 `task.md` Progress. 커밋 의도는 `work/commit-intent.json`([Commit Intent](commit-check.md#commit-intent)) |
 | 일일 이력 | `.memory/history/YYYY-MM-DD.md` |
 | 선택적 프로젝트 설정 | `.memory/project.md` |
 | 명시 수집한 로컬 문서 지식 | `.memory/wiki/` — 상세 형식은 memory-wiki 소유 |
@@ -50,6 +50,9 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
 | 세션을 넘겨 이어야 하는 Task 재개 상태 | 해당 Task 폴더의 `work/` — [Working Files](#working-files) |
 
 - `.memory` 루트에는 위 표의 항목만 둔다. 임시 스크립트·원본 출력·사본 같은 작업 파일은 [Working Files](#working-files)를 따른다.
+- 옛 Plan state(`.memory/state/{plan-id}.md`)는 이전 규칙의 기록이다.
+  - 새로 만들거나 쓰지 않는다. 남아 있는 파일의 본문도 고치지 않는다.
+  - 진행 중인 옛 Plan의 재개는 [resume](resume.md#legacy-plan-state)이, 다 쓴 파일의 정리는 [prj-memory-tidy](../../memory-tidy/guide.md)가 다룬다.
 
 - Plan ID는 `YYYY-MM-DD-{slug}`, Phase ID는 `P01-{slug}`, Task 폴더는 `T01-{slug}` 형식이다. 날짜는 새 Plan 생성일이며 기존 Plan 추가 시 바꾸지 않는다.
 - 같은 날짜·slug의 Plan ID가 있으면 기존 내용·목표를 먼저 확인한다. 같은 목표는 등록 규칙에 따라 연결/재사용하고 다른 신규 목표가 충돌하면 구별되는 ID를 선택한다. 기존 Plan 파일·ID를 새 요청으로 덮어쓰지 않는다.
@@ -90,7 +93,7 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
   - 표시 파일에는 plan·phase·task 대신 activity를 적고, 경로와 nonce는 그 활동의 history 기록이나 채팅 보고에 남긴다.
   - 활동이 끝나기 전에 스스로 지운다.
   - 이 절은 쓰기 권한을 새로 주지 않는다. 읽기 전용 스킬의 무쓰기 경계는 그대로다.
-- `.memory` 루트에는 [Paths](#paths) 표의 항목만 둔다: `current.md`, `project.md`, `decisions/`, `plans/`, `phases/`, `state/`, `history/`, `wiki/`, `captures/`.
+- `.memory` 루트에는 [Paths](#paths) 표의 항목만 둔다: `current.md`, `project.md`, `decisions/`, `plans/`, `phases/`, `history/`, `wiki/`, `captures/`. 남아 있는 옛 `state/`는 [Paths](#paths) 아래 설명을 따른다.
 - Task 폴더에는 기록 md, `evidence/`, `captures/`, `work/`만 둔다.
   - 기록 md: Task 폴더 바로 아래의 다음 파일이다.
     - `task.md`와 [Workflow](#workflow) 표준 단계의 보고: `reference.md`, `design-guide-update.md`, `implementation.md`, `review.md`, `review-action.md`, `test.md`, `guide-update.md`, `final-review.md`, `commit.md`
@@ -98,13 +101,13 @@ Project Memory의 인터뷰, 등록, 계획, 실행이 공유하는 계약이다
     - 하위 폴더 안의 md는 기록 md가 아니다.
   - `evidence/`: 보고서가 인용하는 작은 증거(snapshot·intent·메시지 파일 등)다. 안에 둔 md도 증거로 다룬다.
   - `captures/`: Task 안에서 찍은 UI 캡처 최종본이다([prj-page-capture](../../../../SKILL.md) 계약).
-  - `work/`: 진행 중에만 두는 재개 상태다.
-- 인용: 이 Task 폴더의 기록 md 또는 이 Plan의 state(`.memory/state/{plan-id}.md`)가 상대 링크나 경로로 가리키는 파일이다.
+  - `work/`: 진행 중에만 두는 재개 상태다. 커밋 의도 파일 `work/commit-intent.json`도 여기 둔다([Commit Intent](commit-check.md#commit-intent)).
+- 인용: 이 Task 폴더의 기록 md가 상대 링크나 경로로 가리키는 파일이다. 이 Plan의 옛 state(`.memory/state/{plan-id}.md`)가 남아 있으면 그 state가 가리키는 파일도 인용으로 본다.
   - md가 아닌 파일(JSON 색인 등) 안에만 이름이 있으면 인용이 아니다.
   - 다른 파일 이름의 일부로만 나오면 인용이 아니다.
 - md 형식이어도 다음은 기록 md가 아니므로 Task 폴더에 두지 않는다.
   - 리뷰·모델 위임의 지시문·응답 원문: 작업 파일(OS 임시 또는 세션 scratch)이다.
-  - 재개 상태: `work/` 또는 Plan state에 둔다.
+  - 재개 상태: `work/`에 둔다.
   - commit-check 결과: `task.md`의 Completion Check에 적는다.
 - Task 완료 때 기록 md와 인용된 `evidence/`·`captures/` 파일 외에는 묻지 않고 지운다([작업 파일 정리](commit-check.md#working-file-cleanup)). 인용 파일을 `evidence/`·`captures/` 밖에 두면 완료 때 지워지고 그 링크는 끊긴다.
 - 증거 예산:
@@ -178,6 +181,7 @@ Wiki는 명시한 로컬 Markdown·텍스트의 출처 보존·누적 주제·�
 | Source Snapshot | path별 SHA256·missing·deleted 목록 | 내용 변경 감지; `.memory` 진행 파일 제외 |
 | Checked At | ISO 8601 timestamp 또는 없음 | 실제 수행 시각 |
 | Resume Stage | Stage enum, 선언한 커스텀 단계 또는 없음 | 다음 실제 수행 단계 |
+| Commit Status | `pending / prepared / committed / failed / skipped` | task.md Progress. prepared·failed면 그 Task의 `work/commit-intent.json`이 있어야 한다. skipped는 커밋 없는 완료 |
 | Blocker | string 또는 없음 | 해결되지 않은 원인과 다음 행동 |
 
 Revision은 계약의 버전이다. 단순 문구 정리, stage 상태·보고 기록·커밋 해시 갱신은 계약 변경이 아니면 증가시키지 않는다. scope 또는 검증 의무를 바꿨다면 Revision을 증가시키고 영향을 받는 증거를 다시 확인한다.
@@ -294,7 +298,7 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 
 작업 파일 정리는 전체 Task 실행의 완료 처리에서만 한다([Working File Cleanup](commit-check.md#working-file-cleanup)). 단독 단계는 만든 작업 파일 경로를 보고에 남기고 지우지 않는다.
 
-모든 단독 단계/check_only는 Task done·포인터 전진을 자동 수행하지 않는다. 비활성 대상은 그 결과만 갱신하고 기존 current/checkpoint Position을 보존한다. 의도의 Target Task는 정확히 기록하며 미해결 prepared/failed를 다른 대상으로 덮지 않는다.
+모든 단독 단계/check_only는 Task done·포인터 전진을 자동 수행하지 않는다. 비활성 대상은 그 결과만 갱신하고 기존 current의 활성 위치를 보존한다. 의도의 Target Task는 정확히 기록하며 미해결 prepared/failed를 다른 대상으로 덮지 않는다.
 
 단독 test에서 새/변경 테스트가 review에 영향을 주면 stale 사유·대상 파일·재리뷰 Next Action만 남긴다. 검토하지 않은 snapshot을 passed로 바꾸지 않으며 test passed가 review stale를 해소하지 않는다. 실제 재리뷰는 후속 review 요청이나 전체 Task 실행에서 한다. 단독 implementation/review-action/refactor의 최소 검증도 필요한 별도 재리뷰/test를 대신하지 않는다.
 
@@ -306,7 +310,7 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 - 실행한 보고에는 Task, Stage, Blueprint Revision, Covered Files, Source Snapshot, Checked At, Result, Blockers, Next Action을 포함한다.
 - 현재 파일의 SHA256은 `Get-FileHash` 등의 읽기 전용 도구로 확인한다. 새 파일도 포함하고 삭제된 경로는 deleted로 기록한다. 원문·비밀 값 대신 필요한 hash만 기록한다.
 - 증거 파일의 위치와 양은 [Working Files](#working-files)를 따른다. 원본 출력은 작업 파일이고, 보고에는 요약·SHA256·판단에 필요한 줄을 남긴다.
-- HEAD 식별자는 checkpoint의 Base HEAD와 별도로 기록한다. source snapshot은 covered 파일 내용이므로 커밋으로 HEAD가 달라졌다는 이유만으로 동일 내용의 검증을 무효화하지 않는다.
+- HEAD 식별자는 커밋 의도의 Base HEAD와 별도로 기록한다. source snapshot은 covered 파일 내용이므로 커밋으로 HEAD가 달라졌다는 이유만으로 동일 내용의 검증을 무효화하지 않는다.
 - 검증 freshness의 working SHA256과 커밋 복구의 staged mode/blob는 역할이 다르다. Candidate Snapshot과 줄바꿈/삭제 대조 절차는 [Staging](commit-check.md#staging) 및 [Recovery](resume.md#recovery)를 따른다.
 - 추가 테스트 파일이나 구현 조정이 생기면 실제 변경 scope와 해당 증거를 갱신한다. 변경된 내용에 영향을 받는 단계만 stale로 표시하고 재수행한다.
 - 실행하지 못한 검사는 통과가 아니다. 명령 오류·timeout·환경 차단·미실행을 passed나 skipped로 기록하지 않고 그 결과와 원인을 그대로 남긴다.
@@ -366,20 +370,21 @@ workflow 표는 `Stage | Applicability | Reason / Trigger | Status | Evidence` �
 
 ## State Ownership
 
-- 같은 `.memory`를 변경하는 실행 담당은 한 번에 한 명이다. 제품·Git·보고·Task/current/checkpoint/history 쓰기는 실행 담당이 수행하며, 별도 읽기 전용 리뷰어는 결과만 반환한다. Codex/Claude Code 등 도구를 교체할 때 기존 실행을 끝내거나 멈추고 기록을 확인해 순차 재개한다. 단일 current를 유지하며 자동 잠금 엔진·다중 current·자동 worktree 생성으로 구현하지 않는다. 리뷰 권한·결과 기록은 [Review Delegation](review.md#review-delegation)을 따른다.
-- Task의 Status·Workflow·Completion Check·Progress가 작업 상태의 정본이다.
+- 같은 `.memory`를 변경하는 실행 담당은 한 번에 한 명이다. 제품·Git·보고·Task/current/history 쓰기는 실행 담당이 수행하며, 별도 읽기 전용 리뷰어는 결과만 반환한다. Codex/Claude Code 등 도구를 교체할 때 기존 실행을 끝내거나 멈추고 기록을 확인해 순차 재개한다. 단일 current를 유지하며 자동 잠금 엔진·다중 current·자동 worktree 생성으로 구현하지 않는다. 리뷰 권한·결과 기록은 [Review Delegation](review.md#review-delegation)을 따른다.
+- 역할: current는 활성 위치, task.md는 Task 상태·재개 지점·Commit Status, history는 일지다. Plan별 state는 두지 않는다(옛 state는 [Paths](#paths) 아래 설명).
+- Task의 Status·Workflow·Completion Check·Progress가 작업 상태의 정본이다. 커밋 의도는 그 Task의 `work/commit-intent.json`이다.
 - current는 활성 Plan·Phase·Task와 Active Stage·Blocker·Next Step·정책의 책갈피다. 상세 청사진을 중복 보관하지 않는다.
-  - [Current 템플릿](templates.md#current)의 절만 두고 150줄 이하로 유지한다. 보류 위치와 미해결 commit intent는 Status에 그 Plan state 링크 한 줄씩 둔다.
-  - 지난 위치·완료 기록·전환 메모는 history·Plan별 state·Task 보고에 남기고 current에 쌓지 않는다.
+  - [Current 템플릿](templates.md#current)의 절만 두고 150줄 이하로 유지한다. 보류 위치와 미해결 commit intent는 Status에 그 Task 링크를 한 줄씩 둔다.
+  - 지난 위치·완료 기록·전환 메모는 history·Task 보고에 남기고 current에 쌓지 않는다.
   - 150줄을 넘거나 템플릿 밖 내용이 있으면, current를 쓰는 실행이 다음 상태 쓰기 때 묻지 않고 [current 압축](resume.md#current-compaction)을 한다.
-- current의 Checkpoint는 실제 활성 또는 보존한 Plan별 state 링크다. Last Completed Task는 활성 위치와 별개로 마지막 완료의 Plan ID·Task ID, 확인한 commit hash 또는 명시 no-commit/변경 없음 사유, 실제 완료 evidence를 가리킨다. 완료 이력이 없으면 없음으로 기록하고 가짜 경로·hash를 만들지 않는다. 과거 current에 이 정보가 없으면 Task/보고로 확인 가능한 범위만 읽는다.
+- Last Completed Task는 활성 위치와 별개로 마지막 완료의 Plan ID·Task ID, 확인한 commit hash 또는 명시 no-commit/변경 없음 사유, 실제 완료 evidence를 가리킨다. 완료 이력이 없으면 없음으로 기록하고 가짜 경로·hash를 만들지 않는다. 과거 current에 이 정보가 없으면 Task/보고로 확인 가능한 범위만 읽는다.
 - Phase의 done count와 Plan의 요약은 Task 실제 상태로 갱신한다. 커밋 실패 전에 done을 쓰지 않는다.
-- 새 등록은 기존 활성 작업을 유지한다. 우선 처리 지시가 있을 때만 Task 재개 상태와 Plan checkpoint를 먼저 보존하고 current를 전환한다.
+- 새 등록은 기존 활성 작업을 유지한다. 우선 처리 지시가 있을 때만 이전 Task의 재개 지점을 task.md에 먼저 보존하고 current를 전환한다.
 - 초기 placeholder·실제 작업 없는 링크·완료 Task를 진행 중으로 취급하지 않는다. 실제 진행 위치가 손상됐다는 근거가 있으면 새 active 없음으로 덮지 않고 [Switch](resume.md#switch)의 복원 절차를 먼저 수행한다. 확인 불충분한 손상은 다음 행동을 남기며 새 등록의 활성화로 우회하지 않는다.
 - 기본 실행은 활성 Task 하나다. 연속 실행은 요청한 범위를 따른다. 단계만 요청한 실행은 그 단계만 수행하고 포인터를 자동 전진하지 않는다.
 - 마지막 Task 완료 시 Phase/Plan done과 Active Task·Stage 없음을 기록한다. 다른 pending Plan을 임의로 시작하지 않는다.
-- checkpoint와 원자적 기록·커밋 복구 절차는 [resume.md](resume.md)를 따른다.
-- 이전 위치 보존은 기존 Task·보고·Plan별 checkpoint와 history에 필요한 재개/완료 근거를 남기는 뜻이다. current에 이전 위치·이전 완료를 쌓는 뜻이 아니다. 매 전환마다 전체 checkpoint 사본이나 별도 archive를 만들지 않는다. 기존 사본과 과거 완료 증거는 보존하고 미해결 커밋 의도는 덮어쓰지 않는다.
+- 재개 순서·원자적 기록·커밋 복구 절차는 [resume.md](resume.md)를 따른다.
+- 이전 위치 보존은 기존 Task·보고와 history에 필요한 재개/완료 근거를 남기는 뜻이다. current에 이전 위치·이전 완료를 쌓는 뜻이 아니다. 매 전환마다 사본이나 별도 archive를 만들지 않는다. 기존 사본과 과거 완료 증거는 보존하고 미해결 커밋 의도는 덮어쓰지 않는다.
 
 ## Change Boundaries
 

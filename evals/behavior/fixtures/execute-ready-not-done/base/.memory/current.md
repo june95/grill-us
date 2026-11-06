@@ -23,7 +23,6 @@
 - done: 0/1
 - Blocker: 없음
 - Commit Policy: auto
-- Checkpoint: [state](./state/2026-11-01-greet.md)
 
 ## Last Completed Task
 

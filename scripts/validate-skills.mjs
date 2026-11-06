@@ -498,9 +498,11 @@ export function extractTaskTemplateContract(templateText) {
   }
   const currentFields = fieldsOf(current.find(s => s.name === 'Status')).map(f => f.name);
   requireUnique(currentFields, 'Current Status');
-  for (const name of ['Task Status', 'Commit Policy', 'Blocker', 'Checkpoint']) {
+  for (const name of ['Task Status', 'Commit Policy', 'Blocker']) {
     if (!currentFields.includes(name)) throw new Error('템플릿 Current 필드 누락: ' + name);
   }
+  // Plan별 state를 두지 않으므로 current 템플릿에 Checkpoint 칸이 다시 생기면 계약 손상이다.
+  if (currentFields.includes('Checkpoint')) throw new Error('템플릿 Current에 Checkpoint 필드가 남아 있음(Plan별 state 없음)');
   const lastFields = fieldsOf(current.find(s => s.name === 'Last Completed Task')).map(f => f.name);
   requireUnique(lastFields, 'Last Completed Task');
   for (const name of ['Plan', 'Task', 'Commit', 'Evidence']) {
@@ -669,8 +671,7 @@ export function checkMemoryExamples(root, files) {
     const declaredStage = Boolean(activeTask?.stages?.has(activeStage) && customStageName.test(activeStage || ''));
     if (activeStage !== '없음' && !workflowStages.has(activeStage) && !declaredStage) issue(currentFile, current.sections.get('Active Stage')?.line || 1, 'Active Stage 값은 기존 stage, 활성 Task Workflow에 선언한 커스텀 단계 또는 없음이어야 함');
     if (!commitPolicies.has(status.get('Commit Policy')?.split(/\s/)[0])) issue(currentFile, current.sections.get('Status')?.line || 1, 'Current Commit Policy enum 오류');
-    const checkpoint = status.get('Checkpoint') || '';
-    if (!/^(?:없음\b|없음[ \u2014]|.*\]\([^)]+\))/.test(checkpoint)) issue(currentFile, current.sections.get('Status')?.line || 1, 'Checkpoint는 실제 링크 또는 없음이어야 함');
+    if (status.has('Checkpoint')) issue(currentFile, current.sections.get('Status')?.line || 1, 'Current Status에 Checkpoint 칸을 두지 않음(Plan별 state 없음, 보류 위치는 Task 링크)');
     const last = current.sections.get('Last Completed Task');
     if (/^\s*없음(?:\s|$)/.test(last?.body || '')) {
       if (fieldsOf(last).length) issue(currentFile, last.line, 'Last Completed Task 없음과 필드 충돌');

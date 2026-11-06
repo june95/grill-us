@@ -115,9 +115,9 @@
       - 같은 파일의 실행 전 내용에 이미 있던 줄은 세지 않고, 여러 파일에 있어도 한 번만 센다. 옮긴 줄 수가 `max`를 넘으면 실패다.
       - 형식을 바꿔 옮긴 값은 줄이 같지 않아 세지 않는다(채점 몫). 링크·특수 항목은 `.memory` 새 파일 검사가 본다. 실행 전 `source`를 읽을 수 없으면 실패다.
     - 작업 파일 시나리오(`execute-working-files`):
-      - `allow`는 규약 Workflow 표의 단계 보고 이름(`task`·`reference`·`implementation`·`test`·`commit` 등의 `.md`)과 phase·plan·decision·state·history(날짜 이름)·current·project다.
+      - `allow`는 규약 Workflow 표의 단계 보고 이름(`task`·`reference`·`implementation`·`test`·`commit` 등의 `.md`)과 phase·plan·decision·history(날짜 이름)·current·project다. state는 없다. 실행이 `.memory/state/`에 새 파일을 만들면 `unexpected`로 실패다. fixture에도 `state/`와 current의 Checkpoint 줄이 없다.
       - `evidence`는 Task 폴더의 `evidence/`·`captures/` 아래 파일이다(Working Files의 인용 요약 증거). 인용될 때만 허용한다.
-        - 인용: 그 Task 폴더 바로 아래 `.md`가 Task 기준 경로(`evidence/a/summary.json`, 앞의 `./` 허용)를 적거나, 같은 Plan state(`.memory/state/{plan}.md`)가 state 기준 `../phases/{plan}/{phase}/{task}/…` 또는 저장소 기준 `.memory/phases/…` 경로를 적는다. 다른 위치 안의 `phases/…`(`../archive/phases/…`, 절대 경로)는 인용이 아니다.
+        - 인용: 그 Task 폴더 바로 아래 `.md`가 Task 기준 경로(`evidence/a/summary.json`, 앞의 `./` 허용)를 적거나, 같은 Plan의 옛 state(`.memory/state/{plan}.md`, 남아 있을 때만)가 state 기준 `../phases/{plan}/{phase}/{task}/…` 또는 저장소 기준 `.memory/phases/…` 경로를 적는다. 다른 위치 안의 `phases/…`(`../archive/phases/…`, 절대 경로)는 인용이 아니다.
         - 경로 없이 이름만 적은 인용(앞에 `/`·`\`가 없는 이름)은 그 Task의 후보 중 그 이름이 하나뿐일 때만 인정한다. 다른 하위 경로·다른 Task 경로(`../T02-x/evidence/…`)·절대 경로의 마지막 이름과 다른 Plan state의 인용은 인용이 아니다.
       - Task 폴더(`T01-{slug}` 형식) 바로 아래 md는 기록 이름(`allow`)일 때만 허용한다.
         - 알려진 제한: Workflow 표 Evidence 열이 가리키는 커스텀 단계 보고는 정본(Working Files)상 기록 md지만, 이 결정적 검사는 인정하지 않는다.
@@ -168,7 +168,7 @@
 - Task의 필수 top-level heading/Metadata·Progress, Commit Policy와 Task Status·Revision, 폴더 ID, 표 헤더/행 열 개수를 확인한다. legacy `commit`이나 Execution metadata의 재등장을 검출한다.
 - Constraints와 정확한 H3 `Must` / `Must Not` 각각 하나 및 각 하위의 비어 있지 않은 목록 항목을 템플릿·예시 모두에서 확인한다. 선택 H3 `Ask First`는 이 정적 검사 대상이 아니며 있거나 없어도 결과가 같다. fence/HTML comment의 가짜 항목은 제외하며 적용 제약이 없으면 목록에 `없음 — 이유`를 쓴다. 내용의 작업 적합성·이유의 타당성·과설계는 정적 검사 대상이 아니라 의미 리뷰 대상이다. 과거 사용자 `.memory`에 소급 검사하지 않는다.
 - Bug Investigation은 버그 Type일 때 필요하다. 일반 Task에 억지로 강제하지 않으며 Example Preconditions·추가 설명 섹션·적용되지 않는 API/DTO 세부는 허용한다.
-- Current의 Checkpoint/Last Completed Task, 없음 또는 근거 필드의 형식, 활성 Task와 Plan/Phase/상태 연결을 확인한다. Active Stage는 기존 단계 이름 또는 없음이며, 활성 Task가 없으면 Stage도 없음이어야 한다. 실제 커밋 성공이나 no-commit 완료의 진위는 정적 형식만으로 입증하지 않는다.
+- Current의 Last Completed Task, 없음 또는 근거 필드의 형식, Status에 Checkpoint 칸이 없음(있으면 오류), 활성 Task와 Plan/Phase/상태 연결을 확인한다. Active Stage는 기존 단계 이름 또는 없음이며, 활성 Task가 없으면 Stage도 없음이어야 한다. 실제 커밋 성공이나 no-commit 완료의 진위는 정적 형식만으로 입증하지 않는다.
 - Plan/Phase 표의 대상 예제 링크·ID·명시 상태와 Phase done 집계를 대조한다. Phase의 Task 소속, Plan의 Phase 소속과 Phase 상단의 Plan backlink도 확인한다. 교육 예제가 가정한 제품 명령·파일의 존재, 테스트 결과, 도메인 구현은 검증하지 않는다.
 
 ## Other Limits

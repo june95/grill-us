@@ -67,7 +67,7 @@
 
 - 전체 Task 또는 `--stage review`에서 적용되는 review는 기본적으로 별도 에이전트에게 읽기 전용으로 위임한다. 사용자 자체 리뷰 지시가 우선이며, review가 skipped인 Task에 이 규칙만으로 새 단계를 강제하지 않는다. 실제 변경의 재리뷰도 같은 선택 규칙을 적용한다.
 - 현재 환경에서 허용된 내부 위임 기능과 상위 제약을 먼저 확인한다. 새로운 런타임 설치·모델 지정·외부 메시지 전송·자동 worktree 생성은 하지 않는다. 가능하면 읽기 전용 도구/샌드박스를 사용하고 실제 제한 수준을 기록한다. 지시문만으로 제한했다면 쓰기 권한이 기술적으로 차단됐다고 표현하지 않는다.
-- 실행 담당 한 명이 Task/current/checkpoint/history·보고·제품·Git 상태를 관리한다. 리뷰어는 아래 입력을 읽고 결과만 반환하며 하위 에이전트에 추가 위임하지 않는다. 단일 writer와 도구 교체는 [State Ownership](conventions.md#state-ownership)을 따른다.
+- 실행 담당 한 명이 Task/current/history·커밋 의도 파일·보고·제품·Git 상태를 관리한다. 리뷰어는 아래 입력을 읽고 결과만 반환하며 하위 에이전트에 추가 위임하지 않는다. 단일 writer와 도구 교체는 [State Ownership](conventions.md#state-ownership)을 따른다.
 
 ### Request and Result
 
@@ -81,7 +81,7 @@
 [prj-memory-review](../../memory-review/SKILL.md)와 이 공통 기준을 함께 제공한다. 반환한 실제 범위·Revision/commit/diff·snapshot을 현재 요청과 대조하고 기존 review 단계의 결과로 기록한다. fallback Self에서도 같은 검토/결과 기준을 쓰되 실행 담당의 기록 책임을 유지한다.
 
 - 제품·`.memory`·Git·설정 쓰기, staging/commit·외부 전송·추가 위임 금지. 읽기 조회만 허용하며 테스트 실행과 파일 생성·설정 변경 등 부수 효과가 있는 명령을 실행하지 않는다. 기록·검증 실행은 실행 담당에게 반환한다.
-- 검토는 [Compliance](#compliance)/[Severity](#severity)를 따라 승인 scope와 AC에 한정한다. 결과를 채팅/도구 반환으로만 제공하며 `review.md`, current, checkpoint, history를 직접 작성하지 않는다.
+- 검토는 [Compliance](#compliance)/[Severity](#severity)를 따라 승인 scope와 AC에 한정한다. 결과를 채팅/도구 반환으로만 제공하며 `review.md`, current, task.md, `work/`, history를 직접 작성하지 않는다.
 - 반환 항목: verdict, 유일한 finding ID·severity·계약 항목·path/실제 근거·AC 영향·권고·회귀/기존 결함 구분, 2단계의 finding 분류, 검토 파일별 SHA256 snapshot, 실제 검토 범위·제한 수준·미검토/부분 결과. finding이 없으면 없음이라고 명시한다.
 
 실행 담당은 반환 범위·Revision·snapshot·근거와 현재 대상을 대조한다. 검토하지 않은 경로/AC를 통과로 확대하지 않으며 보고의 [조건부 review 필드](templates.md#stage-report)를 채우고 실제 결과에 맞게 workflow/history를 기록한다. 반환 이후 변경된 대상은 [Re-review](#re-review)와 기존 evidence 규칙을 적용한다.
