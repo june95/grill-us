@@ -13,6 +13,7 @@ description: Create or extend a .memory Plan with Phase and independently execut
 - 중요한 미결정만 [prj-grill-me](../grill-me/guide.md)에 연결한다. 명확한 요청에 decisions 파일을 형식상 강제하거나 확정 선택을 다시 묻지 않는다.
 - 응답할 사용자가 없는 실행에서 질문이 필요한 미결정이 있으면 [Unattended Runs](../memory-execute/references/conventions.md#unattended-runs)에 따라 blocker로 보고한다. 단계·검증을 줄이려는 핑계의 반론은 [Common Rationalizations](../memory-execute/references/conventions.md#common-rationalizations)를 따른다.
 - 기존 근거를 재사용하되 확인되지 않은 가정·승인·성공을 채우지 않는다.
+- 새 기능·화면의 청사진 확정 전에는 [Planning Boundaries](../memory-execute/references/conventions.md#planning-boundaries)의 재사용 확인을 수행하고, 후보·실제 사용처와 재사용/확장/신규 작성의 판단 근거를 Implementation에 남긴다. 후보 없음과 조사 실패·미확인을 구별한다.
 
 ## Golden Rule
 
@@ -34,7 +35,7 @@ description: Create or extend a .memory Plan with Phase and independently execut
 | Decision Summary / Alignment | 확정 선택·코드 사실, 실제 정본·승인/보존 경계 |
 | Bug Investigation | 버그 Task만 기존 [조사 근거](../memory-execute/references/conventions.md#bug-investigation) 재사용; 재현할 수 있으면 수정 전 실패 테스트, 불가하면 사유 |
 | Dependencies | 선행 ID·실제 링크·필요 결과 |
-| Implementation | path::symbol/문서 heading, 목적·new/modify/read-only, 독립 I01/I02 |
+| Implementation | path::symbol/문서 heading, 목적·new/modify/read-only, 독립 I01/I02; 새 기능·화면은 공통 계획 규약의 재사용 조사·판단 근거 |
 | Signatures / Data / Flow | 공유 경계의 정확 타입·필드·기본값·nullable·관계·중요 흐름·오류·반환; 계약에 필수인 내부 선택만 고정 |
 | Acceptance Criteria | 사전에 정한 관찰 가능한 완료 기준 |
 | Workflow | 단계 적용 이유/조건과 초기 상태 |
